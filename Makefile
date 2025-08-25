@@ -7,6 +7,7 @@ GRAPH_IMG := $(BUILD_DIR)/dependencyGraph.png
 
 clean:
 	rm -rf $(BUILD_DIR)
+	find app/ src/ -type f -name "*.ini" -exec rm -f {} +
 
 build:
 	cmake -S . -B $(BUILD_DIR)
