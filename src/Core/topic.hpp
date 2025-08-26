@@ -15,6 +15,7 @@ public:
     Topic(uint32_t id, std::string name, Topic_Type type) : id(id), name(std::move(name)), type(type), covered(false) {}
     uint32_t getId() const { return id; }
     const std::string &getName() const { return name; }
+    void setName(const std::string &new_name) { name = new_name; }
     bool isCovered() const { return covered; }
     void setCovered(bool is_covered) { covered = is_covered; }
     Topic_Type getType() const { return type; }

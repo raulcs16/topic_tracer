@@ -32,7 +32,7 @@ std::shared_ptr<Topic> TopicGraph::getTopic(const std::string &name) const {
     }
     return nullptr;
 }
-std::vector<uint32_t> TopicGraph::getAllTopicIds() const {}
+std::vector<uint32_t> TopicGraph::getAllTopicIds() const { return {}; }
 
 // Edge operations
 void TopicGraph::addEdge(uint32_t from, uint32_t to, Edge_Type type) {
@@ -88,9 +88,9 @@ std::vector<Edge> TopicGraph::getOutgoingEdges(uint32_t from) const {
         return {};
     return it->second;
 }
-std::vector<Edge> TopicGraph::getIncomingEdges(uint32_t to) const {}
-std::vector<uint32_t> TopicGraph::getNeighbors(uint32_t from, Edge_Type type = Edge_Type::depends_on) const {}
+std::vector<Edge> TopicGraph::getIncomingEdges(uint32_t to) const { return {}; }
+std::vector<uint32_t> TopicGraph::getNeighbors(uint32_t from, Edge_Type type) const { return {}; }
 
 // Utilities
-size_t TopicGraph::numTopics() const {}
-size_t TopicGraph::numEdges() const {}
+size_t TopicGraph::numTopics() const { return 0; }
+size_t TopicGraph::numEdges() const { return 0; }
