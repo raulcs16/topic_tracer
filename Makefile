@@ -21,6 +21,8 @@ graph:
 
 show:
 	open $(GRAPH_IMG)
+run:
+	./build/app/TopicTracer.app/Contents/MacOS/TopicTracer
 
 test:
 	./$(BUILD_DIR)/tests/unit_tests -v normal
