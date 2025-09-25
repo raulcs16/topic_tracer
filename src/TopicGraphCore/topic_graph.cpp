@@ -76,3 +76,12 @@ std::vector<Edge> TopicGraph::getOutEdges(uint32_t from) const {
 // Utilities
 size_t TopicGraph::numTopics() const { return m_topicMap.size(); }
 size_t TopicGraph::numEdges() const { return m_edge_count; }
+
+std::shared_ptr<const Topic> TopicGraph::operator[](size_t index) const {
+    if (index >= m_topicMap.size()) {
+        return nullptr;
+    }
+    auto it = m_topicMap.begin();
+    std::advance(it, index);
+    return it->second;
+}

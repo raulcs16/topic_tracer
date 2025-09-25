@@ -17,6 +17,8 @@ qt_add_qml_module(TopicListQt
         topic_list_model.cpp
     QML_FILES
         TopicListView.qml
+    
+    IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
 )
 
 target_include_directories(TopicListQt PUBLIC

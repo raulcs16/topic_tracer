@@ -1,3 +1,5 @@
+#include "topic_graph.hpp"
+#include "topic_list_model.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
@@ -7,6 +9,14 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
 
+    TopicGraph myGraph;
+    myGraph.addTopic("DesignPatterns");
+    myGraph.addTopic("AdapterPattern", Topic_Type::Concrete);
+
+
+    TopicListModel topicListModel(myGraph);
+
+
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine,
@@ -14,6 +24,10 @@ int main(int argc, char *argv[]) {
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
+
+
+    engine.setInitialProperties(
+        {{"topicListModel", QVariant::fromValue(&topicListModel)}});
     engine.loadFromModule("App", "Main");
 
     return app.exec();
