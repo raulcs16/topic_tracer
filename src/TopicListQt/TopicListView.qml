@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls // Use standard Controls for Menu/TextField
+import QtQuick.Controls
 import QtQuick.Controls.Basic // Keep Basic for compatibility if necessary
 
 import Styles
@@ -64,9 +64,7 @@ Item {
         MenuItem {
             id: delegateItem
             text: qsTr("Rename...")
-            onTriggered:
-            //should make the current item editable
-            {
+            onTriggered: {
                 topicView.editingIndex = delegateMenu.clickedIndex;
             }
             background: Rectangle {
@@ -103,7 +101,7 @@ Item {
             anchors {
                 left: parent.left
                 right: parent.right
-                top: parent.contentItem.bottom // 👈 start after last delegate
+                top: parent.contentItem.bottom
                 bottom: parent.bottom
             }
             visible: topicView.contentHeight < topicView.height
@@ -123,9 +121,8 @@ Item {
         id: addTopicInput
 
         Item {
-            // Only visible when the "add topic" menu item is clicked
             visible: root.isAddingNewTopic
-            height: visible ? 30 : 0 // Collapse the height when not visible
+            height: visible ? 30 : 0
             width: parent.width
 
             TextField {
@@ -155,7 +152,7 @@ Item {
                 onFocusChanged: {
                     if (!focus) {
                         root.isAddingNewTopic = false;
-                        topicView.focus = true; // Restore focus to the ListView
+                        topicView.focus = true;
                     }
                 }
             }
@@ -173,7 +170,7 @@ Item {
 
             property ItemView listView: ListView.view
 
-            height: 20
+            height: 30
             width: parent.width
 
             color: "transparent"
@@ -183,23 +180,21 @@ Item {
                 anchors.fill: parent
                 color: Colors.selected
                 opacity: 0.0
-                z: -1 // make sure it’s behind the text
+                z: -1
             }
 
             TextField {
                 id: editor
-                visible: topicView.editingIndex === delegateRect.index // Show if this index is being edited
+                visible: topicView.editingIndex === delegateRect.index
 
                 anchors.fill: parent
                 anchors.leftMargin: 20
-                anchors.rightMargin: 20
-
-                text: delegateRect.topicName // Initial value is the current topic name
+                placeholderText: delegateRect.topicName
                 font.pointSize: 16
                 color: Colors.text_secondary
 
                 background: Rectangle {
-                    color: Colors.secondary
+                    color: Colors.primary
                     border.width: 2
                     border.color: Colors.accent
                 }
@@ -209,14 +204,12 @@ Item {
                     if (newName.length > 0 && newName !== delegateRect.topicName) {
                         topicListModel.editItem(delegateRect.index, newName);
                     }
-                    // Exit editing mode regardless
                     topicView.editingIndex = -1;
                     topicView.focus = true;
                 }
 
                 onFocusChanged: {
                     if (!focus) {
-                        // Exiting edit mode saves the current value (or simply exits)
                         topicView.editingIndex = -1;
                     }
                 }
