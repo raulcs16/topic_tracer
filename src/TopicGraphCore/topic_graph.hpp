@@ -10,8 +10,9 @@ class TopicGraph : public ITopicGraphReader {
 public:
     TopicGraph();
 
-
-    void addTopic(const std::string &name, Topic_Type type = Topic_Type::Concept);
+    //returns 0 for failed to add,
+    //returns + for successfully added
+    uint32_t addTopic(const std::string &name, Topic_Type type = Topic_Type::Concept);
     void removeTopic(uint32_t id);
 
     //get

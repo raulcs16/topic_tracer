@@ -6,7 +6,6 @@ set_target_properties(TopicListQt PROPERTIES AUTOMOC ON)
 target_link_libraries(TopicListQt
     PRIVATE Qt6::Core
     PRIVATE Qt6::Quick
-    PRIVATE TopicGraphCore
 )
 
 qt_add_qml_module(TopicListQt

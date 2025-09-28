@@ -26,6 +26,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     App
     StylesLibplugin
     TopicGraphCore
+    TopicGraphQt
+    TopicGraphQtplugin
     TopicListQt
     TopicListQtplugin
 )

@@ -12,7 +12,7 @@ ApplicationWindow {
     title: qsTr("Topic Tracer")
     visible: true
 
-    required property TopicListModel topicListModel
+    property string activeView: "main_content"
 
     RowLayout {
         anchors.fill: parent
@@ -29,6 +29,11 @@ ApplicationWindow {
                 color: Colors.primary
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                focus: true
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: app.activeView = "main_content"
+                }
             }
 
             Rectangle {
@@ -66,18 +71,25 @@ ApplicationWindow {
                 color: Colors.secondary
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                border.width: 3
+
+                border.width: app.activeView === "topic_list" ? 3 : 0
+
                 border.color: Colors.accent
                 TopicListView {
-
+                    id: topicList
                     anchors.fill: parent
-                    anchors.margins: 5
                     anchors.topMargin: 15
 
-                    listModel: app.topicListModel
-                    viewInteraction: true
+                    // MouseArea {
+                    //     anchors.fill: parent
+                    //     enabled: app.activeView != "topic_list"
+                    //     onClicked: app.activeView = "topic_list"
+                    // }
                 }
             }
         }
+    }
+    Component.onCompleted: {
+        main_content.forceActiveFocus();
     }
 }

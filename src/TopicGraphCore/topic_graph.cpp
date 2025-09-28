@@ -7,13 +7,14 @@ TopicGraph::TopicGraph() {
 }
 
 
-void TopicGraph::addTopic(const std::string &name, Topic_Type topic_type) {
+uint32_t TopicGraph::addTopic(const std::string &name, Topic_Type topic_type) {
     //TODO trim name
     if (getTopic(name) != nullptr)
-        return;
+        return 0;
     auto newTopic = std::make_shared<Topic>(m_id_ref++, name, topic_type);
     m_topicMap[newTopic->id()] = newTopic;
     m_adjOutMap[newTopic->id()] = {};
+    return newTopic->id();
 }
 void TopicGraph::removeTopic(uint32_t id) {}
 std::shared_ptr<const Topic> TopicGraph::getTopic(uint32_t id) const {
