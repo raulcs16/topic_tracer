@@ -16,7 +16,18 @@ uint32_t TopicGraph::addTopic(const std::string &name, Topic_Type topic_type) {
     m_adjOutMap[newTopic->id()] = {};
     return newTopic->id();
 }
-void TopicGraph::removeTopic(uint32_t id) {}
+bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
+    auto it = m_topicMap.find(id);
+    if (it == m_topicMap.end())
+        return false;
+    auto exist = getTopic(new_name);
+    if (exist != nullptr) {
+        return false;
+    }
+    it->second->setName(new_name);
+    return true;
+}
+void TopicGraph::deleteTopic(uint32_t id) {}
 std::shared_ptr<const Topic> TopicGraph::getTopic(uint32_t id) const {
     auto it = m_topicMap.find(id);
     if (it != m_topicMap.end())

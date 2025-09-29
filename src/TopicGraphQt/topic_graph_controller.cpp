@@ -10,3 +10,13 @@ void TopicGraphController::addTopic(const QString &name, Topic_Type type) {
     if (id > 0)
         emit topicAdded(true, id);
 }
+
+void TopicGraphController::renameTopic(uint32_t id, const QString &new_name) {
+
+    bool success = m_graph->renameTopic(id, new_name.toStdString());
+
+    if (success) {
+        emit topicRenamed(true, id);
+    }
+}
+void TopicGraphController::deleteTopic(uint32_t id) { emit topicDelelted(true, id); }

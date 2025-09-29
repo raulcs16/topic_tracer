@@ -36,6 +36,12 @@ FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 endif()
 
+FetchContent_Declare(
+    ogdf
+    GIT_REPOSITORY https://github.com/ogdf/ogdf.git
+    GIT_TAG  elderberry-202309
+)
+FetchContent_MakeAvailable(ogdf)
 
 add_subdirectory(src)
 add_subdirectory(app)

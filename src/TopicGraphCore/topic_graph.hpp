@@ -13,7 +13,8 @@ public:
     //returns 0 for failed to add,
     //returns + for successfully added
     uint32_t addTopic(const std::string &name, Topic_Type type = Topic_Type::Concept);
-    void removeTopic(uint32_t id);
+    bool renameTopic(uint32_t id, const std::string &new_name);
+    void deleteTopic(uint32_t id);
 
     //get
     std::shared_ptr<const Topic> getTopic(uint32_t id) const override;
