@@ -21,32 +21,12 @@ Item {
 
     Menu {
         id: listMenu
-        background: Rectangle {
-            radius: 6
-            color: Colors.secondary
-            border.color: Colors.accent
-            border.width: 1
-            implicitWidth: 200
-        }
-        MenuItem {
-            id: menuItem
+        background: MenuBackground {}
+        MenuItemCard {
             text: qsTr("add topic")
             onTriggered: {
                 root.isAddingNewTopic = true;
                 topicView.contentY = topicView.contentHeight - topicView.height;
-            }
-            background: Rectangle {
-                color: "transparent"
-                implicitWidth: 150
-                implicitHeight: 30
-            }
-            contentItem: Text {
-                text: menuItem.text
-                font.pixelSize: 16
-                font.weight: Font.DemiBold
-                color: "white"
-                verticalAlignment: Text.AlignVCenter
-                leftPadding: 12
             }
         }
     }
@@ -54,31 +34,17 @@ Item {
     Menu {
         id: delegateMenu
         property int clickedIndex: -1
-        background: Rectangle {
-            radius: 6
-            color: Colors.secondary
-            border.color: Colors.accent
-            border.width: 1
-            implicitWidth: 200
-        }
-        MenuItem {
-            id: delegateItem
+        background: MenuBackground {}
+        MenuItemCard {
             text: qsTr("Rename...")
             onTriggered: {
                 topicView.editingIndex = delegateMenu.clickedIndex;
             }
-            background: Rectangle {
-                color: "transparent"
-                implicitWidth: 150
-                implicitHeight: 30
-            }
-            contentItem: Text {
-                text: delegateItem.text
-                font.pixelSize: 16
-                font.weight: Font.DemiBold
-                color: "white"
-                verticalAlignment: Text.AlignVCenter
-                leftPadding: 12
+        }
+        MenuItemCard {
+            text: qsTr("Delete")
+            onTriggered: {
+                topicView.model.removeItem(delegateMenu.clickedIndex);
             }
         }
     }
@@ -171,7 +137,7 @@ Item {
             property ItemView listView: ListView.view
 
             height: 30
-            width: parent.width
+            width: listView.width
 
             color: "transparent"
 
@@ -259,5 +225,29 @@ Item {
             color: Colors.selected
             opacity: 0.40
         }
+    }
+
+    component MenuItemCard: MenuItem {
+        id: rootItem
+        background: Rectangle {
+            color: "transparent"
+            implicitWidth: 150
+            implicitHeight: 30
+        }
+        contentItem: Text {
+            text: rootItem.text
+            font.pixelSize: 16
+            font.weight: Font.DemiBold
+            color: "white"
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: 12
+        }
+    }
+    component MenuBackground: Rectangle {
+        radius: 6
+        color: Colors.secondary
+        border.color: Colors.accent
+        border.width: 1
+        implicitWidth: 200
     }
 }
