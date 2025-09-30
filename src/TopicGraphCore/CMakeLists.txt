@@ -5,6 +5,7 @@ add_library(TopicGraphCore STATIC
     edge_type.hpp
 )
 target_link_libraries(TopicGraphCore PUBLIC TopicCore)
+
 target_include_directories(TopicGraphCore
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}  

@@ -6,5 +6,5 @@ add_library(TopicCore STATIC
 
 target_include_directories(TopicCore
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}    # so other targets can #include "topic.hpp"
+        ${CMAKE_CURRENT_SOURCE_DIR} 
 )

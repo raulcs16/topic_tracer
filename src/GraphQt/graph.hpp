@@ -16,8 +16,8 @@ class Graph : public QObject {
     Q_OBJECT
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(GraphLayout *layout READ layout CONSTANT)
-    Q_PROPERTY(NodeModel *nodes READ nodes CONSTANT)
-    Q_PROPERTY(EdgeModel *edges READ edges CONSTANT)
+    Q_PROPERTY(NodeListModel *nodes READ nodes CONSTANT)
+    Q_PROPERTY(EdgeListModel *edges READ edges CONSTANT)
 public:
     Graph(QObject *parent = 0);
 

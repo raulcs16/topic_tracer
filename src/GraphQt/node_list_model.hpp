@@ -1,6 +1,6 @@
 #pragma once
 
-//https: //github.com/schulzch/qml-ogdf/blob/master/ogdfplugin/nodemodel.h
+//https://github.com/schulzch/qml-ogdf/blob/master/ogdfplugin/nodemodel.h
 
 
 #include <QAbstractListModel>

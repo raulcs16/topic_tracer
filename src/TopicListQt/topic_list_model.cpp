@@ -1,12 +1,7 @@
 #include "topic_list_model.hpp"
 
 
-TopicListModel::TopicListModel(QObject *parent) : QAbstractListModel{parent} {
-    m_topics.append(TopicItem{.id = m_next_id++, .name = "SomeTopic"});
-    m_topics.append(TopicItem{.id = m_next_id++, .name = "SomeTopic"});
-    m_topics.append(TopicItem{.id = m_next_id++, .name = "SomeTopic"});
-    m_topics.append(TopicItem{.id = m_next_id++, .name = "SomeTopic"});
-}
+TopicListModel::TopicListModel(QObject *parent) : QAbstractListModel{parent} {}
 
 int TopicListModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid()) {
@@ -29,6 +24,7 @@ QVariant TopicListModel::data(const QModelIndex &index, int role) const {
     switch (role) {
     case NameRole: return topic.name;
     case IdRole: return topic.id;
+    case PendingRole: return topic.pending;
     default: return QVariant();
     }
 }
@@ -74,6 +70,7 @@ QHash<int, QByteArray> TopicListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "topicId";
     roles[NameRole] = "topicName";
+    roles[PendingRole] = "pending";
     return roles;
 }
 void TopicListModel::addItem(const QString &name) {
@@ -87,12 +84,12 @@ void TopicListModel::addItem(const QString &name) {
 
     beginInsertRows(QModelIndex(), newRow, newRow);
 
-    m_topics.push_back(TopicItem{
-        .id = m_next_id++,
-        .name = topicName,
-    });
+    int temp = m_next_temp--;
+    m_topics.push_back(
+        TopicItem{.tempId = temp, .id = 0, .name = topicName, .pending = true});
 
     endInsertRows();
+    m_controller->addTopic(temp, topicName);
 }
 
 bool TopicListModel::removeItem(int index) {
@@ -115,4 +112,68 @@ bool TopicListModel::editItem(int index, const QString &newName) {
     }
     QModelIndex modelIndex = this->index(index);
     return setData(modelIndex, newName.trimmed(), NameRole);
+}
+
+void TopicListModel::setEditingIndex(int idx) {
+    if (idx == m_editingIndex)
+        return;
+    //-1 non are set
+    if (idx < -1 || idx >= m_topics.size())
+        return;
+
+    m_editingIndex = idx;
+    emit editingIndexChanged();
+}
+
+void TopicListModel::setIsAddingNewTopic(bool value) {
+    if (value != m_isAddingNewTopic) {
+        m_isAddingNewTopic = value;
+        emit isAddingNewTopicChanged();
+    }
+}
+void TopicListModel::setCurrentIndex(int idx) {
+    if (idx == m_currentIndex)
+        return;
+    //-1 no currentIndex
+    if (idx < -1 || idx >= m_topics.size())
+        return;
+    m_currentIndex = idx;
+    emit currentIndexChanged();
+}
+TopicGraphController *TopicListModel::controller() const { return m_controller; }
+void TopicListModel::setController(TopicGraphController *ctrl) {
+    if (m_controller == ctrl)
+        return;
+    if (m_controller)
+        disconnect(m_controller, nullptr, this, nullptr);
+
+    m_controller = ctrl;
+
+    if (m_controller) {
+        // connect signals here, e.g.
+        connect(m_controller,
+                &TopicGraphController::topicAdded,
+                this,
+                &TopicListModel::onTopicAdded);
+    }
+
+    emit controllerChanged();
+}
+void TopicListModel::onTopicAdded(int tempId, bool success, uint32_t id) {
+    for (int i = 0; i < m_topics.size(); ++i) {
+        if (m_topics[i].tempId == tempId) {
+            if (success) {
+                m_topics[i].id = id;
+                m_topics[i].pending = false;
+
+                QModelIndex idx = index(i);
+                emit dataChanged(idx, idx, {IdRole, PendingRole});
+            } else {
+                beginRemoveRows(QModelIndex(), i, i);
+                m_topics.removeAt(i);
+                endRemoveRows();
+            }
+            break;
+        }
+    }
 }

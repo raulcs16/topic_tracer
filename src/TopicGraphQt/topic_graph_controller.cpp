@@ -1,14 +1,16 @@
 #include "topic_graph_controller.hpp"
+#include <QTimer>
 
-TopicGraphController::TopicGraphController(TopicGraph *graph, QObject *parent)
-    : m_graph{graph}, QObject{parent} {}
-
-void TopicGraphController::addTopic(const QString &name, Topic_Type type) {
+TopicGraphController::TopicGraphController(QObject *parent) : QObject{parent} {
+    m_graph = new TopicGraph();
+}
+TopicGraphController::~TopicGraphController() { delete m_graph; }
+void TopicGraphController::addTopic(int tempId, const QString &name, Topic_Type type) {
 
     auto id = m_graph->addTopic(name.toStdString(), type);
 
-    if (id > 0)
-        emit topicAdded(true, id);
+
+    QTimer::singleShot(500, this, [=]() { emit topicAdded(tempId, id > 0, id); });
 }
 
 void TopicGraphController::renameTopic(uint32_t id, const QString &new_name) {

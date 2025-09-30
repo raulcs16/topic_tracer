@@ -10,12 +10,6 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
 
-    TopicGraph myGraph;
-
-    myGraph.addTopic("DesignPatterns");
-    myGraph.addTopic("AdapterPattern", Topic_Type::Concrete);
-
-
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine,

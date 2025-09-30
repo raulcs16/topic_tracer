@@ -6,7 +6,7 @@ GRAPH_DOT := $(BUILD_DIR)/graph.dot
 GRAPH_IMG := $(BUILD_DIR)/dependencyGraph.png
 
 clean:
-	rm -rf $(BUILD_DIR)
+	cmake --build $(BUILD_DIR) --target clean
 	find app/ src/ -type f -name "*.ini" -exec rm -f {} +
 
 build:
