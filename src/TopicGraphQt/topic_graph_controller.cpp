@@ -10,7 +10,7 @@ void TopicGraphController::addTopic(int tempId, const QString &name, Topic_Type 
     auto id = m_graph->addTopic(name.toStdString(), type);
 
 
-    QTimer::singleShot(500, this, [=]() { emit topicAdded(tempId, id > 0, id); });
+    emit topicAdded(tempId, id > 0, id);
 }
 
 void TopicGraphController::renameTopic(uint32_t id, const QString &new_name) {

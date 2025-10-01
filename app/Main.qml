@@ -4,6 +4,8 @@ import QtQuick.Controls.Basic
 
 import Styles
 import TopicList
+import App
+import Graph
 
 ApplicationWindow {
     id: app

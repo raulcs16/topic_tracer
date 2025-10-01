@@ -25,7 +25,7 @@ public:
         HeightRole
     };
 
-    NodeListModel(Graph *graph, QObject *parent = nullptr);
+    NodeListModel(Graph *graph);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -41,7 +41,7 @@ public:
     void edgeDeleted(ogdf::edge e) override;
 
     //
-    void attribuitesChanged();
+    void attributesChanged();
     void reInit();
 
     //qml
@@ -56,6 +56,6 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    Graph *m_gaph;
+    Graph *m_graph;
     QVector<ogdf::node> m_nodes;
 };

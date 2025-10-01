@@ -18,15 +18,16 @@ class EdgeListModel : public QAbstractListModel, public ogdf::GraphObserver {
 
 public:
     enum Roles {
-        SouceRole = Qt::UserRole + 1,
+        SourceRole = Qt::UserRole + 1,
         SourceXRole,
         SourceYRole,
-        TagertXRole,
+        TargetRole,
+        TargetXRole,
         TargetYRole,
         BendsRole
     };
 
-    EdgeListModel(Graph *graph, QObject *parent = nullptr);
+    EdgeListModel(Graph *graph);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -42,7 +43,7 @@ public:
     void edgeDeleted(ogdf::edge e) override;
 
     //
-    void attribuitesChanged();
+    void attributesChanged();
     void reInit();
 
     //qml
@@ -61,6 +62,6 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    Graph *m_gaph;
+    Graph *m_graph;
     QVector<ogdf::edge> m_edges;
 };

@@ -97,11 +97,11 @@ bool TopicListModel::removeItem(int index) {
         return false;
     }
 
+    uint32_t id = m_topics[index].id;
     beginRemoveRows(QModelIndex(), index, index);
-
     m_topics.removeAt(index);
-
     endRemoveRows();
+    m_controller->deleteTopic(id);
 
     return true;
 }
@@ -111,7 +111,9 @@ bool TopicListModel::editItem(int index, const QString &newName) {
         return false;
     }
     QModelIndex modelIndex = this->index(index);
-    return setData(modelIndex, newName.trimmed(), NameRole);
+    setData(modelIndex, newName.trimmed(), NameRole);
+    m_controller->renameTopic(m_topics[index].id, newName);
+    return true;
 }
 
 void TopicListModel::setEditingIndex(int idx) {
