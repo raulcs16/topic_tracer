@@ -14,8 +14,18 @@ ApplicationWindow {
     title: qsTr("Topic Tracer")
     visible: true
 
-    property string activeView: "main_content"
-
+    Graph {
+        id: graph
+    }
+    Timer {
+        id: autoLayouter
+        interval: 100
+        repeat: true
+        running: true
+        onTriggered: {
+            graph.layout.call();
+        }
+    }
     RowLayout {
         anchors.fill: parent
         spacing: 0
@@ -31,10 +41,20 @@ ApplicationWindow {
                 color: Colors.primary
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                focus: true
-                MouseArea {
+
+                CanvasView {
                     anchors.fill: parent
-                    onClicked: app.activeView = "main_content"
+                    clip: true
+                    focus: true
+                    GraphView {
+                        model: graph
+                        anchors.fill: parent
+                        property var highlightedNode: null
+                        property var highlightedEdge: null
+                    }
+                    Keys.onAsteriskPressed: {
+                        graph.randomTree(10);
+                    }
                 }
             }
 
@@ -74,24 +94,12 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                border.width: app.activeView === "topic_list" ? 3 : 0
-
-                border.color: Colors.accent
                 TopicListView {
                     id: topicList
                     anchors.fill: parent
                     anchors.topMargin: 15
-
-                    // MouseArea {
-                    //     anchors.fill: parent
-                    //     enabled: app.activeView != "topic_list"
-                    //     onClicked: app.activeView = "topic_list"
-                    // }
                 }
             }
         }
-    }
-    Component.onCompleted: {
-        main_content.forceActiveFocus();
     }
 }

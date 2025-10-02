@@ -22,10 +22,11 @@ NodeListModel::NodeListModel(Graph *graph)
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[Qt::DisplayRole] = "node";
-    roles[XRole] = "x";
-    roles[YRole] = "y";
-    roles[WidthRole] = "width";
-    roles[HeightRole] = "height";
+    roles[XRole] = "posx";
+    roles[YRole] = "posy";
+    roles[WidthRole] = "w";
+    roles[HeightRole] = "h";
+    return roles;
 }
 
 int NodeListModel::rowCount(const QModelIndex &parent) const {
@@ -114,7 +115,15 @@ void NodeListModel::nodeAdded(ogdf::node v) {
     endInsertRows();
     emit countChanged();
 }
-
+void NodeListModel::nodeDeleted(ogdf::node v) {
+    int index = m_nodes.indexOf(v);
+    Q_ASSERT(index != -1);
+    beginRemoveRows(QModelIndex(), index, index);
+    m_nodes.removeAt(index);
+    m_graph->removeNode(v);
+    endRemoveRows();
+    emit countChanged();
+}
 void NodeListModel::edgeAdded(ogdf::edge e) {}
 
 void NodeListModel::edgeDeleted(ogdf::edge e) {}

@@ -28,6 +28,7 @@ qt_add_qml_module(GraphQt
     QML_FILES
         EdgeSpline.qml
         GraphView.qml
+    IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
 )
 
 target_include_directories(GraphQt PUBLIC

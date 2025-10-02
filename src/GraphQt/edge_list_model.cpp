@@ -55,6 +55,32 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
     default: return QVariant();
     }
 }
+bool EdgeListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+    if (!index.isValid())
+        return false;
+
+    ogdf::edge v = m_edges[index.row()];
+    switch (role) {
+    case SourceRole: break;
+    case SourceXRole: break;
+    case SourceYRole: break;
+    case TargetRole: break;
+    case TargetXRole: break;
+    case TargetYRole: break;
+    case BendsRole: break;
+    default: return false;
+    }
+
+    QVector<int> roles;
+    roles << SourceRole << SourceXRole << SourceYRole << TargetRole << TargetXRole
+          << TargetYRole << BendsRole;
+    emit dataChanged(index, index, roles);
+    m_graph->layout()->invalidate();
+    return true;
+}
+Qt::ItemFlags EdgeListModel::flags(const QModelIndex &index) const {
+    return QAbstractListModel::flags(index) | Qt::ItemIsEditable;
+}
 
 void EdgeListModel::reInit() {
     beginResetModel();

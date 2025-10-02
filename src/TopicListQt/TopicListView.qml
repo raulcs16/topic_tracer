@@ -14,12 +14,12 @@ Item {
     height: parent.height
     width: parent.width
 
-    TopicGraphController{
-        id: _controller
+    TopicGraphController {
+        id: controller
     }
     TopicListModel {
         id: topicListModel
-        controller:_controller
+        controller: controller
         isAddingNewTopic: false
         currentIndex: 1
     }
@@ -138,7 +138,6 @@ Item {
             required property string topicName
             required property bool pending
             required property int index
-
             property ItemView listView: ListView.view
 
             height: 30
@@ -190,7 +189,7 @@ Item {
                 text: delegateRect.topicName
                 font.pointSize: 16
                 font.weight: Font.DemiBold
-                color: delegateRect.pending? Colors.primary:Colors.text_secondary
+                color: delegateRect.pending ? Colors.primary : Colors.text_secondary
                 Layout.fillWidth: true
                 elide: Text.ElideRight
                 anchors {

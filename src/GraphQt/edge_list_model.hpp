@@ -14,6 +14,7 @@ class Graph;
 class EdgeListModel : public QAbstractListModel, public ogdf::GraphObserver {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Use Graph.edges instead")
     Q_PROPERTY(int count READ count NOTIFY countChanged);
 
 public:

@@ -7,6 +7,7 @@
 #include <QJSValue>
 #include <QObject>
 #include <QUrl>
+#include <QtQml/qqml.h>
 #include <ogdf/basic/Graph.h>
 #include <ogdf/basic/GraphAttributes.h>
 
@@ -14,6 +15,7 @@
 
 class Graph : public QObject {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(GraphLayout *layout READ layout CONSTANT)
     Q_PROPERTY(NodeListModel *nodes READ nodes CONSTANT)
@@ -33,7 +35,7 @@ public:
     ogdf::Graph &g();
 
     ogdf::node v(const QString &node) const;
-    QString node(ogdf::node v) const;
+    Q_INVOKABLE QString node(ogdf::node v) const;
     void insertNode(ogdf::node v, const QString &node);
     void removeNode(ogdf::node v);
     void clearNodes();
@@ -73,7 +75,6 @@ private:
     Q_DISABLE_COPY(Graph)
 
     QUrl m_source;
-
     ogdf::Graph m_graph;
 
     NodeListModel m_nodeModel;

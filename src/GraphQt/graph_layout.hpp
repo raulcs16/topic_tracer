@@ -5,11 +5,14 @@
 
 
 #include <QObject>
+#include <QtQml/qqml.h>
 #include <ogdf/basic/GraphAttributes.h>
 #include <ogdf/basic/LayoutModule.h>
 
 class GraphLayout : public QObject {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("used with Graph")
     Q_ENUMS(Algorithm)
     Q_PROPERTY(
         Algorithm algorithm READ algorithm WRITE setAlgorithm NOTIFY algorithmChanged)

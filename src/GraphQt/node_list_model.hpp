@@ -15,6 +15,7 @@ class Graph;
 class NodeListModel : public QAbstractListModel, public ogdf::GraphObserver {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Use Graph.nodes instead")
     Q_PROPERTY(int count READ count NOTIFY countChanged);
 
 public:
