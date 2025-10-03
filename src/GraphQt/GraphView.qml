@@ -5,17 +5,18 @@ import Graph
 
 Item {
     id: root
+
+    width: childrenRect.width
+    height: childrenRect.height
+
     required property Graph model
 
     // property Component edgeDelegate: EdgeSpline {}
 
-    // Repeater {
-    //     model: root.model.edges
-    //     delegate: Loader {
-    //         property var model: modelData
-    //         sourceComponent: root.edgeDelegate
-    //     }
-    // }
+    Repeater {
+        model: root.model.edges
+        delegate: EdgeSpline {}
+    }
 
     Repeater {
         model: root.model.nodes
@@ -28,7 +29,7 @@ Item {
             required property double h
             width: w
             height: h
-            x: posy * 5 * index
+            x: posy
             y: posx
             color: '#dee0e7'
             radius: 4

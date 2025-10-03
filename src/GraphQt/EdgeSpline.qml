@@ -1,15 +1,19 @@
 import QtQuick
 
 Canvas {
+    required property double sourceX
+    required property double sourceY
+    required property double targetX
+    required property double targetY
+    required property var bends
+
     property int headSize: 10
     property color color: '#ffffff'
-    property var model: {}
 
-    property int minX: Math.min(model.sourceX, model.targetX)
-    property int minY: Math.min(model.sourceY, model.targetY)
-    property int maxX: Math.max(model.sourceX, model.targetX)
-    property int maxY: Math.max(model.sourceY, model.targetY)
-    property var bends: model.bends
+    property int minX: Math.min(sourceX, targetX)
+    property int minY: Math.min(sourceY, targetY)
+    property int maxX: Math.max(sourceX, targetX)
+    property int maxY: Math.max(sourceY, targetY)
     x: minX - headSize / 2
     y: minY - headSize / 2
     width: maxX - minX + headSize + 1

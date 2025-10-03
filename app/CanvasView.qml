@@ -1,50 +1,55 @@
 pragma ComponentBehavior: Bound
-import QtQuick 2.0
+import QtQuick
 
-Flickable {
-    id: view
-    default property alias innerData: viewInner.data
-    property int panStep: 15
-    contentWidth: Math.max(width, viewInner.width)
-    contentHeight: Math.max(height, viewInner.height)
-    focus: true   // make sure this item can receive keyboard events
+Item {
+    id: root
+    anchors.fill: parent
+    focus: true
 
-    Keys.onUpPressed: {
-        contentY = Math.max(contentY - panStep, 0);
-        console.log("Up");
-    }
-    Keys.onDownPressed: {
-        contentY = Math.min(contentY + panStep, contentHeight - height);
-        console.log("Down");
-    }
-    Keys.onLeftPressed: {
-        contentX = Math.max(contentX - panStep, 0);
+    property real zoom: 1.0
+    property real minZoom: 0.2
+    property real maxZoom: 3.0
+    property int panStep: 30
+    default property alias content: contentItem.data
 
-        console.log("Left");
-    }
-    Keys.onRightPressed: {
-        contentX = Math.min(contentX + panStep, contentWidth - width);
-        console.log("Right");
-    }
-    Behavior on contentX {
-        NumberAnimation {
-            duration: 45
-        }
-    }
-    Behavior on contentY {
-        NumberAnimation {
-            duration: 45
-        }
-    }
-
+    // This is the container we scale + translate
     Item {
-        id: viewInner
-        x: childrenRect.width < view.width ? (view.width - childrenRect.width) / 2 : -childrenRect.x * 2
-        y: childrenRect.height < view.height ? (view.height - childrenRect.height) / 2 : -childrenRect.y * 2
-        width: childrenRect.width
-        height: childrenRect.height
+        id: contentItem
+        scale: root.zoom
+        transformOrigin: Item.TopLeft
+
+        DragHandler {
+            id: pan
+            target: contentItem
+        }
     }
-    Component.onCompleted: {
-        view.forceActiveFocus();
+
+    // Pinch zoom (touchscreen)
+    PinchArea {
+        anchors.fill: parent
+        pinch.target: contentItem
+        onPinchUpdated: {
+            let newZoom = Math.min(root.maxZoom, Math.max(root.minZoom, root.zoom * parent.scale));
+            root.zoom = newZoom;
+        }
     }
+
+    // Mouse wheel zoom (desktop)
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
+            zoom = Math.min(maxZoom, zoom * 1.1);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Minus) {
+            zoom = Math.max(minZoom, zoom * 0.9);
+            event.accepted = true;
+        }
+    }
+
+    // Keyboard panning
+    Keys.onUpPressed: contentItem.y += panStep
+    Keys.onDownPressed: contentItem.y -= panStep
+    Keys.onLeftPressed: contentItem.x += panStep
+    Keys.onRightPressed: contentItem.x -= panStep
+
+    Component.onCompleted: root.forceActiveFocus()
 }
