@@ -29,8 +29,8 @@ Item {
             required property double h
             width: w
             height: h
-            x: posy
-            y: posx
+            x: posx - w / 2
+            y: posy - h / 2
             color: '#dee0e7'
             radius: 4
             border.width: 1
