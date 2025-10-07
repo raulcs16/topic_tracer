@@ -23,7 +23,7 @@ public:
         XRole = Qt::UserRole + 1,
         YRole,
         WidthRole,
-        HeightRole
+        HeightRole,
     };
 
     NodeListModel(Graph *graph);

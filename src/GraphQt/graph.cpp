@@ -142,7 +142,26 @@ void Graph::randomTriconnectedGraph(int n, double p1, double p2) {
 
 void Graph::randomTree(int n) {
     clear();
-    ogdf::randomTree(m_graph, n);
+    // ogdf::randomTree(m_graph, n);
+    std::vector<ogdf::node> nodeList;
+    for (size_t i = 0; i < n; i++) {
+        ogdf::node v = m_graph.newNode(i);
+        QString node = QString("Topic%1").arg('A' + i);
+        insertNode(v, node);
+        nodeList.push_back(v);
+    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, n - 1);
+    //make random connections
+    for (size_t i = 0; i < n / 2; i++) {
+        ogdf::node u = nodeList[dist(gen)];
+        ogdf::node v = nodeList[dist(gen)];
+        if (u != v)
+            m_graph.newEdge(u, v);
+    }
+
+
     m_layout->invalidate();
 }
 

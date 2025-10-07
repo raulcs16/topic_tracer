@@ -3,6 +3,7 @@
 #include "edge_list_model.hpp"
 #include "graph_layout.hpp"
 #include "node_list_model.hpp"
+#include "topic_graph_controller.hpp"
 
 #include <QJSValue>
 #include <QObject>
@@ -11,7 +12,7 @@
 #include <ogdf/basic/Graph.h>
 #include <ogdf/basic/GraphAttributes.h>
 
-//https : //github.com/schulzch/qml-ogdf/blob/master/ogdfplugin/graph.h
+//https://github.com/schulzch/qml-ogdf/blob/master/ogdfplugin/graph.h
 
 class Graph : public QObject {
     Q_OBJECT
@@ -20,6 +21,10 @@ class Graph : public QObject {
     Q_PROPERTY(GraphLayout *layout READ layout CONSTANT)
     Q_PROPERTY(NodeListModel *nodes READ nodes CONSTANT)
     Q_PROPERTY(EdgeListModel *edges READ edges CONSTANT)
+
+
+    Q_PROPERTY(TopicGraphController *controller READ controller WRITE setController NOTIFY
+                   controllerChanged)
 public:
     Graph(QObject *parent = 0);
 
@@ -73,6 +78,7 @@ private slots:
 
 private:
     Q_DISABLE_COPY(Graph)
+    TopicGraphController *m_controller = nullptr;
 
     QUrl m_source;
     ogdf::Graph m_graph;
