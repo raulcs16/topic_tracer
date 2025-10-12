@@ -1,21 +1,17 @@
 #pragma once
 
-//https: //github.com/schulzch/qml-ogdf/blob/master/ogdfplugin/nodemodel.h
-
-
+#include "graph_engine.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
-#include <ogdf/basic/GraphAttributes.h>
-#include <ogdf/basic/GraphObserver.h>
+#include <vector>
 
-class Graph;
+class GraphController;
 
-class EdgeListModel : public QAbstractListModel, public ogdf::GraphObserver {
+class EdgeListModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Use Graph.edges instead")
-    Q_PROPERTY(int count READ count NOTIFY countChanged);
 
 public:
     enum Roles {
@@ -28,41 +24,22 @@ public:
         BendsRole
     };
 
-    EdgeListModel(Graph *graph);
+    EdgeListModel(GraphController *controller);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    //graphobserver interface
-    void cleared() override;
-    void nodeAdded(ogdf::node v) override;
-    void nodeDeleted(ogdf::node v) override;
-    void edgeAdded(ogdf::edge e) override;
-    void edgeDeleted(ogdf::edge e) override;
-
-    //
-    void attributesChanged();
-    void reInit();
-
-    //qml
-    int count() const;
-    Q_INVOKABLE QString get(int index) const;
-    Q_INVOKABLE QString getSource(int index) const;
-    Q_INVOKABLE QString getTarget(int index) const;
-    Q_INVOKABLE void insert(const QString &edge,
-                            const QString &source,
-                            const QString &target);
-    Q_INVOKABLE void remove(const QString &edge);
-signals:
-    void countChanged();
+    void resetEdges(const std::vector<GraphEdge> &edges);
+    // public slots:
+    //     void onGraphChanged();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    Graph *m_graph;
-    QVector<ogdf::edge> m_edges;
+    GraphController *m_controller;
+    std::vector<GraphEdge> m_edges;
 };

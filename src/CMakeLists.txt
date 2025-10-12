@@ -4,4 +4,5 @@ add_subdirectory(TopicGraphCore)
 
 add_subdirectory(TopicGraphQt)
 add_subdirectory(TopicListQt)
+add_subdirectory(GraphCore)
 add_subdirectory(GraphQt)

@@ -14,17 +14,8 @@ ApplicationWindow {
     title: qsTr("Topic Tracer")
     visible: true
 
-    Graph {
-        id: graph
-    }
-    Timer {
-        id: autoLayouter
-        interval: 100
-        repeat: true
-        running: true
-        onTriggered: {
-            graph.layout.call();
-        }
+    GraphController {
+        id: graph_cotnroller
     }
     RowLayout {
         anchors.fill: parent
@@ -47,13 +38,10 @@ ApplicationWindow {
                     clip: true
                     focus: true
                     GraphView {
-                        model: graph
+                        controller: graph_cotnroller
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
-                    }
-                    Keys.onAsteriskPressed: {
-                        graph.randomTree(10);
                     }
                 }
             }
