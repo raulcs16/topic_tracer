@@ -8,13 +8,13 @@ TopicGraph::TopicGraph() {
 
 
 uint32_t TopicGraph::addTopic(const std::string &name, Topic_Type topic_type) {
-    //TODO trim name
     if (getTopic(name) != nullptr)
         return 0;
-    auto newTopic = std::make_shared<Topic>(m_id_ref++, name, topic_type);
-    m_topicMap[newTopic->id()] = newTopic;
-    m_adjOutMap[newTopic->id()] = {};
-    return newTopic->id();
+    auto newTopic =
+        Topic{.id = m_id_ref++, .name = name, .type = topic_type, .covered = false};
+    m_topicMap[newTopic.id] = newTopic;
+    m_adjOutMap[newTopic.id] = {};
+    return newTopic.id;
 }
 bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
     auto it = m_topicMap.find(id);
@@ -24,20 +24,20 @@ bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
     if (exist != nullptr) {
         return false;
     }
-    it->second->setName(new_name);
+    it->second.name = new_name;
     return true;
 }
 void TopicGraph::deleteTopic(uint32_t id) {}
 std::shared_ptr<const Topic> TopicGraph::getTopic(uint32_t id) const {
     auto it = m_topicMap.find(id);
     if (it != m_topicMap.end())
-        return it->second;
+        return std::make_shared<Topic>(it->second);
     return nullptr;
 }
 std::shared_ptr<const Topic> TopicGraph::getTopic(const std::string &name) const {
     for (const auto &[id, topic] : m_topicMap) {
-        if (topic->name() == name) {
-            return topic;
+        if (topic.name == name) {
+            return std::make_shared<Topic>(topic);
         }
     }
     return nullptr;
@@ -95,5 +95,5 @@ std::shared_ptr<const Topic> TopicGraph::operator[](size_t index) const {
     }
     auto it = m_topicMap.begin();
     std::advance(it, index);
-    return it->second;
+    return std::make_shared<Topic>(it->second);
 }

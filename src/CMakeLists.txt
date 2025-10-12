@@ -1,8 +1,7 @@
 add_subdirectory(Styles)
-add_subdirectory(TopicCore)
 add_subdirectory(TopicGraphCore)
+add_subdirectory(GraphCore)
 
 add_subdirectory(TopicGraphQt)
 add_subdirectory(TopicListQt)
-add_subdirectory(GraphCore)
 add_subdirectory(GraphQt)
