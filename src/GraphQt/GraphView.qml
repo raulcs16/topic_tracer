@@ -18,25 +18,31 @@ Item {
 
     Repeater {
         model: root.controller.nodes
-        delegate: Rectangle {
+        delegate: Item {
             required property int index
-            required property string node
+            required property int id
             required property double posx
             required property double posy
-            // required property double w
-            // required property double h
-            width: 20
-            height: 20
-            x: posx - width / 2
-            y: posy - height / 2
-            color: '#dee0e7'
-            radius: 4
-            border.width: 1
-            border.color: "#af9476"
+            x: posx
+            y: posy
+            Rectangle {
+                id: node
+                width: 20
+                height: 20
+                x: -width / 2
+                y: -height / 2
+                color: '#dee0e7'
+                radius: 100
+                border.width: 1
+                border.color: "#af9476"
+            }
             Text {
-                anchors.centerIn: parent
-                text: parent.node
-                color: "black"
+                text: parent.id
+                color: "white"
+                anchors.top: node.bottom
+                anchors.horizontalCenter: node.horizontalCenter
+                anchors.topMargin: 4
+                font.pointSize: 12
             }
         }
     }

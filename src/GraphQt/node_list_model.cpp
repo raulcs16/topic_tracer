@@ -6,7 +6,7 @@ NodeListModel::NodeListModel(GraphController *controller)
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[Qt::DisplayRole] = "node";
+    roles[IdRole] = "id";
     roles[XRole] = "posx";
     roles[YRole] = "posy";
     return roles;
