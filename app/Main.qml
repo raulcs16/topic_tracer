@@ -48,6 +48,8 @@ ApplicationWindow {
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
+                        viewWidth: main_content.width
+                        viewHeight: main_content.height
                     }
                 }
             }

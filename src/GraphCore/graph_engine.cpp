@@ -41,13 +41,11 @@ GraphEngine::GraphEngine(GraphAlg alg)
                                   ogdf::GraphAttributes::edgeGraphics |
                                   ogdf::GraphAttributes::nodeLabel |
                                   ogdf::GraphAttributes::edgeStyle),
-      m_algorithm(alg), m_layout(new ogdf::FMMMLayout), m_latest(false) {}
+      m_algorithm(alg), m_layout(new ogdf::FMMMLayout), m_latest(false) {
+    setAlgorithm(GraphAlg::FMMMLayout);
+}
 
 void GraphEngine::setAlgorithm(GraphAlg algo) {
-
-    if (algo == m_algorithm)
-        return;
-
 
     ogdf::LayoutModule *layout = 0;
     switch (algo) {
@@ -58,7 +56,13 @@ void GraphEngine::setAlgorithm(GraphAlg algo) {
         break;
     case GraphAlg::DavidsonHarelLayout: layout = new ogdf::DavidsonHarelLayout; break;
     case GraphAlg::DominanceLayout: layout = new ogdf::DominanceLayout; break;
-    case GraphAlg::FMMMLayout: layout = new ogdf::FMMMLayout; break;
+    case GraphAlg::FMMMLayout: {
+        auto *fmmm = new ogdf::FMMMLayout();
+        fmmm->unitEdgeLength(100.0);
+        fmmm->repForcesStrength(10);
+        layout = fmmm;
+        break;
+    }
     case GraphAlg::FPPLayout: layout = new ogdf::FPPLayout; break;
     case GraphAlg::FastMultipoleEmbedder: layout = new ogdf::FastMultipoleEmbedder; break;
     case GraphAlg::FastMultipoleMultilevelEmbedder:
@@ -104,7 +108,13 @@ void GraphEngine::calculateLayout() {
     if (m_latest)
         return;
 
+    if (m_state.edges.size() == 0) {
+        assignFermatSpiralPositions(m_state.nodes);
+        m_latest = true;
+        return;
+    }
     try {
+
         m_layout->call(m_attributes);
         m_attributes.addNodeCenter2Bends();
         for (auto &node : m_state.nodes) {
@@ -162,4 +172,14 @@ const std::vector<GraphEdge> &GraphEngine::edges() const { return m_state.edges;
 
 std::string GraphEngine::key(uint32_t from, uint32_t to) {
     return std::to_string(from) + "->" + std::to_string(to);
+}
+void GraphEngine::assignFermatSpiralPositions(std::vector<GraphNode> &nodes) {
+    const double golden = M_PI * (3 - std::sqrt(5));
+    const double scale = 50.0;
+    for (int i = 0; i < nodes.size(); i++) {
+        double r = scale * std::sqrt(i + 1);
+        double theta = i * golden;
+        nodes[i].x = r * std::cos(theta);
+        nodes[i].y = r * std::sin(theta);
+    }
 }

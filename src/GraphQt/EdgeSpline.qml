@@ -1,6 +1,8 @@
 import QtQuick
 
 Canvas {
+    property real viewWidth: 0
+    property real viewHeight: 0
     required property double sourceX
     required property double sourceY
     required property double targetX
@@ -9,10 +11,17 @@ Canvas {
 
     property color color: '#ffffff'
 
-    property int minX: Math.min(sourceX, targetX)
-    property int minY: Math.min(sourceY, targetY)
-    property int maxX: Math.max(sourceX, targetX)
-    property int maxY: Math.max(sourceY, targetY)
+    // Compute translated coordinates (centered)
+    property real sX: (viewWidth / 2) + sourceX
+    property real sY: (viewHeight / 2) + sourceY
+    property real tX: (viewWidth / 2) + targetX
+    property real tY: (viewHeight / 2) + targetY
+
+    // Compute bounding box (so the Canvas knows what to paint)
+    property real minX: Math.min(sX, tX)
+    property real minY: Math.min(sY, tY)
+    property real maxX: Math.max(sX, tX)
+    property real maxY: Math.max(sY, tY)
     x: minX
     y: minY
     width: maxX - minX
@@ -29,11 +38,12 @@ Canvas {
         context.beginPath();
         // Draw line.
         for (var i = 0; i < bends.length; ++i) {
-            if (i == 0) {
-                context.moveTo(bends[i].x - x, bends[i].y - y);
-            } else {
-                context.lineTo(bends[i].x - x, bends[i].y - y);
-            }
+            const px = (viewWidth / 2) + bends[i].x - x;
+            const py = (viewHeight / 2) + bends[i].y - y;
+            if (i === 0)
+                context.moveTo(px, py);
+            else
+                context.lineTo(px, py);
         }
         // Draw head.
         context.stroke();

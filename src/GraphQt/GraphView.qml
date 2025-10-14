@@ -6,14 +6,19 @@ import Graph
 Item {
     id: root
 
-    width: childrenRect.width
-    height: childrenRect.height
-
     required property GraphController controller
+    property real viewWidth: 0
+    property real viewHeight: 0
+
+    width: viewWidth
+    height: viewHeight
 
     Repeater {
         model: root.controller.edges
-        delegate: EdgeSpline {}
+        delegate: EdgeSpline {
+            viewWidth: root.viewWidth
+            viewHeight: root.viewHeight
+        }
     }
 
     Repeater {
@@ -24,8 +29,8 @@ Item {
             required property string label
             required property double posx
             required property double posy
-            x: posx
-            y: posy
+            x: (root.viewWidth / 2) + posx
+            y: (root.viewHeight / 2) + posy
             Rectangle {
                 id: node
                 width: 20

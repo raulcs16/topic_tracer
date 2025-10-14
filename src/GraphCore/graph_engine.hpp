@@ -81,6 +81,8 @@ private:
     void invalidate();
     static std::string key(uint32_t from, uint32_t to);
 
+    void assignFermatSpiralPositions(std::vector<GraphNode> &nodes);
+
 private:
     ogdf::Graph m_graph;
     ogdf::GraphAttributes m_attributes;
