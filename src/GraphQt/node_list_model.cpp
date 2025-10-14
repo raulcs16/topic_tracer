@@ -7,6 +7,7 @@ NodeListModel::NodeListModel(GraphController *controller)
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "id";
+    roles[LabelRole] = "label";
     roles[XRole] = "posx";
     roles[YRole] = "posy";
     return roles;
@@ -32,6 +33,7 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
 
     switch (role) {
     case IdRole: return QVariant::fromValue(nodeInfo.id);
+    case LabelRole: return QString::fromStdString(nodeInfo.label);
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     default: return QVariant();

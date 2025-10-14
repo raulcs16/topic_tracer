@@ -17,6 +17,7 @@ class GraphController : public QObject {
 public:
     explicit GraphController(QObject *parent = nullptr);
     void init();
+    void addNode(uint32_t id, const QString &label);
     NodeListModel *nodes() { return &m_nodeModel; }
     EdgeListModel *edges() { return &m_edgeModel; }
     void invalidateLayout();
@@ -27,4 +28,5 @@ private:
     GraphEngine m_engine;
     NodeListModel m_nodeModel;
     EdgeListModel m_edgeModel;
+    GraphState m_state;
 };

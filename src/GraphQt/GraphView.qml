@@ -21,6 +21,7 @@ Item {
         delegate: Item {
             required property int index
             required property int id
+            required property string label
             required property double posx
             required property double posy
             x: posx
@@ -37,7 +38,7 @@ Item {
                 border.color: "#af9476"
             }
             Text {
-                text: parent.id
+                text: parent.label
                 color: "white"
                 anchors.top: node.bottom
                 anchors.horizontalCenter: node.horizontalCenter

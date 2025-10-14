@@ -21,6 +21,7 @@ class NodeListModel : public QAbstractListModel {
 public:
     enum Roles {
         IdRole = Qt::UserRole + 1,
+        LabelRole,
         XRole,
         YRole,
     };

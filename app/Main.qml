@@ -6,6 +6,7 @@ import Styles
 import TopicList
 import App
 import Graph
+import TopicGraph
 
 ApplicationWindow {
     id: app
@@ -16,6 +17,11 @@ ApplicationWindow {
 
     GraphController {
         id: graph_cotnroller
+    }
+    TopicGraphController {
+        id: topic_controller
+        topicListModel: topicListView.topicListModel
+        graphController: graph_cotnroller
     }
     RowLayout {
         anchors.fill: parent
@@ -83,7 +89,7 @@ ApplicationWindow {
                 Layout.fillHeight: true
 
                 TopicListView {
-                    id: topicList
+                    id: topicListView
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }

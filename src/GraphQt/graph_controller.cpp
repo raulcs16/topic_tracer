@@ -17,14 +17,19 @@ void GraphController::invalidateLayout() {
 }
 void GraphController::init() {
     //
-    GraphState state;
-    for (uint32_t i = 0; i < 100; i++) {
-        state.nodes.push_back(GraphNode{.id = i});
+    for (uint32_t i = 0; i < 10; i++) {
+        m_state.nodes.push_back(GraphNode{.id = i, .label = "Topic" + std::to_string(i)});
     }
-    state.edges.push_back(GraphEdge{.from = 0, .to = 3});
-    state.edges.push_back(GraphEdge{.from = 0, .to = 5});
-    state.edges.push_back(GraphEdge{.from = 0, .to = 7});
-    m_engine.setState(state);
+    m_state.edges.push_back(GraphEdge{.from = 0, .to = 3});
+    m_state.edges.push_back(GraphEdge{.from = 0, .to = 5});
+    m_state.edges.push_back(GraphEdge{.from = 0, .to = 7});
+    m_engine.setState(m_state);
+    m_engine.calculateLayout();
+    invalidateLayout();
+}
+void GraphController::addNode(uint32_t id, const QString &label) {
+    m_state.nodes.push_back(GraphNode{.id = id, .label = label.toStdString()});
+    m_engine.setState(m_state);
     m_engine.calculateLayout();
     invalidateLayout();
 }

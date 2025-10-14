@@ -6,7 +6,6 @@ import QtQuick.Controls.Basic // Keep Basic for compatibility if necessary
 
 import Styles
 import TopicList
-import TopicGraph
 
 Item {
     id: root
@@ -14,12 +13,10 @@ Item {
     height: parent.height
     width: parent.width
 
-    TopicGraphController {
-        id: controller
-    }
+    property alias topicListModel: topicListModel
+
     TopicListModel {
         id: topicListModel
-        controller: controller
         isAddingNewTopic: false
         currentIndex: 1
     }

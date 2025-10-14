@@ -7,6 +7,7 @@
 
 struct GraphNode {
     uint32_t id;
+    std::string label = "label";
     double x;
     double y;
 };

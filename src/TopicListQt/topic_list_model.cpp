@@ -2,7 +2,13 @@
 
 
 TopicListModel::TopicListModel(QObject *parent) : QAbstractListModel{parent} {}
-
+QHash<int, QByteArray> TopicListModel::roleNames() const {
+    QHash<int, QByteArray> roles;
+    roles[IdRole] = "topicId";
+    roles[NameRole] = "topicName";
+    roles[PendingRole] = "pending";
+    return roles;
+}
 int TopicListModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid()) {
         return 0;
@@ -66,13 +72,7 @@ bool TopicListModel::setData(const QModelIndex &index, const QVariant &value, in
     return false;
 }
 
-QHash<int, QByteArray> TopicListModel::roleNames() const {
-    QHash<int, QByteArray> roles;
-    roles[IdRole] = "topicId";
-    roles[NameRole] = "topicName";
-    roles[PendingRole] = "pending";
-    return roles;
-}
+
 void TopicListModel::addItem(const QString &name) {
     QString topicName = name.trimmed();
     if (topicName.isEmpty()) {
@@ -83,13 +83,9 @@ void TopicListModel::addItem(const QString &name) {
     const int newRow = m_topics.size();
 
     beginInsertRows(QModelIndex(), newRow, newRow);
-
-    int temp = m_next_temp--;
-    m_topics.push_back(
-        TopicItem{.tempId = temp, .id = 0, .name = topicName, .pending = true});
-
+    m_topics.push_back(TopicItem{.id = 0, .name = topicName, .pending = true});
     endInsertRows();
-    m_controller->addTopic(temp, topicName);
+    emit requestAddTopic(m_topics.size() - 1, topicName);
 }
 
 bool TopicListModel::removeItem(int index) {
@@ -101,7 +97,7 @@ bool TopicListModel::removeItem(int index) {
     beginRemoveRows(QModelIndex(), index, index);
     m_topics.removeAt(index);
     endRemoveRows();
-    m_controller->deleteTopic(id);
+
 
     return true;
 }
@@ -112,7 +108,6 @@ bool TopicListModel::editItem(int index, const QString &newName) {
     }
     QModelIndex modelIndex = this->index(index);
     setData(modelIndex, newName.trimmed(), NameRole);
-    m_controller->renameTopic(m_topics[index].id, newName);
     return true;
 }
 
@@ -142,40 +137,16 @@ void TopicListModel::setCurrentIndex(int idx) {
     m_currentIndex = idx;
     emit currentIndexChanged();
 }
-TopicGraphController *TopicListModel::controller() const { return m_controller; }
-void TopicListModel::setController(TopicGraphController *ctrl) {
-    if (m_controller == ctrl)
+
+void TopicListModel::confirmTopic(int index, uint32_t new_id) {
+    if (index < 0 || index >= m_topics.size())
         return;
-    if (m_controller)
-        disconnect(m_controller, nullptr, this, nullptr);
 
-    m_controller = ctrl;
+    TopicItem &item = m_topics[index];
+    item.id = new_id;
+    item.pending = false;
 
-    if (m_controller) {
-        // connect signals here, e.g.
-        connect(m_controller,
-                &TopicGraphController::topicAdded,
-                this,
-                &TopicListModel::onTopicAdded);
-    }
-
-    emit controllerChanged();
-}
-void TopicListModel::onTopicAdded(int tempId, bool success, uint32_t id) {
-    for (int i = 0; i < m_topics.size(); ++i) {
-        if (m_topics[i].tempId == tempId) {
-            if (success) {
-                m_topics[i].id = id;
-                m_topics[i].pending = false;
-
-                QModelIndex idx = index(i);
-                emit dataChanged(idx, idx, {IdRole, PendingRole});
-            } else {
-                beginRemoveRows(QModelIndex(), i, i);
-                m_topics.removeAt(i);
-                endRemoveRows();
-            }
-            break;
-        }
-    }
+    // Notify any views or bindings that these fields changed
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {IdRole, PendingRole});
 }

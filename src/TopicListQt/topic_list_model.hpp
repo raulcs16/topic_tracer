@@ -1,13 +1,12 @@
 #pragma once
 
-#include "topic_graph_controller.hpp"
+
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
 
 
 struct TopicItem {
-    int tempId; //negative id
     uint32_t id;
     QString name;
     bool pending;
@@ -24,8 +23,6 @@ class TopicListModel : public QAbstractListModel {
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY
                    currentIndexChanged)
 
-    Q_PROPERTY(TopicGraphController *controller READ controller WRITE setController NOTIFY
-                   controllerChanged)
 public:
     enum Roles {
         IdRole = Qt::UserRole + 1,
@@ -45,8 +42,6 @@ public:
     Q_INVOKABLE bool removeItem(int index);
     Q_INVOKABLE bool editItem(int index, const QString &newName);
 
-    TopicGraphController *controller() const;
-    void setController(TopicGraphController *ctrl);
 
     // State API
     int editingIndex() const { return m_editingIndex; }
@@ -56,15 +51,14 @@ public:
     int currentIndex() const { return m_currentIndex; }
     void setCurrentIndex(int idx);
 
+    void confirmTopic(int index, uint32_t new_id);
+
 signals:
     void editingIndexChanged();
     void isAddingNewTopicChanged();
     void currentIndexChanged();
-
-    void controllerChanged();
-
-public slots:
-    void onTopicAdded(int tempId, bool success, uint32_t id);
+    void requestAddTopic(int index, const QString &name);
+    void deleteAddTopic(uint32_t id);
 
 
 protected:
@@ -72,8 +66,7 @@ protected:
 
 private:
     QVector<TopicItem> m_topics;
-    TopicGraphController *m_controller = nullptr;
-    int m_next_temp = -1;
+
 
     int m_editingIndex = -1;
     bool m_isAddingNewTopic = false;
