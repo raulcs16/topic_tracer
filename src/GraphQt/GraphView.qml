@@ -29,8 +29,8 @@ Item {
             required property string label
             required property double posx
             required property double posy
-            x: (root.viewWidth / 2) + posx
-            y: (root.viewHeight / 2) + posy
+            x: (root.viewWidth / 3) + posx
+            y: (root.viewHeight / 3) + posy
             Rectangle {
                 id: node
                 width: 20

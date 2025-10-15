@@ -60,7 +60,7 @@ void GraphController::init() {
     m_state.nodes.push_back(GraphNode{.id = 24, .label = "State"});
     m_state.nodes.push_back(GraphNode{.id = 25, .label = "TemplateMethod"});
     m_state.nodes.push_back(GraphNode{.id = 26, .label = "Visitor"});
-    m_state.nodes.push_back(GraphNode{.id = 26, .label = "Interpreter"});
+    m_state.nodes.push_back(GraphNode{.id = 27, .label = "Interpreter"});
 
     m_state.edges.push_back(GraphEdge{.from = 400, .to = 17});
     m_state.edges.push_back(GraphEdge{.from = 400, .to = 18});
@@ -72,6 +72,7 @@ void GraphController::init() {
     m_state.edges.push_back(GraphEdge{.from = 400, .to = 24});
     m_state.edges.push_back(GraphEdge{.from = 400, .to = 25});
     m_state.edges.push_back(GraphEdge{.from = 400, .to = 26});
+    m_state.edges.push_back(GraphEdge{.from = 400, .to = 27});
 
 
     m_engine.setState(m_state);

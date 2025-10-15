@@ -12,10 +12,10 @@ Canvas {
     property color color: '#ffffff'
 
     // Compute translated coordinates (centered)
-    property real sX: (viewWidth / 2) + sourceX
-    property real sY: (viewHeight / 2) + sourceY
-    property real tX: (viewWidth / 2) + targetX
-    property real tY: (viewHeight / 2) + targetY
+    property real sX: (viewWidth / 3) + sourceX
+    property real sY: (viewHeight / 3) + sourceY
+    property real tX: (viewWidth / 3) + targetX
+    property real tY: (viewHeight / 3) + targetY
 
     // Compute bounding box (so the Canvas knows what to paint)
     property real minX: Math.min(sX, tX)
@@ -38,8 +38,8 @@ Canvas {
         context.beginPath();
         // Draw line.
         for (var i = 0; i < bends.length; ++i) {
-            const px = (viewWidth / 2) + bends[i].x - x;
-            const py = (viewHeight / 2) + bends[i].y - y;
+            const px = (viewWidth / 3) + bends[i].x - x;
+            const py = (viewHeight / 3) + bends[i].y - y;
             if (i === 0)
                 context.moveTo(px, py);
             else
