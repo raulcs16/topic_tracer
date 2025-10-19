@@ -41,7 +41,7 @@ GraphEngine::GraphEngine(GraphAlg alg)
                                   ogdf::GraphAttributes::edgeGraphics |
                                   ogdf::GraphAttributes::nodeLabel |
                                   ogdf::GraphAttributes::edgeStyle),
-      m_algorithm(alg), m_layout(new ogdf::FMMMLayout), m_latest(false) {
+      m_algorithm(alg), m_layout(new ogdf::FMMMLayout) {
     setAlgorithm(GraphAlg::FMMMLayout);
 }
 
@@ -99,52 +99,62 @@ void GraphEngine::setAlgorithm(GraphAlg algo) {
     if (layout) {
         m_layout.reset(layout);
         m_algorithm = algo;
-        invalidate();
     }
 }
-void GraphEngine::invalidate() { m_latest = false; }
 
-void GraphEngine::calculateLayout() {
-    if (m_latest)
-        return;
 
-    if (m_state.edges.size() == 0) {
-        assignFermatSpiralPositions(m_state.nodes);
-        m_latest = true;
+void GraphEngine::calculateLayout(std::vector<std::reference_wrapper<GraphNode>> &nodes,
+                                  std::vector<std::reference_wrapper<GraphEdge>> &edges) {
+    // if (m_latest)
+    //     return;
+
+    if (edges.size() == 0) {
+        assignFermatSpiralPositions(nodes);
+        // m_latest = true;
         return;
     }
     try {
-
+        m_graph.clear();
+        m_idToNode.clear();
+        m_idToEdge.clear();
+        for (auto node : nodes) {
+            auto n = m_graph.newNode();
+            m_idToNode[node.get().id] = n;
+        }
+        for (auto edge : edges) {
+            auto e =
+                m_graph.newEdge(m_idToNode[edge.get().from], m_idToNode[edge.get().to]);
+            m_idToEdge[key(edge.get().from, edge.get().to)] = e;
+        }
         m_layout->call(m_attributes);
         m_attributes.addNodeCenter2Bends();
-        for (auto &node : m_state.nodes) {
-            auto it = m_idToNode.find(node.id);
+        for (auto &node : nodes) {
+            auto it = m_idToNode.find(node.get().id);
             if (it == m_idToNode.end())
                 continue;
-            node.x = m_attributes.x(it->second);
-            node.y = m_attributes.y(it->second);
+            node.get().x = m_attributes.x(it->second);
+            node.get().y = m_attributes.y(it->second);
         }
-        for (auto &edge : m_state.edges) {
-            auto src = m_idToNode.find(edge.from);
-            auto target = m_idToNode.find(edge.to);
+        for (auto &edge : edges) {
+            auto src = m_idToNode.find(edge.get().from);
+            auto target = m_idToNode.find(edge.get().to);
             if (src == m_idToNode.end() || target == m_idToNode.end())
                 continue;
 
-            edge.source_x = m_attributes.x(src->second);
-            edge.source_y = m_attributes.y(src->second);
-            edge.target_x = m_attributes.x(target->second);
-            edge.target_y = m_attributes.y(target->second);
-            auto e = m_idToEdge.find(key(edge.from, edge.to));
+            edge.get().source_x = m_attributes.x(src->second);
+            edge.get().source_y = m_attributes.y(src->second);
+            edge.get().target_x = m_attributes.x(target->second);
+            edge.get().target_y = m_attributes.y(target->second);
+            auto e = m_idToEdge.find(key(edge.get().from, edge.get().to));
             if (e == m_idToEdge.end())
                 continue;
-            edge.bends.clear();
+            edge.get().bends.clear();
             for (ogdf::DPoint &p : m_attributes.bends(e->second)) {
-                edge.bends.push_back(p);
+                edge.get().bends.push_back(p);
             }
         }
 
 
-        m_latest = true;
     } catch (ogdf::AlgorithmFailureException &e) {
         std::cerr << "Algorithmn Failure: " << (int)(e.exceptionCode()) << "\n";
     } catch (...) {
@@ -152,34 +162,18 @@ void GraphEngine::calculateLayout() {
     }
 }
 
-void GraphEngine::setState(const GraphState &state) {
-    m_graph.clear();
-    m_idToNode.clear();
-    m_state = state;
-    invalidate();
-
-    for (auto node : state.nodes) {
-        auto n = m_graph.newNode();
-        m_idToNode[node.id] = n;
-    }
-    for (auto edge : state.edges) {
-        auto e = m_graph.newEdge(m_idToNode[edge.from], m_idToNode[edge.to]);
-        m_idToEdge[key(edge.from, edge.to)] = e;
-    }
-}
-const std::vector<GraphNode> &GraphEngine::nodes() const { return m_state.nodes; }
-const std::vector<GraphEdge> &GraphEngine::edges() const { return m_state.edges; }
 
 std::string GraphEngine::key(uint32_t from, uint32_t to) {
     return std::to_string(from) + "->" + std::to_string(to);
 }
-void GraphEngine::assignFermatSpiralPositions(std::vector<GraphNode> &nodes) {
+void GraphEngine::assignFermatSpiralPositions(
+    std::vector<std::reference_wrapper<GraphNode>> &nodes) {
     const double golden = M_PI * (3 - std::sqrt(5));
     const double scale = 50.0;
     for (int i = 0; i < nodes.size(); i++) {
         double r = scale * std::sqrt(i + 1);
         double theta = i * golden;
-        nodes[i].x = r * std::cos(theta);
-        nodes[i].y = r * std::sin(theta);
+        nodes[i].get().x = r * std::cos(theta);
+        nodes[i].get().y = r * std::sin(theta);
     }
 }

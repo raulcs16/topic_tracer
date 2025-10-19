@@ -3,6 +3,7 @@
 #include "edge_list_model.hpp"
 #include "graph_engine.hpp"
 #include "node_list_model.hpp"
+#include "topic_graph.hpp"
 #include <QObject>
 #include <QUrl>
 #include <QtQml/qqml.h>
@@ -16,11 +17,11 @@ class GraphController : public QObject {
 
 public:
     explicit GraphController(QObject *parent = nullptr);
-    void init();
-    void addNode(uint32_t id, const QString &label);
+
     NodeListModel *nodes() { return &m_nodeModel; }
     EdgeListModel *edges() { return &m_edgeModel; }
-    void invalidateLayout();
+
+    void synchFromTopicGraph(TopicGraph &graph);
 signals:
     void graphChanged();
 
@@ -28,5 +29,4 @@ private:
     GraphEngine m_engine;
     NodeListModel m_nodeModel;
     EdgeListModel m_edgeModel;
-    GraphState m_state;
 };

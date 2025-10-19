@@ -1,8 +1,11 @@
 add_library(TopicGraphCore STATIC
-    topic.hpp
+    topic_graph_types.hpp
     topic_graph.cpp
     topic_graph.hpp
-    edge_type.hpp
+)
+
+target_link_libraries(TopicGraphCore 
+    PUBLIC GraphCore
 )
 
 target_include_directories(TopicGraphCore

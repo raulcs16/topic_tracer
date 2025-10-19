@@ -50,6 +50,8 @@ void TopicGraphController::setGraphController(GraphController *controller) {
     if (m_gr_cntrl)
         disconnect(m_gr_cntrl, nullptr, this, nullptr);
     m_gr_cntrl = controller;
+    if (m_gr_cntrl)
+        m_gr_cntrl->synchFromTopicGraph(*m_graph);
     emit graphControllerChanged();
 }
 void TopicGraphController::onRequestAddTopic(int index, const QString &name) {
@@ -60,5 +62,5 @@ void TopicGraphController::onRequestAddTopic(int index, const QString &name) {
     if (m_topicList)
         m_topicList->confirmTopic(index, id);
     if (m_gr_cntrl)
-        m_gr_cntrl->addNode(id, name);
+        m_gr_cntrl->synchFromTopicGraph(*m_graph);
 }

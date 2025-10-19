@@ -7,6 +7,7 @@ target_link_libraries(GraphQt
     PRIVATE Qt6::Quick
     PRIVATE OGDF
     PUBLIC GraphCore
+    PUBLIC TopicGraphCore
 )
 
 qt_add_qml_module(GraphQt

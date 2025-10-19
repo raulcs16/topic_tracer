@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "graph_engine.hpp"
+#include "graph_types.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>

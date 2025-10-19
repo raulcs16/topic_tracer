@@ -1,4 +1,5 @@
 add_library(GraphCore STATIC
+    graph_types.hpp
     graph_engine.cpp
     graph_engine.hpp
 
