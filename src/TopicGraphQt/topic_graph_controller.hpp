@@ -27,6 +27,9 @@ public:
     TopicListModel *topicListModel() const { return m_topicList; }
     GraphController *graphController() const { return m_gr_cntrl; }
 
+    Q_INVOKABLE void createTopic(const QString &name, Topic_Type = Topic_Type::Concept);
+    Q_INVOKABLE void join(const QString &topicA, const QString &topicB);
+
 
 public slots:
     void addTopic(int tempId, const QString &name, Topic_Type type = Topic_Type::Concept);

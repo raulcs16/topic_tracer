@@ -10,10 +10,44 @@ import TopicGraph
 
 ApplicationWindow {
     id: app
-    width: 2074
-    height: 1296
+    width: 2074 * .8
+    height: 1296 * .8
     title: qsTr("Topic Tracer")
     visible: true
+
+    function parseCommand(cmd) {
+        const parts = cmd.split(" ");
+        const command = parts[0];
+        const args = parts.slice(1);
+
+        switch (command) {
+        case "touch":
+            if (args.length < 1) {
+                console.warn("Usage: touch <name>");
+                return;
+            }
+            for (let i = 0; i < args.length; i++) {
+                const topicName = args[i];
+                topic_controller.createTopic(topicName);
+            }
+            break;
+        case "join":
+            if (args.length < 2 || args.length > 2) {
+                console.warn("Usage: join <topicA> <topicB>");
+                return;
+            }
+            const topicA = args[0];
+            const topicB = args[1];
+            topic_controller.join(topicA, topicB);
+            break;
+        default:
+            console.warn("Unknown command:", command);
+        }
+    }
+    Shortcut {
+        sequence: [":"]
+        onActivated: commandInput.focus = true
+    }
 
     GraphController {
         id: graph_cotnroller
@@ -55,10 +89,44 @@ ApplicationWindow {
             }
 
             Rectangle {
-                id: status_bar
+                id: command_interface
                 color: Colors.accent
                 Layout.fillWidth: true
                 Layout.preferredHeight: 75
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 6
+
+                    Text {
+                        id: prompt
+                        text: "$"
+                        font.bold: true
+                        font.pointSize: 20
+                        color: "white"
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    TextField {
+                        id: commandInput
+                        Layout.fillWidth: true
+                        color: "white"
+                        font.pointSize: 20
+                        font.bold: true
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+
+                        Keys.onReturnPressed: {
+                            const cmd = commandInput.text.trim();
+                            if (cmd.length === 0)
+                                return;
+                            app.parseCommand(cmd);
+                            commandInput.text = "";
+                        }
+                    }
+                }
             }
         }
 
@@ -66,7 +134,7 @@ ApplicationWindow {
         ColumnLayout {
             spacing: 0
             Layout.preferredWidth: 300 // fixed width
-            Layout.maximumWidth: 500
+            Layout.maximumWidth: 350
             Layout.fillHeight: true
 
             Rectangle {

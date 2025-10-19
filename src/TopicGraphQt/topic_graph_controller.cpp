@@ -64,3 +64,28 @@ void TopicGraphController::onRequestAddTopic(int index, const QString &name) {
     if (m_gr_cntrl)
         m_gr_cntrl->synchFromTopicGraph(*m_graph);
 }
+void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
+    uint32_t id = m_graph->addTopic(name.toStdString());
+    if (!id)
+        return;
+    if (m_topicList) {
+        m_topicList->addConfirmedItem(id, name);
+    }
+    if (m_gr_cntrl) {
+        m_gr_cntrl->synchFromTopicGraph(*m_graph);
+    }
+}
+void TopicGraphController::join(const QString &topicA, const QString &topicB) {
+    auto tnodeA = m_graph->getTopic(topicA.toStdString());
+    auto tnodeB = m_graph->getTopic(topicB.toStdString());
+
+    if (tnodeA == nullptr || tnodeB == nullptr) {
+        return;
+    }
+    m_graph->addEdge(tnodeA.get()->topic.id,
+                     tnodeB.get()->topic.id,
+                     Edge_Type::RelatedTo);
+    if (m_gr_cntrl) {
+        m_gr_cntrl->synchFromTopicGraph(*m_graph);
+    }
+}

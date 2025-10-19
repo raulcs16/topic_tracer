@@ -88,6 +88,14 @@ void TopicListModel::addItem(const QString &name) {
     emit requestAddTopic(m_topics.size() - 1, topicName);
 }
 
+void TopicListModel::addConfirmedItem(uint32_t id, const QString &name) {
+    const int newRow = m_topics.size();
+
+    beginInsertRows(QModelIndex(), newRow, newRow);
+    m_topics.push_back(TopicItem{.id = id, .name = name, .pending = false});
+    endInsertRows();
+}
+
 bool TopicListModel::removeItem(int index) {
     if (index < 0 || index >= m_topics.size()) {
         return false;

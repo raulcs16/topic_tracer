@@ -1,15 +1,7 @@
 #include "topic_graph.hpp"
 
 
-TopicGraph::TopicGraph() : m_edge_count{0}, m_id_ref{1} {
-    auto a = addTopic("DesignPatterns");
-    auto b = addTopic("StructualPatterns");
-    auto c = addTopic("CreationalPatterns");
-    auto d = addTopic("BehaviouralPatterns");
-    addEdge(a, b, Edge_Type::ComposedOf);
-    addEdge(a, c, Edge_Type::ComposedOf);
-    addEdge(a, d, Edge_Type::ComposedOf);
-}
+TopicGraph::TopicGraph() : m_edge_count{0}, m_id_ref{1} {}
 
 
 uint32_t TopicGraph::addTopic(const std::string &name, Topic_Type topic_type) {
@@ -65,6 +57,8 @@ std::shared_ptr<const TopicNode> TopicGraph::getTopic(const std::string &name) c
 }
 
 void TopicGraph::addEdge(uint32_t from, uint32_t to, Edge_Type type) {
+    if (from == to)
+        return;
     if (getTopic(from) == nullptr || getTopic(to) == nullptr)
         return;
     if (hasEdge(from, to))

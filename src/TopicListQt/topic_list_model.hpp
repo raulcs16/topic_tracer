@@ -39,6 +39,7 @@ public:
 
     //API
     Q_INVOKABLE void addItem(const QString &name);
+    Q_INVOKABLE void addConfirmedItem(uint32_t id, const QString &name);
     Q_INVOKABLE bool removeItem(int index);
     Q_INVOKABLE bool editItem(int index, const QString &newName);
 
