@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include "graph_types.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -10,8 +9,12 @@
 #include <vector>
 
 
-class GraphController;
-
+struct NodeItem {
+    uint32_t id;
+    QString label;
+    double x;
+    double y;
+};
 
 class NodeListModel : public QAbstractListModel {
     Q_OBJECT
@@ -26,7 +29,7 @@ public:
         YRole,
     };
 
-    explicit NodeListModel(GraphController *graph);
+    explicit NodeListModel(QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -34,7 +37,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    void resetNodes(const std::vector<GraphNode> &nodes);
+    void resetNodes(const std::vector<NodeItem> &nodes);
 public slots:
     void onGaphChanged();
 
@@ -42,7 +45,5 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    GraphController *m_controller;
-
-    std::vector<GraphNode> m_nodes;
+    std::vector<NodeItem> m_nodes;
 };

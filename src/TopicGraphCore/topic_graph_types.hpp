@@ -1,5 +1,4 @@
 #pragma once
-#include "graph_types.hpp"
 #include <cstdint>
 #include <string>
 
@@ -11,8 +10,8 @@ enum class Topic_Type {
 struct Topic {
     uint32_t id;
     std::string name;
-    bool covered;
     Topic_Type type;
+    bool covered;
 };
 
 enum class Edge_Type {
@@ -23,14 +22,10 @@ enum class Edge_Type {
     RelatedTo
 };
 
-
-struct TopicNode {
-    Topic topic;
-    GraphNode geometry;
-};
-struct TopicEdge {
+struct Edge {
+    std::string key;
     uint32_t from;
     uint32_t to;
-    Edge_Type relation;
-    GraphEdge geometry;
+    Edge_Type type;
+    bool directed = true;
 };

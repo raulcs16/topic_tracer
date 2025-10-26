@@ -1,6 +1,8 @@
 #pragma once
 
-#include "graph_controller.hpp"
+#include "edge_list_model.hpp"
+#include "layout_engine.hpp"
+#include "node_list_model.hpp"
 #include "topic_graph.hpp"
 #include "topic_list_model.hpp"
 #include <QObject>
@@ -10,11 +12,10 @@
 class TopicGraphController : public QObject {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(TopicListModel *topicListModel READ topicListModel WRITE setTopicListModel
-                   NOTIFY topicListModelChanged)
+    Q_PROPERTY(TopicListModel *topicListModel READ topicListModel CONSTANT)
+    Q_PROPERTY(EdgeListModel *edgeListModel READ edgeListModel CONSTANT)
+    Q_PROPERTY(NodeListModel *nodeListModel READ nodeListModel CONSTANT)
 
-    Q_PROPERTY(GraphController *graphController READ graphController WRITE
-                   setGraphController NOTIFY graphControllerChanged)
 
 public:
     using Topic_Type = ::Topic_Type;
@@ -25,33 +26,39 @@ public:
     explicit TopicGraphController(QObject *parent = nullptr);
     ~TopicGraphController();
     TopicListModel *topicListModel() const { return m_topicList; }
-    GraphController *graphController() const { return m_gr_cntrl; }
+    NodeListModel *nodeListModel() const { return m_nodeList; }
+    EdgeListModel *edgeListModel() const { return m_edgeList; }
 
-    Q_INVOKABLE void createTopic(const QString &name, Topic_Type = Topic_Type::Concept);
+
+    //QML API
+
+    Q_INVOKABLE void createTopic(const QString &name,
+                                 Topic_Type type = Topic_Type::Concept);
     Q_INVOKABLE void join(const QString &topicA, const QString &topicB);
 
 
-public slots:
-    void addTopic(int tempId, const QString &name, Topic_Type type = Topic_Type::Concept);
-    void renameTopic(uint32_t id, const QString &new_name);
-    void deleteTopic(uint32_t id);
+    // public slots:
+    //     void addTopic(int tempId, const QString &name, Topic_Type type = Topic_Type::Concept);
+    //     void renameTopic(uint32_t id, const QString &new_name);
+    //     void deleteTopic(uint32_t id);
 
-    void setTopicListModel(TopicListModel *list);
-    void setGraphController(GraphController *controller);
+    // private slots:
+    //     void onRequestAddTopic(int tempId, const QString &name);
 
-private slots:
-    void onRequestAddTopic(int tempId, const QString &name);
+    // signals:
+    //     void topicAdded(int tempId, bool success, uint32_t id);
+    //     void topicDelelted(bool success, uint32_t id);
+    //     void topicRenamed(bool success, uint32_t id);
 
-signals:
-    void topicAdded(int tempId, bool success, uint32_t id);
-    void topicDelelted(bool success, uint32_t id);
-    void topicRenamed(bool success, uint32_t id);
-
-    void topicListModelChanged();
-    void graphControllerChanged();
+    //     void topicListModelChanged();
+    //     void graphControllerChanged();
+private:
+    void synchGraphView();
 
 private:
-    TopicGraph *m_graph;
-    GraphController *m_gr_cntrl;
+    TopicGraph m_graph;
+    LayoutEngine m_layout;
     TopicListModel *m_topicList;
+    NodeListModel *m_nodeList;
+    EdgeListModel *m_edgeList;
 };

@@ -3,48 +3,62 @@
 
 #include "topic_graph_types.hpp"
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 class TopicGraph {
 public:
     TopicGraph();
 
-    //returns 0 for failed to add,
-    //returns + for successfully added
+    //Topic API
     uint32_t addTopic(const std::string &name, Topic_Type type = Topic_Type::Concept);
     bool renameTopic(uint32_t id, const std::string &new_name);
-    void deleteTopic(uint32_t id);
+    bool deleteTopic(uint32_t id);
+    //getters
+    std::shared_ptr<const Topic> getTopic(uint32_t id) const;
+    std::shared_ptr<const Topic> getTopic(const std::string &name) const;
+    std::vector<std::shared_ptr<Topic>> topics() const;
 
-    //get
-    std::shared_ptr<const TopicNode> getTopic(uint32_t id) const;
-    std::shared_ptr<const TopicNode> getTopic(const std::string &name) const;
+    //Edge API
+    std::shared_ptr<const Edge> addEdge(uint32_t from, uint32_t to, Edge_Type type);
+    std::shared_ptr<const Edge> addEdge(const std::string &topicA,
+                                        const std::string &topicB,
+                                        Edge_Type type);
+    bool removeEdge(uint32_t from, uint32_t to);
+    bool removeEdge(const std::string &topicA, const std::string &topicB);
+    bool hasEdge(uint32_t from, uint32_t to);
+    //gettters
+    std::shared_ptr<const Edge> getEdge(std::string key);
+    std::shared_ptr<const Edge> getEdge(uint32_t from, uint32_t to);
+    std::vector<std::shared_ptr<Edge>> edges() const;
 
-    std::vector<std::reference_wrapper<TopicNode>> topics();
-    std::vector<std::reference_wrapper<TopicEdge>> edges();
 
-    std::vector<GraphNode> graphNodes();
-    std::vector<GraphEdge> graphEdges();
+    std::vector<Edge> getOutEdges(uint32_t from) const;
+    std::vector<Edge> getInEdges(uint32_t to) const;
 
-
-    void addEdge(uint32_t from, uint32_t to, Edge_Type type);
-    bool hasEdge(uint32_t from, uint32_t to) const;
-    void removeEdge(uint32_t from, uint32_t to);
-
-    //todo: look into shared_ptr for Edges
-    std::vector<TopicEdge> getOutEdges(uint32_t from) const;
-    // std::shared_ptr<const Edge> getInEdges(uint32_t to) const;
-
-    size_t numTopics() const;
-    size_t numEdges() const;
-
-    //override [] to return that index in m_topicMap
-    std::shared_ptr<const TopicNode> operator[](size_t index) const;
 
 private:
-    std::unordered_map<uint32_t, TopicNode> m_topicMap;
-    std::unordered_map<uint32_t, std::vector<TopicEdge>> m_adjOutMap;
+    std::string genKey(uint32_t from, uint32_t to);
+    inline uint32_t extractFrom(const std::string &key) {
+        auto arrowPos = key.find("->");
+        if (arrowPos == std::string::npos)
+            throw std::invalid_argument("Invalid edge key format: " + key);
+        return std::stoul(key.substr(0, arrowPos));
+    }
+
+    inline uint32_t extractTo(const std::string &key) {
+        auto arrowPos = key.find("->");
+        if (arrowPos == std::string::npos)
+            throw std::invalid_argument("Invalid edge key format: " + key);
+        return std::stoul(key.substr(arrowPos + 2));
+    }
+
+private:
+    std::unordered_map<uint32_t, Topic> m_topicMap;
+    std::unordered_map<uint32_t, std::vector<Edge>> m_adjOutMap;
+    std::unordered_set<std::string> m_keySet;
 
 
     size_t m_edge_count;
-    uint32_t m_id_ref;
+    uint32_t m_id_ref = 1;
 };

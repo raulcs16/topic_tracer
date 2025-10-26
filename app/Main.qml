@@ -3,9 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
 import Styles
-import TopicList
 import App
-import Graph
 import TopicGraph
 
 ApplicationWindow {
@@ -49,13 +47,8 @@ ApplicationWindow {
         onActivated: commandInput.focus = true
     }
 
-    GraphController {
-        id: graph_cotnroller
-    }
     TopicGraphController {
         id: topic_controller
-        topicListModel: topicListView.topicListModel
-        graphController: graph_cotnroller
     }
     RowLayout {
         anchors.fill: parent
@@ -78,7 +71,8 @@ ApplicationWindow {
                     clip: true
                     focus: true
                     GraphView {
-                        controller: graph_cotnroller
+                        edgeModel: topic_controller.edgeListModel
+                        nodeModel: topic_controller.nodeListModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
@@ -160,6 +154,7 @@ ApplicationWindow {
 
                 TopicListView {
                     id: topicListView
+                    model: topic_controller.topicListModel
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }

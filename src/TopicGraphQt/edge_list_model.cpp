@@ -1,9 +1,7 @@
 #include "edge_list_model.hpp"
-#include "graph_controller.hpp"
-#include <QPointF>
 
-EdgeListModel::EdgeListModel(GraphController *controller)
-    : QAbstractListModel{controller}, m_controller{controller} {}
+
+EdgeListModel::EdgeListModel(QObject *parent) : QAbstractListModel{parent} {}
 
 QHash<int, QByteArray> EdgeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -34,7 +32,7 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
     if (index.row() >= m_edges.size()) {
         return QVariant();
     }
-    GraphEdge edge = m_edges[index.row()];
+    EdgeItem edge = m_edges[index.row()];
     switch (role) {
     case Qt::DisplayRole: return QVariant();
     case SourceRole: return QVariant(edge.from);
@@ -46,13 +44,13 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
     case BendsRole: {
         QVariantList points;
         for (const auto &p : edge.bends)
-            points.append(QPointF(p.m_x, p.m_y));
+            points.append(p);
         return points;
     }
     default: return QVariant();
     }
 }
-void EdgeListModel::resetEdges(const std::vector<GraphEdge> &edges) {
+void EdgeListModel::resetEdges(const std::vector<EdgeItem> &edges) {
     beginResetModel();
     m_edges.clear();
     m_edges = edges;

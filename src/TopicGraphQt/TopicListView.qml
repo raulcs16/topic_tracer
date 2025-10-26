@@ -5,7 +5,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic // Keep Basic for compatibility if necessary
 
 import Styles
-import TopicList
+import TopicGraph
 
 Item {
     id: root
@@ -13,13 +13,7 @@ Item {
     height: parent.height
     width: parent.width
 
-    property alias topicListModel: topicListModel
-
-    TopicListModel {
-        id: topicListModel
-        isAddingNewTopic: false
-        currentIndex: 1
-    }
+    required property TopicListModel model
 
     Menu {
         id: listMenu
@@ -27,7 +21,7 @@ Item {
         MenuItemCard {
             text: qsTr("add topic")
             onTriggered: {
-                topicListModel.isAddingNewTopic = true;
+                root.model.isAddingNewTopic = true;
                 topicView.contentY = topicView.contentHeight - topicView.height;
             }
         }
@@ -40,13 +34,13 @@ Item {
         MenuItemCard {
             text: qsTr("Rename...")
             onTriggered: {
-                topicListModel.editingIndex = delegateMenu.clickedIndex;
+                root.model.editingIndex = delegateMenu.clickedIndex;
             }
         }
         MenuItemCard {
             text: qsTr("Delete")
             onTriggered: {
-                topicListModel.removeItem(delegateMenu.clickedIndex);
+                root.model.removeItem(delegateMenu.clickedIndex);
             }
         }
     }
@@ -55,7 +49,7 @@ Item {
         id: topicView
         anchors.fill: parent
         bottomMargin: 30
-        model: topicListModel
+        model: root.model
         delegate: topicDelegate
         orientation: ListView.Vertical
         currentIndex: model.currentIndex
@@ -88,7 +82,7 @@ Item {
         id: addTopicInput
 
         Item {
-            visible: topicListModel.isAddingNewTopic
+            visible: root.model.isAddingNewTopic
             height: visible ? 30 : 0
             width: parent.width
 
@@ -109,16 +103,16 @@ Item {
                 Keys.onReturnPressed: {
                     let topicName = text.trim();
                     if (topicName.length > 0) {
-                        topicListModel.addItem(topicName);
-                        topicListModel.currentIndex = topicListModel.rowCount() - 1;
+                        root.model.addItem(topicName);
+                        root.model.currentIndex = root.model.rowCount() - 1;
                     }
                     text = "";
-                    topicListModel.isAddingNewTopic = false;
+                    root.model.isAddingNewTopic = false;
                     topicView.focus = true;
                 }
                 onFocusChanged: {
                     if (!focus) {
-                        topicListModel.isAddingNewTopic = false;
+                        root.model.isAddingNewTopic = false;
                         topicView.focus = true;
                     }
                 }
@@ -152,7 +146,7 @@ Item {
 
             TextField {
                 id: editor
-                visible: topicListModel.editingIndex === delegateRect.index
+                visible: root.model.editingIndex === delegateRect.index
 
                 anchors.fill: parent
                 anchors.leftMargin: 20
@@ -169,20 +163,20 @@ Item {
                 Keys.onReturnPressed: {
                     let newName = text.trim();
                     if (newName.length > 0 && newName !== delegateRect.topicName) {
-                        topicListModel.editItem(delegateRect.index, newName);
+                        root.model.editItem(delegateRect.index, newName);
                     }
-                    topicListModel.editingIndex = -1;
+                    root.model.editingIndex = -1;
                     topicView.focus = true;
                 }
 
                 onFocusChanged: {
                     if (!focus) {
-                        topicListModel.editingIndex = -1;
+                        root.model.editingIndex = -1;
                     }
                 }
             }
             Text {
-                visible: topicListModel.editingIndex !== delegateRect.index
+                visible: root.model.editingIndex !== delegateRect.index
                 text: delegateRect.topicName
                 font.pointSize: 16
                 font.weight: Font.DemiBold

@@ -1,4 +1,4 @@
-#include "graph_engine.hpp"
+#include "layout_engine.hpp"
 
 #include <ogdf/basic/PreprocessorLayout.h>
 #include <ogdf/energybased/DavidsonHarelLayout.h>
@@ -35,7 +35,7 @@
 #include <ogdf/upward/VisibilityLayout.h>
 
 
-GraphEngine::GraphEngine(GraphAlg alg)
+LayoutEngine::LayoutEngine(GraphAlg alg)
     : m_graph(), m_attributes(m_graph,
                               ogdf::GraphAttributes::nodeGraphics |
                                   ogdf::GraphAttributes::edgeGraphics |
@@ -45,7 +45,7 @@ GraphEngine::GraphEngine(GraphAlg alg)
     setAlgorithm(GraphAlg::FMMMLayout);
 }
 
-void GraphEngine::setAlgorithm(GraphAlg algo) {
+void LayoutEngine::setAlgorithm(GraphAlg algo) {
 
     ogdf::LayoutModule *layout = 0;
     switch (algo) {
@@ -103,54 +103,37 @@ void GraphEngine::setAlgorithm(GraphAlg algo) {
 }
 
 
-void GraphEngine::calculateLayout(std::vector<std::reference_wrapper<GraphNode>> &nodes,
-                                  std::vector<std::reference_wrapper<GraphEdge>> &edges) {
-    // if (m_latest)
-    //     return;
-
-    if (edges.size() == 0) {
-        assignFermatSpiralPositions(nodes);
-        // m_latest = true;
+void LayoutEngine::calculateLayout() {
+    if (m_edges.size() == 0) {
+        assignFermatSpiralPositions();
         return;
     }
     try {
-        m_graph.clear();
-        m_idToNode.clear();
-        m_idToEdge.clear();
-        for (auto node : nodes) {
-            auto n = m_graph.newNode();
-            m_idToNode[node.get().id] = n;
-        }
-        for (auto edge : edges) {
-            auto e =
-                m_graph.newEdge(m_idToNode[edge.get().from], m_idToNode[edge.get().to]);
-            m_idToEdge[key(edge.get().from, edge.get().to)] = e;
-        }
         m_layout->call(m_attributes);
         m_attributes.addNodeCenter2Bends();
-        for (auto &node : nodes) {
-            auto it = m_idToNode.find(node.get().id);
+        for (auto &node : m_nodes) {
+            auto it = m_idToNode.find(node.id);
             if (it == m_idToNode.end())
                 continue;
-            node.get().x = m_attributes.x(it->second);
-            node.get().y = m_attributes.y(it->second);
+            node.x = m_attributes.x(it->second);
+            node.y = m_attributes.y(it->second);
         }
-        for (auto &edge : edges) {
-            auto src = m_idToNode.find(edge.get().from);
-            auto target = m_idToNode.find(edge.get().to);
+        for (auto &edge : m_edges) {
+            auto src = m_idToNode.find(edge.from);
+            auto target = m_idToNode.find(edge.to);
             if (src == m_idToNode.end() || target == m_idToNode.end())
                 continue;
 
-            edge.get().source_x = m_attributes.x(src->second);
-            edge.get().source_y = m_attributes.y(src->second);
-            edge.get().target_x = m_attributes.x(target->second);
-            edge.get().target_y = m_attributes.y(target->second);
-            auto e = m_idToEdge.find(key(edge.get().from, edge.get().to));
+            edge.source_x = m_attributes.x(src->second);
+            edge.source_y = m_attributes.y(src->second);
+            edge.target_x = m_attributes.x(target->second);
+            edge.target_y = m_attributes.y(target->second);
+            auto e = m_idToEdge.find(edge.key);
             if (e == m_idToEdge.end())
                 continue;
-            edge.get().bends.clear();
+            edge.bends.clear();
             for (ogdf::DPoint &p : m_attributes.bends(e->second)) {
-                edge.get().bends.push_back(p);
+                edge.bends.push_back(p);
             }
         }
 
@@ -162,18 +145,71 @@ void GraphEngine::calculateLayout(std::vector<std::reference_wrapper<GraphNode>>
     }
 }
 
-
-std::string GraphEngine::key(uint32_t from, uint32_t to) {
+void LayoutEngine::clear() {
+    m_graph.clear();
+    m_idToEdge.clear();
+    m_idToNode.clear();
+    m_nodes.clear();
+    m_edges.clear();
+}
+void LayoutEngine::addNode(uint32_t id) {
+    auto node = m_graph.newNode(id);
+    m_idToNode[id] = node;
+    m_nodes.push_back(GraphNode{.id = id, .x = 0, .y = 0});
+}
+void LayoutEngine::removeNode(uint32_t id) {
+    auto it = m_idToNode.find(id);
+    if (it == m_idToNode.end()) {
+        return;
+    }
+    m_graph.delNode(it->second);
+    auto nit = m_nodes.begin();
+    while (nit != m_nodes.end()) {
+        if (nit->id == id)
+            break;
+        ++nit;
+    }
+    if (nit != m_nodes.end()) {
+        m_nodes.erase(nit);
+    }
+}
+void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
+    auto fromNode = m_idToNode.find(from);
+    auto toNode = m_idToNode.find(to);
+    if (fromNode == m_idToNode.end() || toNode == m_idToNode.end()) {
+        return;
+    }
+    auto edge = m_graph.newEdge(fromNode->second, toNode->second);
+    std::string k = key(from, to);
+    m_idToEdge[k] = edge;
+    m_edges.push_back(GraphEdge{.key = k, .from = from, .to = to, .bends = {}});
+}
+void LayoutEngine::removeEdge(const std::string &k) {
+    auto it = m_idToEdge.find(k);
+    if (it == m_idToEdge.end()) {
+        return;
+    }
+    m_graph.delEdge(it->second);
+    auto nit = m_edges.begin();
+    while (nit != m_edges.end()) {
+        if (nit->key == k)
+            break;
+        ++nit;
+    }
+    if (nit != m_edges.end()) {
+        m_edges.erase(nit);
+    }
+}
+std::string LayoutEngine::key(uint32_t from, uint32_t to) {
     return std::to_string(from) + "->" + std::to_string(to);
 }
-void GraphEngine::assignFermatSpiralPositions(
-    std::vector<std::reference_wrapper<GraphNode>> &nodes) {
+void LayoutEngine::assignFermatSpiralPositions() {
     const double golden = M_PI * (3 - std::sqrt(5));
     const double scale = 50.0;
-    for (int i = 0; i < nodes.size(); i++) {
+    for (int i = 0; i < m_nodes.size(); i++) {
         double r = scale * std::sqrt(i + 1);
         double theta = i * golden;
-        nodes[i].get().x = r * std::cos(theta);
-        nodes[i].get().y = r * std::sin(theta);
+        m_nodes[i].x = r * std::cos(theta);
+        m_nodes[i].y = r * std::sin(theta);
     }
 }

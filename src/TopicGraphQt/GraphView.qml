@@ -1,12 +1,14 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 
-import Graph
+import TopicGraph
 
 Item {
     id: root
 
-    required property GraphController controller
+    required property NodeListModel nodeModel
+    required property EdgeListModel edgeModel
+
     property real viewWidth: 0
     property real viewHeight: 0
 
@@ -14,7 +16,7 @@ Item {
     height: viewHeight
 
     Repeater {
-        model: root.controller.edges
+        model: root.edgeModel
         delegate: EdgeSpline {
             viewWidth: root.viewWidth
             viewHeight: root.viewHeight
@@ -22,7 +24,7 @@ Item {
     }
 
     Repeater {
-        model: root.controller.nodes
+        model: root.nodeModel
         delegate: Item {
             required property int index
             required property int id

@@ -1,12 +1,21 @@
 #pragma once
 
-#include "graph_types.hpp"
+
 #include <QAbstractListModel>
 #include <QObject>
+#include <QPointF>
 #include <QtQml/qqml.h>
 #include <vector>
 
-class GraphController;
+struct EdgeItem {
+    uint32_t from;
+    uint32_t to;
+    double source_x;
+    double source_y;
+    double target_x;
+    double target_y;
+    std::vector<QPointF> bends;
+};
 
 class EdgeListModel : public QAbstractListModel {
     Q_OBJECT
@@ -24,7 +33,7 @@ public:
         BendsRole
     };
 
-    EdgeListModel(GraphController *controller);
+    explicit EdgeListModel(QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -32,7 +41,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    void resetEdges(const std::vector<GraphEdge> &edges);
+    void resetEdges(const std::vector<EdgeItem> &edges);
     // public slots:
     //     void onGraphChanged();
 
@@ -40,6 +49,5 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    GraphController *m_controller;
-    std::vector<GraphEdge> m_edges;
+    std::vector<EdgeItem> m_edges;
 };

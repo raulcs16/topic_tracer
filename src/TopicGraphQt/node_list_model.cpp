@@ -1,8 +1,6 @@
-#include "graph_controller.hpp"
 #include "node_list_model.hpp"
 
-NodeListModel::NodeListModel(GraphController *controller)
-    : QAbstractListModel{controller}, m_controller{controller} {}
+NodeListModel::NodeListModel(QObject *parent) : QAbstractListModel{parent} {}
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -29,18 +27,18 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     if (index.row() >= m_nodes.size()) {
         return QVariant();
     }
-    GraphNode nodeInfo = m_nodes[index.row()];
+    NodeItem nodeInfo = m_nodes[index.row()];
 
     switch (role) {
     case IdRole: return QVariant::fromValue(nodeInfo.id);
-    case LabelRole: return QString::fromStdString(nodeInfo.label);
+    case LabelRole: return nodeInfo.label;
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     default: return QVariant();
     }
 }
 
-void NodeListModel::resetNodes(const std::vector<GraphNode> &nodes) {
+void NodeListModel::resetNodes(const std::vector<NodeItem> &nodes) {
     beginResetModel();
     m_nodes.clear();
     m_nodes = nodes;

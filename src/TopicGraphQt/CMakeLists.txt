@@ -7,8 +7,7 @@ target_link_libraries(TopicGraphQt
     PRIVATE Qt6::Core
     PRIVATE Qt6::Quick
     PUBLIC TopicGraphCore
-    PUBLIC TopicListQt
-    PUBLIC GraphQt
+    PUBLIC LayoutEngine
 )
 
 qt_add_qml_module(TopicGraphQt
@@ -17,6 +16,22 @@ qt_add_qml_module(TopicGraphQt
     SOURCES
         topic_graph_controller.hpp
         topic_graph_controller.cpp
+
+        topic_list_model.hpp
+        topic_list_model.cpp
+
+        edge_list_model.hpp
+        edge_list_model.cpp
+
+        node_list_model.hpp
+        node_list_model.cpp
+    QML_FILES
+        TopicListView.qml
+        GraphView.qml
+        EdgeSpline.qml
+
+    IMPORT_PATH 
+        ${QT_QML_OUTPUT_DIRECTORY}
 )
 
 target_include_directories(TopicGraphQt PUBLIC

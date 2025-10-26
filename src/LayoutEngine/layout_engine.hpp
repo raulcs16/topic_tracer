@@ -1,14 +1,9 @@
 #pragma once
 
-#include "graph_types.hpp"
+#include "layout_types.hpp"
 #include <ogdf/basic/GraphAttributes.h>
 #include <ogdf/basic/LayoutModule.h>
 #include <ogdf/basic/geometry.h>
-
-struct GraphState {
-    std::vector<GraphNode> nodes;
-    std::vector<GraphEdge> edges;
-};
 
 
 enum class GraphAlg {
@@ -48,22 +43,30 @@ enum class GraphAlg {
     VisibilityLayout
 };
 
-class GraphEngine {
+class LayoutEngine {
 
 public:
-    explicit GraphEngine(GraphAlg alg = GraphAlg::FMMMLayout);
+    explicit LayoutEngine(GraphAlg alg = GraphAlg::FMMMLayout);
     void setAlgorithm(GraphAlg algo);
 
-    //modify the nodes and edges directly
-    void calculateLayout(std::vector<std::reference_wrapper<GraphNode>> &nodes,
-                         std::vector<std::reference_wrapper<GraphEdge>> &edges);
+    //incremental ops
+    void addNode(uint32_t id);
+    void removeNode(uint32_t id);
+    void addEdge(uint32_t from, uint32_t to);
+    void removeEdge(const std::string &key);
 
+    void clear();
+
+    //modify the nodes and edges directly
+    void calculateLayout();
+
+    const std::vector<GraphNode> &nodes() const { return m_nodes; }
+    const std::vector<GraphEdge> &edges() const { return m_edges; }
 
 private:
     static std::string key(uint32_t from, uint32_t to);
 
-    void assignFermatSpiralPositions(
-        std::vector<std::reference_wrapper<GraphNode>> &nodes);
+    void assignFermatSpiralPositions();
 
 private:
     ogdf::Graph m_graph;
@@ -72,6 +75,9 @@ private:
 
     std::unordered_map<uint32_t, ogdf::node> m_idToNode;
     std::unordered_map<std::string, ogdf::edge> m_idToEdge;
+
+    std::vector<GraphNode> m_nodes;
+    std::vector<GraphEdge> m_edges;
 
     GraphAlg m_algorithm;
 };

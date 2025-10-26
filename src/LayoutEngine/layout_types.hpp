@@ -6,11 +6,11 @@
 
 struct GraphNode {
     uint32_t id;
-    std::string label = "label";
     double x;
     double y;
 };
 struct GraphEdge {
+    std::string key;
     uint32_t from;
     uint32_t to;
     double source_x;
