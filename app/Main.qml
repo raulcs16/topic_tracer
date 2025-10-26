@@ -20,24 +20,60 @@ ApplicationWindow {
 
         switch (command) {
         case "touch":
-            if (args.length < 1) {
-                console.warn("Usage: touch <name>");
-                return;
+            {
+                if (args.length < 1) {
+                    console.warn("Usage: touch <name>");
+                    return;
+                }
+                for (let i = 0; i < args.length; i++) {
+                    const topicName = args[i];
+                    topic_controller.createTopic(topicName);
+                }
+                break;
             }
-            for (let i = 0; i < args.length; i++) {
-                const topicName = args[i];
-                topic_controller.createTopic(topicName);
-            }
-            break;
         case "join":
-            if (args.length < 2 || args.length > 2) {
-                console.warn("Usage: join <topicA> <topicB>");
-                return;
+            {
+                if (args.length < 2 || args.length > 2) {
+                    console.warn("Usage: join <topicA> <topicB>");
+                    return;
+                }
+                let topicA = args[0];
+                let topicB = args[1];
+                topic_controller.join(topicA, topicB);
+                break;
             }
-            const topicA = args[0];
-            const topicB = args[1];
-            topic_controller.join(topicA, topicB);
-            break;
+        case "remove":
+            {
+                if (args.length < 1) {
+                    console.warn("Usage: remove <name>");
+                    return;
+                }
+                const topic = args[0];
+                topic_controller.deleteTopic(topic);
+                break;
+            }
+        case "no":
+            {
+                if (args.length < 3) {
+                    return;
+                }
+                if (args[0] != "join")
+                    return;
+                let topicA = args[1];
+                let topicB = args[2];
+                topic_controller.noJoin(topicA, topicB);
+                break;
+            }
+        case "mv":
+            {
+                if (args.length < 2) {
+                    return;
+                }
+                let topic = args[0];
+                let newName = args[1];
+                topic_controller.rename(topic, newName);
+                break;
+            }
         default:
             console.warn("Unknown command:", command);
         }

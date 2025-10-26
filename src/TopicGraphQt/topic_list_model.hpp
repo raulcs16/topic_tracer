@@ -43,6 +43,9 @@ public:
     Q_INVOKABLE bool removeItem(int index);
     Q_INVOKABLE bool editItem(int index, const QString &newName);
 
+    void deleteTopic(uint32_t id);
+    void renameTopic(uint32_t id, const QString &newName);
+
 
     // State API
     int editingIndex() const { return m_editingIndex; }
@@ -64,6 +67,10 @@ signals:
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
+
+private:
+    //<-1 for not found
+    int getTopicIndex(uint32_t id);
 
 private:
     QVector<TopicItem> m_topics;

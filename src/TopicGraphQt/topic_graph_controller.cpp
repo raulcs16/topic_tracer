@@ -17,6 +17,44 @@ void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
     m_layout.addNode(id);
     synchGraphView();
 }
+void TopicGraphController::deleteTopic(const QString &topic) {
+    auto ptr = m_graph.getTopic(topic.toStdString());
+    if (ptr == nullptr)
+        return;
+    auto outEdges = m_graph.getOutEdges(ptr->id);
+    auto inEdges = m_graph.getInEdges(ptr->id);
+    for (auto &edge : outEdges) {
+        m_layout.removeEdge(edge.key);
+    }
+    for (auto &edge : inEdges) {
+        m_layout.removeEdge(edge.key);
+    }
+    m_layout.removeNode(ptr->id);
+    m_graph.deleteTopic(ptr->id);
+    if (m_topicList) {
+        m_topicList->deleteTopic(ptr->id);
+    }
+    synchGraphView();
+}
+void TopicGraphController::rename(const QString &topic, const QString &new_name) {
+    qDebug() << "rename start";
+    auto ptr = m_graph.getTopic(topic.toStdString());
+    if (ptr == nullptr) {
+
+        qDebug() << "not found";
+        return;
+    }
+    bool success = m_graph.renameTopic(ptr->id, new_name.toStdString());
+    if (!success) {
+        qDebug() << "no success";
+        return;
+    }
+    if (m_topicList) {
+        m_topicList->renameTopic(ptr->id, new_name);
+    }
+    synchGraphView();
+    qDebug() << "rename end";
+}
 
 void TopicGraphController::join(const QString &topicA, const QString &topicB) {
     auto edge =
@@ -24,6 +62,15 @@ void TopicGraphController::join(const QString &topicA, const QString &topicB) {
     if (edge == nullptr)
         return;
     m_layout.addEdge(edge.get()->from, edge.get()->to);
+    synchGraphView();
+}
+void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) {
+    auto ta = m_graph.getTopic(topicA.toStdString());
+    auto tb = m_graph.getTopic(topicB.toStdString());
+    if (ta == nullptr || tb == nullptr)
+        return;
+    m_graph.removeEdge(ta->id, tb->id);
+    m_layout.removeEdge(std::to_string(ta->id) + "->" + std::to_string(tb->id));
     synchGraphView();
 }
 

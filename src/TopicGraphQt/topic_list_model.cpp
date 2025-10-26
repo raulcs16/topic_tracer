@@ -109,7 +109,32 @@ bool TopicListModel::removeItem(int index) {
 
     return true;
 }
-
+void TopicListModel::deleteTopic(uint32_t id) {
+    int index = getTopicIndex(id);
+    if (index == -1)
+        return;
+    beginRemoveRows(QModelIndex(), index, index);
+    m_topics.removeAt(index);
+    endRemoveRows();
+}
+void TopicListModel::renameTopic(uint32_t id, const QString &newName) {
+    int index = getTopicIndex(id);
+    if (index == -1) {
+        return;
+    }
+    editItem(index, newName);
+}
+int TopicListModel::getTopicIndex(uint32_t id) {
+    int index = 0;
+    while (index < m_topics.size()) {
+        if (m_topics[index].id == id)
+            break;
+        index++;
+    }
+    if (index >= m_topics.size())
+        return -1;
+    return index;
+}
 bool TopicListModel::editItem(int index, const QString &newName) {
     if (index < 0 || index >= m_topics.size() || newName.trimmed().isEmpty()) {
         return false;
