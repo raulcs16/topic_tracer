@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "ui_state_manager.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -29,7 +30,7 @@ public:
         NameRole,
         PendingRole,
     };
-    explicit TopicListModel(QObject *parent = nullptr);
+    explicit TopicListModel(UIStateManager *stateManager, QObject *parent = nullptr);
 
     //list interface override
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -74,7 +75,7 @@ private:
 
 private:
     QVector<TopicItem> m_topics;
-
+    UIStateManager *m_stateManager;
 
     int m_editingIndex = -1;
     bool m_isAddingNewTopic = false;

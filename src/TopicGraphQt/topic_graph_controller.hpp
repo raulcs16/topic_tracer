@@ -5,6 +5,7 @@
 #include "node_list_model.hpp"
 #include "topic_graph.hpp"
 #include "topic_list_model.hpp"
+#include "ui_state_manager.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>
 
@@ -62,6 +63,7 @@ private:
 private:
     TopicGraph m_graph;
     LayoutEngine m_layout;
+    UIStateManager m_uiManager;
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;

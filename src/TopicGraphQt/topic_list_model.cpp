@@ -1,7 +1,9 @@
 #include "topic_list_model.hpp"
 
 
-TopicListModel::TopicListModel(QObject *parent) : QAbstractListModel{parent} {}
+TopicListModel::TopicListModel(UIStateManager *stateManager, QObject *parent)
+    : QAbstractListModel{parent}, m_stateManager{stateManager} {}
+
 QHash<int, QByteArray> TopicListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "topicId";

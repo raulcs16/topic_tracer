@@ -2,8 +2,9 @@
 #include <QTimer>
 
 TopicGraphController::TopicGraphController(QObject *parent)
-    : QObject{parent}, m_graph{}, m_layout{}, m_topicList{new TopicListModel(this)},
-      m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)) {}
+    : QObject{parent}, m_graph{}, m_layout{}, m_uiManager{},
+      m_topicList{new TopicListModel(this)}, m_nodeList(new NodeListModel(this)),
+      m_edgeList(new EdgeListModel(this)) {}
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
 void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
