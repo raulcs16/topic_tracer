@@ -1,9 +1,5 @@
 qt_add_library(StylesLib STATIC)
 
-set_target_properties(StylesLib PROPERTIES AUTOMOC ON)
-target_link_libraries(StylesLib PRIVATE Qt6::Quick)
-
-
 set(SINGLETON_SRC
     Colors.qml
 )
@@ -16,3 +12,6 @@ qt_add_qml_module(StylesLib
     QML_FILES
         Colors.qml
  )
+
+set_target_properties(StylesLib PROPERTIES AUTOMOC ON)
+target_link_libraries(StylesLib PRIVATE Qt6::Quick)

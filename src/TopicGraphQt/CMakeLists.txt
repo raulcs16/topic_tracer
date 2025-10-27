@@ -2,6 +2,7 @@ qt_add_library(TopicGraphQt STATIC)
 
 
 set_target_properties(TopicGraphQt PROPERTIES AUTOMOC ON)
+target_link_libraries(TopicGraphQt PRIVATE Qt6::Quick)
 
 target_link_libraries(TopicGraphQt
     PRIVATE Qt6::Core
@@ -25,6 +26,10 @@ qt_add_qml_module(TopicGraphQt
 
         node_list_model.hpp
         node_list_model.cpp
+        
+        ui_state_manager.hpp
+        ui_state_manager.cpp
+
     QML_FILES
         TopicListView.qml
         GraphView.qml
