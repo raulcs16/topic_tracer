@@ -31,6 +31,7 @@ Item {
             required property string label
             required property double posx
             required property double posy
+            required property bool highlighted
             x: (root.viewWidth / 3) + posx
             y: (root.viewHeight / 3) + posy
             Rectangle {
@@ -42,7 +43,7 @@ Item {
                 color: '#dee0e7'
                 radius: 100
                 border.width: 1
-                border.color: "#af9476"
+                border.color: parent.highlighted ? '#9806f3' : "#af9476"
             }
             Text {
                 text: parent.label

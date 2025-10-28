@@ -30,3 +30,27 @@ void UIStateManager::unsetSelected() {
     it->second.get()->selected = false;
     m_selectedId = -1;
 }
+void UIStateManager::setHoveredId(int id) {
+    if (m_hoveredId == id) {
+        return;
+    }
+    //TODO: loop through all, ensure toggles?
+    //reset previously hovered
+    auto it = m_stateMap.find(m_hoveredId);
+    if (it != m_stateMap.end()) {
+        it->second.get()->highlighted = false;
+        emit stateChanged(m_hoveredId);
+    }
+    if (id == -1) {
+        m_hoveredId = -1;
+        return;
+    }
+    //set current
+    it = m_stateMap.find(id);
+    if (it == m_stateMap.end()) {
+        return;
+    }
+    it->second.get()->highlighted = true;
+    m_hoveredId = id;
+    emit stateChanged(id);
+}

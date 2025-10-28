@@ -16,13 +16,16 @@ struct TopicItem {
 class TopicListModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Must be created by owner")
 
-    Q_PROPERTY(int editingIndex READ editingIndex WRITE setEditingIndex NOTIFY
-                   editingIndexChanged)
+    //list state properties
     Q_PROPERTY(bool isAddingNewTopic READ isAddingNewTopic WRITE setIsAddingNewTopic
                    NOTIFY isAddingNewTopicChanged)
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY
                    currentIndexChanged)
+    Q_PROPERTY(int editingIndex READ editingIndex WRITE setEditingIndex NOTIFY
+                   editingIndexChanged)
+    Q_PROPERTY(int hoveredId READ hoveredId WRITE setHoveredId NOTIFY hoveredIdChanged)
 
 public:
     enum Roles {
@@ -46,22 +49,31 @@ public:
 
     void deleteTopic(uint32_t id);
     void renameTopic(uint32_t id, const QString &newName);
+    void confirmTopic(int index, uint32_t new_id);
 
-
-    // State API
-    int editingIndex() const { return m_editingIndex; }
-    void setEditingIndex(int idx);
+    // list state API
     bool isAddingNewTopic() const { return m_isAddingNewTopic; }
     void setIsAddingNewTopic(bool value);
+
+    int editingIndex() const { return m_editingIndex; }
+    void setEditingIndex(int idx);
+
     int currentIndex() const { return m_currentIndex; }
     void setCurrentIndex(int idx);
 
-    void confirmTopic(int index, uint32_t new_id);
+    int hoveredId() const { return m_hoveredId; }
+    void setHoveredId(int id);
+
 
 signals:
-    void editingIndexChanged();
+    //state changes
     void isAddingNewTopicChanged();
-    void currentIndexChanged();
+    //emit the id of the item whos state is being set
+    void editingIndexChanged(int idx);
+    void currentIndexChanged(int idx);
+    void hoveredIdChanged(int id);
+
+    //
     void requestAddTopic(int index, const QString &name);
     void deleteAddTopic(uint32_t id);
 
@@ -77,7 +89,8 @@ private:
     QVector<TopicItem> m_topics;
     UIStateManager *m_stateManager;
 
-    int m_editingIndex = -1;
     bool m_isAddingNewTopic = false;
+    int m_editingIndex = -1;
     int m_currentIndex = -1;
+    int m_hoveredId = -1;
 };

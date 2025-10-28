@@ -110,6 +110,10 @@ Item {
                     root.model.isAddingNewTopic = false;
                     topicView.focus = true;
                 }
+                Keys.onEscapePressed: {
+                    console.log("Escaping..");
+                    root.model.isAddingNewTopic = false;
+                }
                 onFocusChanged: {
                     if (!focus) {
                         root.model.isAddingNewTopic = false;
@@ -126,10 +130,12 @@ Item {
         Rectangle {
             id: delegateRect
 
+            required property int topicId
             required property string topicName
             required property bool pending
-            required property int index
+
             property ItemView listView: ListView.view
+            required property int index //auto assigned by view
 
             height: 30
             width: listView.width
@@ -194,8 +200,14 @@ Item {
                 hoverEnabled: true
 
                 cursorShape: Qt.PointingHandCursor
-                onEntered: hoverBackground.opacity = 0.2
-                onExited: hoverBackground.opacity = 0.0
+                onEntered: {
+                    hoverBackground.opacity = 0.2;
+                    root.model.hoveredId = delegateRect.topicId;
+                }
+                onExited: {
+                    hoverBackground.opacity = 0.0;
+                    root.model.hoveredId = -1;//TODO:remove magic number
+                }
 
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: mouse => {

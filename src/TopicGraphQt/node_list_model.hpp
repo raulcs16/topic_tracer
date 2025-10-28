@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include "ui_state_manager.hpp"
+
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -19,7 +21,7 @@ struct NodeItem {
 class NodeListModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("Use Graph.nodes instead")
+    QML_UNCREATABLE("Use TGC.nodes instead")
 
 public:
     enum Roles {
@@ -27,9 +29,10 @@ public:
         LabelRole,
         XRole,
         YRole,
+        HighlightRole
     };
 
-    explicit NodeListModel(QObject *parent = nullptr);
+    explicit NodeListModel(UIStateManager *uiManger, QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -40,10 +43,15 @@ public:
     void resetNodes(const std::vector<NodeItem> &nodes);
 public slots:
     void onGaphChanged();
+    void onNodeStateChanged(int id);
+
+private:
+    int getNodeIndex(int id);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     std::vector<NodeItem> m_nodes;
+    UIStateManager *m_uiManager;
 };

@@ -152,9 +152,8 @@ void TopicListModel::setEditingIndex(int idx) {
     //-1 non are set
     if (idx < -1 || idx >= m_topics.size())
         return;
-
     m_editingIndex = idx;
-    emit editingIndexChanged();
+    emit editingIndexChanged(idx);
 }
 
 void TopicListModel::setIsAddingNewTopic(bool value) {
@@ -170,7 +169,16 @@ void TopicListModel::setCurrentIndex(int idx) {
     if (idx < -1 || idx >= m_topics.size())
         return;
     m_currentIndex = idx;
-    emit currentIndexChanged();
+    emit currentIndexChanged(idx);
+}
+void TopicListModel::setHoveredId(int id) {
+    if (id == m_hoveredId)
+        return;
+    m_hoveredId = id;
+    if (m_stateManager) {
+        m_stateManager->setHoveredId(id);
+    }
+    emit hoveredIdChanged(id);
 }
 
 void TopicListModel::confirmTopic(int index, uint32_t new_id) {

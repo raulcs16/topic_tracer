@@ -1,6 +1,7 @@
 #include "node_list_model.hpp"
 
-NodeListModel::NodeListModel(QObject *parent) : QAbstractListModel{parent} {}
+NodeListModel::NodeListModel(UIStateManager *uiManager, QObject *parent)
+    : QAbstractListModel{parent}, m_uiManager{uiManager} {}
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -8,6 +9,7 @@ QHash<int, QByteArray> NodeListModel::roleNames() const {
     roles[LabelRole] = "label";
     roles[XRole] = "posx";
     roles[YRole] = "posy";
+    roles[HighlightRole] = "highlighted";
     return roles;
 }
 
@@ -34,13 +36,36 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     case LabelRole: return nodeInfo.label;
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
+    case HighlightRole: {
+        if (!m_uiManager) {
+            return false;
+        }
+        auto state = m_uiManager->state(nodeInfo.id);
+        if (!state) {
+            return false;
+        }
+        return state->highlighted;
+    }
     default: return QVariant();
     }
+}
+void NodeListModel::onNodeStateChanged(int id) {
+    int idx = getNodeIndex(id);
+    if (idx < 0)
+        return;
+    QModelIndex modelIndex = this->index(idx);
+    emit dataChanged(modelIndex, modelIndex, {HighlightRole});
+}
+int NodeListModel::getNodeIndex(int id) {
+    for (int i = 0; i < m_nodes.size(); i++) {
+        if (m_nodes[i].id == id)
+            return i;
+    }
+    return -1;
 }
 
 void NodeListModel::resetNodes(const std::vector<NodeItem> &nodes) {
     beginResetModel();
-    m_nodes.clear();
     m_nodes = nodes;
     endResetModel();
 }

@@ -3,8 +3,17 @@
 
 TopicGraphController::TopicGraphController(QObject *parent)
     : QObject{parent}, m_graph{}, m_layout{}, m_uiManager{},
-      m_topicList{new TopicListModel(this)}, m_nodeList(new NodeListModel(this)),
-      m_edgeList(new EdgeListModel(this)) {}
+      m_topicList{new TopicListModel{&m_uiManager, this}},
+      m_nodeList(new NodeListModel(&m_uiManager, this)),
+      m_edgeList(new EdgeListModel(this)) {
+
+    if (m_nodeList) {
+        connect(&m_uiManager,
+                &UIStateManager::stateChanged,
+                m_nodeList,
+                &NodeListModel::onNodeStateChanged);
+    }
+}
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
 void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
@@ -15,6 +24,7 @@ void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
     if (m_topicList) {
         m_topicList->addConfirmedItem(id, name);
     }
+    m_uiManager.setState(id, UIState{});
     m_layout.addNode(id);
     synchGraphView();
 }
@@ -38,23 +48,19 @@ void TopicGraphController::deleteTopic(const QString &topic) {
     synchGraphView();
 }
 void TopicGraphController::rename(const QString &topic, const QString &new_name) {
-    qDebug() << "rename start";
     auto ptr = m_graph.getTopic(topic.toStdString());
     if (ptr == nullptr) {
 
-        qDebug() << "not found";
         return;
     }
     bool success = m_graph.renameTopic(ptr->id, new_name.toStdString());
     if (!success) {
-        qDebug() << "no success";
         return;
     }
     if (m_topicList) {
         m_topicList->renameTopic(ptr->id, new_name);
     }
     synchGraphView();
-    qDebug() << "rename end";
 }
 
 void TopicGraphController::join(const QString &topicA, const QString &topicB) {
@@ -79,7 +85,6 @@ void TopicGraphController::synchGraphView() {
     if (!m_nodeList || !m_edgeList)
         return;
     m_layout.calculateLayout();
-
 
     std::vector<EdgeItem> edgeList;
     auto gEdges = m_layout.edges();

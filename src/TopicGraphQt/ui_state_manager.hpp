@@ -22,8 +22,15 @@ public:
     void setState(uint32_t id, UIState state);
     void setSelectedId(uint32_t id);
     void unsetSelected();
+public slots:
+
+    void setHoveredId(int id);
+
+signals:
+    void stateChanged(uint32_t id);
 
 private:
     std::unordered_map<uint32_t, std::shared_ptr<UIState>> m_stateMap;
     int m_selectedId = -1;
+    int m_hoveredId = -1;
 };
