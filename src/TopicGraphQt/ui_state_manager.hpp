@@ -19,11 +19,8 @@ Q_DECLARE_FLAGS(StateFlags, StateFlag);
 Q_DECLARE_OPERATORS_FOR_FLAGS(StateFlags);
 
 struct UIState {
-    bool selectable = true;
-    bool selected = false;
-    bool highlighted = false;
-    bool dimmed = false;
-    bool visible = true;
+    StateFlags flags = StateFlag::None;
+    bool has(StateFlag f) const { return flags.testFlag(f); }
 };
 
 class UIStateManager : public QObject {
@@ -31,10 +28,11 @@ class UIStateManager : public QObject {
 
 public:
     explicit UIStateManager(QObject *parent = nullptr);
-    std::shared_ptr<const UIState> state(uint32_t id);
-    void setState(uint32_t id, UIState state);
+    std::shared_ptr<const UIState> state(uint32_t id) const;
+    void setState(uint32_t id, StateFlags flags);
+    void addState(uint32_t id, StateFlags flags);
+    void removeState(uint32_t id, StateFlags flags);
     void setSelectedId(uint32_t id);
-    void unsetSelected();
 public slots:
 
     void setHoveredId(int id);

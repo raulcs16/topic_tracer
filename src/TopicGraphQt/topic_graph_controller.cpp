@@ -13,6 +13,21 @@ TopicGraphController::TopicGraphController(QObject *parent)
                 m_nodeList,
                 &NodeListModel::onNodeStateChanged);
     }
+    createTopic("V1");
+    createTopic("V2");
+    createTopic("V3");
+    createTopic("V4");
+    createTopic("V5");
+    createTopic("V6");
+
+    join("V1", "V3");
+    join("V2", "V1");
+    join("V3", "V2");
+    join("V3", "V4");
+    join("V3", "V5");
+    join("V4", "V5");
+    join("V5", "V6");
+    join("V6", "V4");
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
@@ -24,7 +39,7 @@ void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
     if (m_topicList) {
         m_topicList->addConfirmedItem(id, name);
     }
-    m_uiManager.setState(id, UIState{});
+    m_uiManager.setState(id, StateFlag::Selectable);
     m_layout.addNode(id);
     synchGraphView();
 }
@@ -65,7 +80,7 @@ void TopicGraphController::rename(const QString &topic, const QString &new_name)
 
 void TopicGraphController::join(const QString &topicA, const QString &topicB) {
     auto edge =
-        m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), Edge_Type::RelatedTo);
+        m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), Edge_Type::DependsOn);
     if (edge == nullptr)
         return;
     m_layout.addEdge(edge.get()->from, edge.get()->to);

@@ -47,11 +47,11 @@ Item {
             }
             Text {
                 text: parent.label
-                color: parent.highlighted ? "#9806f3" : "white"
+                color: "white"
                 anchors.top: node.bottom
                 anchors.horizontalCenter: node.horizontalCenter
                 anchors.topMargin: 4
-                font.pointSize: 12
+                font.pointSize: parent.highlighted ? 16 : 12
             }
         }
     }

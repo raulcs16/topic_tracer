@@ -37,14 +37,8 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     case HighlightRole: {
-        if (!m_uiManager) {
-            return false;
-        }
-        auto state = m_uiManager->state(nodeInfo.id);
-        if (!state) {
-            return false;
-        }
-        return state->highlighted;
+        return m_uiManager &&
+               m_uiManager->state(nodeInfo.id)->has(StateFlag::Highlighted);
     }
     default: return QVariant();
     }
