@@ -1,9 +1,22 @@
 #pragma once
 
+#include <QFlags>
 #include <QObject>
 #include <QUrl>
 #include <QtQml/qqml.h>
 #include <unordered_map>
+
+enum class StateFlag : uint32_t {
+    None = 0,
+    Selectable = 1 << 0,
+    Selected = 1 << 1,
+    Highlighted = 1 << 2,
+    Dimmed = 1 << 3,
+    Hidden = 1 << 4,
+};
+
+Q_DECLARE_FLAGS(StateFlags, StateFlag);
+Q_DECLARE_OPERATORS_FOR_FLAGS(StateFlags);
 
 struct UIState {
     bool selectable = true;

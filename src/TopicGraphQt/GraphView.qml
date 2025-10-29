@@ -42,12 +42,12 @@ Item {
                 y: -height / 2
                 color: '#dee0e7'
                 radius: 100
-                border.width: 1
+                border.width: 2
                 border.color: parent.highlighted ? '#9806f3' : "#af9476"
             }
             Text {
                 text: parent.label
-                color: "white"
+                color: parent.highlighted ? "#9806f3" : "white"
                 anchors.top: node.bottom
                 anchors.horizontalCenter: node.horizontalCenter
                 anchors.topMargin: 4
