@@ -41,7 +41,8 @@ public:
     Q_INVOKABLE void noJoin(const QString &topicA, const QString &topicB);
     Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
 
-
+public slots:
+    void onStateChanged(const std::string &id);
     // public slots:
     //     void addTopic(int tempId, const QString &name, Topic_Type type = Topic_Type::Concept);
     //     void renameTopic(uint32_t id, const QString &new_name);
@@ -63,7 +64,8 @@ private:
 private:
     TopicGraph m_graph;
     LayoutEngine m_layout;
-    UIStateManager m_uiManager;
+    UIStateManager m_topicStates;
+    UIStateManager m_edgeStates;
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;

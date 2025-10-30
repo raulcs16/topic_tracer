@@ -2,17 +2,22 @@
 #include <QTimer>
 
 TopicGraphController::TopicGraphController(QObject *parent)
-    : QObject{parent}, m_graph{}, m_layout{}, m_uiManager{},
-      m_topicList{new TopicListModel{&m_uiManager, this}},
-      m_nodeList(new NodeListModel(&m_uiManager, this)),
-      m_edgeList(new EdgeListModel(this)) {
+    : QObject{parent}, m_graph{}, m_layout{}, m_topicStates{}, m_edgeStates{},
+      m_topicList{new TopicListModel{&m_topicStates, this}},
+      m_nodeList(new NodeListModel(&m_topicStates, this)),
+      m_edgeList(new EdgeListModel(&m_edgeStates, this)) {
 
     if (m_nodeList) {
-        connect(&m_uiManager,
+        connect(&m_topicStates,
                 &UIStateManager::stateChanged,
                 m_nodeList,
                 &NodeListModel::onNodeStateChanged);
     }
+    connect(&m_topicStates,
+            &UIStateManager::stateChanged,
+            this,
+            &TopicGraphController::onStateChanged);
+
     createTopic("V1");
     createTopic("V2");
     createTopic("V3");
@@ -40,7 +45,7 @@ void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
         m_topicList->addConfirmedItem(id, name);
     }
 
-    m_uiManager.setState(std::to_string(id), StateFlag::Selectable);
+    m_topicStates.setState(std::to_string(id), StateFlag::Selectable);
     m_layout.addNode(id);
     synchGraphView();
 }
@@ -84,6 +89,7 @@ void TopicGraphController::join(const QString &topicA, const QString &topicB) {
         m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), Edge_Type::DependsOn);
     if (edge == nullptr)
         return;
+    m_edgeStates.setState(edge->key, StateFlag::Selectable);
     m_layout.addEdge(edge.get()->from, edge.get()->to);
     synchGraphView();
 }
@@ -132,4 +138,17 @@ void TopicGraphController::synchGraphView() {
             NodeItem{.id = gnode.id, .x = gnode.x, .y = gnode.y, .label = label});
     }
     m_nodeList->resetNodes(nodeList);
+}
+//TODO:
+//make api on node and edge list for TGC to directly invoke the changes
+void TopicGraphController::onStateChanged(const std::string &id) {
+    //todo 1. get out edges of the state that changed
+    //todo 2. set state to equal topic state (highlighted part)
+    //todo 3. notify nodeLm
+    const auto &edges = m_graph.getOutEdges(std::stoi(id));
+    auto state = m_topicStates.state(id);
+    for (auto edge : edges) {
+        m_edgeStates.setState(edge.key, state->flags);
+        m_edgeList->onEdgeStateChanged(edge.from, edge.to);
+    }
 }

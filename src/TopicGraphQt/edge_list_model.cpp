@@ -1,7 +1,8 @@
 #include "edge_list_model.hpp"
 
 
-EdgeListModel::EdgeListModel(QObject *parent) : QAbstractListModel{parent} {}
+EdgeListModel::EdgeListModel(UIStateManager *uiManager, QObject *parent)
+    : QAbstractListModel{parent}, m_uiManager{uiManager} {}
 
 QHash<int, QByteArray> EdgeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -13,6 +14,7 @@ QHash<int, QByteArray> EdgeListModel::roleNames() const {
     roles[TargetXRole] = "targetX";
     roles[TargetYRole] = "targetY";
     roles[BendsRole] = "bends";
+    roles[HighlightRole] = "highlighted";
     return roles;
 }
 
@@ -47,6 +49,10 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
             points.append(p);
         return points;
     }
+    case HighlightRole: {
+        std::string key = std::to_string(edge.from) + "->" + std::to_string(edge.to);
+        return m_uiManager && m_uiManager->state(key)->has(StateFlag::Highlighted);
+    }
     default: return QVariant();
     }
 }
@@ -55,6 +61,20 @@ void EdgeListModel::resetEdges(const std::vector<EdgeItem> &edges) {
     m_edges.clear();
     m_edges = edges;
     endResetModel();
+}
+void EdgeListModel::onEdgeStateChanged(uint32_t from, uint32_t to) {
+    //find edge
+    auto it = m_edges.begin();
+    int index = 0;
+    while (it != m_edges.end()) {
+        if (it->from == from && it->to == to) {
+            QModelIndex midx = this->index(index);
+            emit dataChanged(midx, midx, {HighlightRole});
+            break;
+        }
+        ++it;
+        ++index;
+    }
 }
 // bool EdgeListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
 //     if (!index.isValid())

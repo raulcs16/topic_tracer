@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "ui_state_manager.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QPointF>
@@ -30,10 +31,11 @@ public:
         TargetRole,
         TargetXRole,
         TargetYRole,
-        BendsRole
+        BendsRole,
+        HighlightRole,
     };
 
-    explicit EdgeListModel(QObject *parent = nullptr);
+    explicit EdgeListModel(UIStateManager *uiManager, QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -42,12 +44,15 @@ public:
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     void resetEdges(const std::vector<EdgeItem> &edges);
-    // public slots:
-    //     void onGraphChanged();
+
+public slots:
+    void onEdgeStateChanged(uint32_t from, uint32_t to);
+
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     std::vector<EdgeItem> m_edges;
+    UIStateManager *m_uiManager;
 };
