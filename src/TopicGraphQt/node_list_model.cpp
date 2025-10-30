@@ -37,14 +37,14 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     case HighlightRole: {
-        return m_uiManager &&
-               m_uiManager->state(nodeInfo.id)->has(StateFlag::Highlighted);
+        return m_uiManager && m_uiManager->state(std::to_string(nodeInfo.id))
+                                  ->has(StateFlag::Highlighted);
     }
     default: return QVariant();
     }
 }
-void NodeListModel::onNodeStateChanged(int id) {
-    int idx = getNodeIndex(id);
+void NodeListModel::onNodeStateChanged(const std::string &id) {
+    int idx = getNodeIndex(std::stoi(id));
     if (idx < 0)
         return;
     QModelIndex modelIndex = this->index(idx);

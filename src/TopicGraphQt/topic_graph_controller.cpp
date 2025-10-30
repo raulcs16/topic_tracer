@@ -39,7 +39,8 @@ void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
     if (m_topicList) {
         m_topicList->addConfirmedItem(id, name);
     }
-    m_uiManager.setState(id, StateFlag::Selectable);
+
+    m_uiManager.setState(std::to_string(id), StateFlag::Selectable);
     m_layout.addNode(id);
     synchGraphView();
 }

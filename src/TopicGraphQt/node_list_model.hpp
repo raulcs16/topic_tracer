@@ -43,7 +43,7 @@ public:
     void resetNodes(const std::vector<NodeItem> &nodes);
 public slots:
     void onGaphChanged();
-    void onNodeStateChanged(int id);
+    void onNodeStateChanged(const std::string &id);
 
 private:
     int getNodeIndex(int id);

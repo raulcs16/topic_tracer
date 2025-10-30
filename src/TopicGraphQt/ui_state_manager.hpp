@@ -28,20 +28,20 @@ class UIStateManager : public QObject {
 
 public:
     explicit UIStateManager(QObject *parent = nullptr);
-    std::shared_ptr<const UIState> state(uint32_t id) const;
-    void setState(uint32_t id, StateFlags flags);
-    void addState(uint32_t id, StateFlags flags);
-    void removeState(uint32_t id, StateFlags flags);
-    void setSelectedId(uint32_t id);
+    std::shared_ptr<const UIState> state(const std::string &id) const;
+    void setState(const std::string &id, StateFlags flags);
+    void addState(const std::string &id, StateFlags flags);
+    void removeState(const std::string &id, StateFlags flags);
+    void setSelectedId(const std::string &id);
 public slots:
 
-    void setHoveredId(int id);
+    void setHoveredId(const std::string &id);
 
 signals:
-    void stateChanged(uint32_t id);
+    void stateChanged(const std::string &id);
 
 private:
-    std::unordered_map<uint32_t, std::shared_ptr<UIState>> m_stateMap;
-    int m_selectedId = -1;
-    int m_hoveredId = -1;
+    std::unordered_map<std::string, std::shared_ptr<UIState>> m_stateMap;
+    std::string m_selectedId{};
+    std::string m_hoveredId{};
 };

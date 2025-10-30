@@ -176,7 +176,7 @@ void TopicListModel::setHoveredId(int id) {
         return;
     m_hoveredId = id;
     if (m_stateManager) {
-        m_stateManager->setHoveredId(id);
+        m_stateManager->setHoveredId(std::to_string(id));
     }
     emit hoveredIdChanged(id);
 }
