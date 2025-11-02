@@ -17,6 +17,7 @@
 // #include <ogdf/energybased/multilevel_mixer/MixedForceLayout.h>
 #include <ogdf/energybased/multilevel_mixer/ModularMultilevelMixer.h>
 #include <ogdf/energybased/multilevel_mixer/ScalingLayout.h>
+
 #include <ogdf/layered/SugiyamaLayout.h>
 #include <ogdf/misclayout/BalloonLayout.h>
 #include <ogdf/misclayout/CircularLayout.h>
@@ -49,52 +50,96 @@ void LayoutEngine::setAlgorithm(GraphAlg algo) {
 
     ogdf::LayoutModule *layout = 0;
     switch (algo) {
-    case GraphAlg::BalloonLayout: layout = new ogdf::BalloonLayout(); break;
-    case GraphAlg::CircularLayout: layout = new ogdf::CircularLayout(); break;
-    case GraphAlg::ComponentSplitterLayout:
-        layout = new ogdf::ComponentSplitterLayout;
-        break;
-    case GraphAlg::DavidsonHarelLayout: layout = new ogdf::DavidsonHarelLayout; break;
-    case GraphAlg::DominanceLayout: layout = new ogdf::DominanceLayout; break;
+        //=====================
+        // 1. Force Directed / Engergy Based
+        //====================
     case GraphAlg::FMMMLayout: {
         auto *fmmm = new ogdf::FMMMLayout();
         fmmm->unitEdgeLength(100.0);
-        fmmm->repForcesStrength(10);
+        fmmm->repForcesStrength(10.0);
+        fmmm->pageRatio(1.0);
+        fmmm->randSeed(42);
         layout = fmmm;
         break;
     }
+    case GraphAlg::GEMLayout: {
+        auto *gem = new ogdf::GEMLayout();
+        gem->attractionFormula(1);
+        layout = gem;
+        break;
+    }
+    case GraphAlg::SpringEmbedderFRExact: layout = new ogdf::SpringEmbedderFRExact; break;
+    case GraphAlg::SpringEmbedderKK: layout = new ogdf::SpringEmbedderKK; break;
+    case GraphAlg::DavidsonHarelLayout: layout = new ogdf::DavidsonHarelLayout; break;
+    case GraphAlg::StressMinimization: layout = new ogdf::StressMinimization; break;
+
+    //=====================
+    // 2.Tree / Hierarchical
+    //====================
+    case GraphAlg::TreeLayout: {
+        auto *tree = new ogdf::TreeLayout();
+        tree->levelDistance(100);
+        tree->siblingDistance(60);
+        tree->orientation(ogdf::Orientation::topToBottom);
+        layout = tree;
+        break;
+    }
+    case GraphAlg::RadialTreeLayout: layout = new ogdf::RadialTreeLayout; break;
+    case GraphAlg::SugiyamaLayout: layout = new ogdf::SugiyamaLayout; break;
+    case GraphAlg::UpwardPlanarizationLayout:
+        layout = new ogdf::UpwardPlanarizationLayout;
+        break;
+    case GraphAlg::DominanceLayout: layout = new ogdf::DominanceLayout; break;
+
+    //=====================
+    // 3. Planar / Geometric
+    //=====================
+    case GraphAlg::PlanarizationLayout: {
+        auto *planar = new ogdf::PlanarizationLayout();
+        layout = planar;
+        break;
+    }
+    case GraphAlg::PlanarStraightLayout: layout = new ogdf::PlanarStraightLayout; break;
+    case GraphAlg::SchnyderLayout: layout = new ogdf::SchnyderLayout; break;
     case GraphAlg::FPPLayout: layout = new ogdf::FPPLayout; break;
+    case GraphAlg::TutteLayout: layout = new ogdf::TutteLayout; break;
+    case GraphAlg::PlanarDrawLayout: layout = new ogdf::PlanarDrawLayout; break;
+
+    //=====================
+    // 4. Circular / Ballon /Mixed
+    //=====================
+    case GraphAlg::CircularLayout: {
+        auto *circular = new ogdf::CircularLayout();
+        circular->minDistCircle(80);
+        circular->pageRatio(1.0);
+        layout = circular;
+        break;
+    }
+    case GraphAlg::BalloonLayout: layout = new ogdf::BalloonLayout(); break;
+    case GraphAlg::ComponentSplitterLayout:
+        layout = new ogdf::ComponentSplitterLayout;
+        break;
+    case GraphAlg::MixedModelLayout: layout = new ogdf::MixedModelLayout; break;
+    case GraphAlg::VisibilityLayout: layout = new ogdf::VisibilityLayout; break;
+
+    //=====================
+    // 5. MultiLevel/ Hybrid /Scalable
+    //=====================
+    case GraphAlg::MultilevelLayout: layout = new ogdf::MultilevelLayout; break;
+    case GraphAlg::ModularMultilevelMixer:
+        layout = new ogdf::ModularMultilevelMixer;
+        break;
+    case GraphAlg::ScalingLayout: layout = new ogdf::ScalingLayout; break;
     case GraphAlg::FastMultipoleEmbedder: layout = new ogdf::FastMultipoleEmbedder; break;
     case GraphAlg::FastMultipoleMultilevelEmbedder:
         layout = new ogdf::FastMultipoleMultilevelEmbedder;
         break;
-    case GraphAlg::GEMLayout: layout = new ogdf::GEMLayout; break;
-    case GraphAlg::MixedModelLayout: layout = new ogdf::MixedModelLayout; break;
-    case GraphAlg::ModularMultilevelMixer:
-        layout = new ogdf::ModularMultilevelMixer;
-        break;
-    case GraphAlg::MultilevelLayout: layout = new ogdf::MultilevelLayout; break;
-    case GraphAlg::PlanarDrawLayout: layout = new ogdf::PlanarDrawLayout; break;
-    case GraphAlg::PlanarStraightLayout: layout = new ogdf::PlanarStraightLayout; break;
     case GraphAlg::PlanarizationGridLayout:
         layout = new ogdf::PlanarizationGridLayout;
         break;
-    case GraphAlg::PlanarizationLayout: layout = new ogdf::PlanarizationLayout; break;
     case GraphAlg::PreprocessorLayout: layout = new ogdf::PreprocessorLayout; break;
-    case GraphAlg::RadialTreeLayout: layout = new ogdf::RadialTreeLayout; break;
-    case GraphAlg::ScalingLayout: layout = new ogdf::ScalingLayout; break;
-    case GraphAlg::SchnyderLayout: layout = new ogdf::SchnyderLayout; break;
-    case GraphAlg::SpringEmbedderFRExact: layout = new ogdf::SpringEmbedderFRExact; break;
-    case GraphAlg::SpringEmbedderKK: layout = new ogdf::SpringEmbedderKK; break;
-    case GraphAlg::StressMinimization: layout = new ogdf::StressMinimization; break;
-    case GraphAlg::SugiyamaLayout: layout = new ogdf::SugiyamaLayout; break;
-    case GraphAlg::TreeLayout: layout = new ogdf::TreeLayout; break;
-    case GraphAlg::TutteLayout: layout = new ogdf::TutteLayout; break;
-    case GraphAlg::UpwardPlanarizationLayout:
-        layout = new ogdf::UpwardPlanarizationLayout;
-        break;
-    case GraphAlg::VisibilityLayout: layout = new ogdf::VisibilityLayout; break;
-    default: break;
+    //FALLBACK
+    default: layout = new ogdf::FMMMLayout(); break;
     }
     if (layout) {
         m_layout.reset(layout);

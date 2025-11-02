@@ -74,6 +74,32 @@ ApplicationWindow {
                 topic_controller.rename(topic, newName);
                 break;
             }
+        case "layout":
+            {
+                if (args.length < 1)
+                    return;
+                let layout = args[0];
+                switch (layout) {
+                case "directed":
+                    topic_controller.directedLayout();
+                    break;
+                case "circular":
+                    topic_controller.circularLayout();
+                    break;
+                case "tree":
+                    topic_controller.treeLayout();
+                    break;
+                case "planar":
+                    topic_controller.planarLayout();
+                    break;
+                case "multi":
+                    topic_controller.multiLayout();
+                    break;
+                default:
+                    break;
+                }
+                break;
+            }
         default:
             console.warn("Unknown command:", command);
         }

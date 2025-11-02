@@ -24,15 +24,6 @@ TopicGraphController::TopicGraphController(QObject *parent)
     createTopic("V4");
     createTopic("V5");
     createTopic("V6");
-
-    join("V1", "V3");
-    join("V2", "V1");
-    join("V3", "V2");
-    join("V3", "V4");
-    join("V3", "V5");
-    join("V4", "V5");
-    join("V5", "V6");
-    join("V6", "V4");
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
@@ -149,4 +140,25 @@ void TopicGraphController::onStateChanged(const std::string &id,
         m_edgeStates.setState(edge.key, flags);
         m_edgeList->onEdgeStateChanged(edge.from, edge.to);
     }
+}
+
+void TopicGraphController::directedLayout() {
+    m_layout.setAlgorithm(GraphAlg::FMMMLayout);
+    synchGraphView();
+}
+void TopicGraphController::treeLayout() {
+    m_layout.setAlgorithm(GraphAlg::TreeLayout);
+    synchGraphView();
+}
+void TopicGraphController::circularLayout() {
+    m_layout.setAlgorithm(GraphAlg::CircularLayout);
+    synchGraphView();
+}
+void TopicGraphController::planarLayout() {
+    m_layout.setAlgorithm(GraphAlg::PlanarizationLayout);
+    synchGraphView();
+}
+void TopicGraphController::multiLayout() {
+    m_layout.setAlgorithm(GraphAlg::MixedModelLayout);
+    synchGraphView();
 }
