@@ -42,7 +42,7 @@ public:
     Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
 
 public slots:
-    void onStateChanged(const std::string &id);
+    void onStateChanged(const std::string &id, const StateFlags &flags);
     // public slots:
     //     void addTopic(int tempId, const QString &name, Topic_Type type = Topic_Type::Concept);
     //     void renameTopic(uint32_t id, const QString &new_name);

@@ -15,21 +15,21 @@ void UIStateManager::setState(const std::string &id, StateFlags flags) {
     if (!ptr)
         ptr = std::make_shared<UIState>();
     ptr->flags = flags;
-    emit stateChanged(id);
+    emit stateChanged(id, ptr->flags);
 }
 void UIStateManager::addState(const std::string &id, StateFlags flags) {
     auto &ptr = m_stateMap[id];
     if (!ptr)
         std::make_shared<UIState>();
     ptr->flags |= flags;
-    emit stateChanged(id);
+    emit stateChanged(id, ptr->flags);
 }
 void UIStateManager::removeState(const std::string &id, StateFlags flags) {
     auto &ptr = m_stateMap[id];
     if (!ptr)
         return;
     ptr->flags &= ~flags;
-    emit stateChanged(id);
+    emit stateChanged(id, ptr->flags);
 }
 void UIStateManager::setSelectedId(const std::string &id) {
     auto it = m_stateMap.find(id);

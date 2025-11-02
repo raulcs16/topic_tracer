@@ -141,14 +141,12 @@ void TopicGraphController::synchGraphView() {
 }
 //TODO:
 //make api on node and edge list for TGC to directly invoke the changes
-void TopicGraphController::onStateChanged(const std::string &id) {
-    //todo 1. get out edges of the state that changed
-    //todo 2. set state to equal topic state (highlighted part)
-    //todo 3. notify nodeLm
+void TopicGraphController::onStateChanged(const std::string &id,
+                                          const StateFlags &flags) {
+
     const auto &edges = m_graph.getOutEdges(std::stoi(id));
-    auto state = m_topicStates.state(id);
     for (auto edge : edges) {
-        m_edgeStates.setState(edge.key, state->flags);
+        m_edgeStates.setState(edge.key, flags);
         m_edgeList->onEdgeStateChanged(edge.from, edge.to);
     }
 }

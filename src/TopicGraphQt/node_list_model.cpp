@@ -43,12 +43,20 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     default: return QVariant();
     }
 }
-void NodeListModel::onNodeStateChanged(const std::string &id) {
+void NodeListModel::onNodeStateChanged(const std::string &id, const StateFlags &flags) {
     int idx = getNodeIndex(std::stoi(id));
     if (idx < 0)
         return;
     QModelIndex modelIndex = this->index(idx);
-    emit dataChanged(modelIndex, modelIndex, {HighlightRole});
+
+    QVector<int> roles = {};
+    if (flags.testFlag(StateFlag::Highlighted))
+        roles.append(HighlightRole);
+
+    if (roles.empty())
+        return;
+
+    emit dataChanged(modelIndex, modelIndex, roles);
 }
 int NodeListModel::getNodeIndex(int id) {
     for (int i = 0; i < m_nodes.size(); i++) {

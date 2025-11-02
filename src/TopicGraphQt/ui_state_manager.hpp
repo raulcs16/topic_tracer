@@ -38,7 +38,7 @@ public slots:
     void setHoveredId(const std::string &id);
 
 signals:
-    void stateChanged(const std::string &id);
+    void stateChanged(const std::string &id, const StateFlags &changedFlags);
 
 private:
     std::unordered_map<std::string, std::shared_ptr<UIState>> m_stateMap;
