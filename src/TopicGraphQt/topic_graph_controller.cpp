@@ -1,3 +1,5 @@
+#include "fmmm_strategy.hpp"
+#include "sugiyama_strategy.hpp"
 #include "topic_graph_controller.hpp"
 #include <QTimer>
 
@@ -24,6 +26,9 @@ TopicGraphController::TopicGraphController(QObject *parent)
     createTopic("V4");
     createTopic("V5");
     createTopic("V6");
+    join("V1", "V2");
+    join("V1", "V3");
+    join("V4", "V5");
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
@@ -98,7 +103,6 @@ void TopicGraphController::synchGraphView() {
     if (!m_nodeList || !m_edgeList)
         return;
     m_layout.calculateLayout();
-
     std::vector<EdgeItem> edgeList;
     auto gEdges = m_layout.edges();
     for (const auto &gedge : gEdges) {
@@ -143,22 +147,13 @@ void TopicGraphController::onStateChanged(const std::string &id,
 }
 
 void TopicGraphController::directedLayout() {
-    m_layout.setAlgorithm(GraphAlg::FMMMLayout);
+    m_layout.setStrategy(std::make_unique<SugiyamaStrategy>());
     synchGraphView();
 }
 void TopicGraphController::treeLayout() {
-    m_layout.setAlgorithm(GraphAlg::TreeLayout);
+    m_layout.setStrategy(std::make_unique<FMMMStrategy>());
     synchGraphView();
 }
-void TopicGraphController::circularLayout() {
-    m_layout.setAlgorithm(GraphAlg::CircularLayout);
-    synchGraphView();
-}
-void TopicGraphController::planarLayout() {
-    m_layout.setAlgorithm(GraphAlg::PlanarizationLayout);
-    synchGraphView();
-}
-void TopicGraphController::multiLayout() {
-    m_layout.setAlgorithm(GraphAlg::MixedModelLayout);
-    synchGraphView();
-}
+void TopicGraphController::circularLayout() {}
+void TopicGraphController::planarLayout() {}
+void TopicGraphController::multiLayout() {}

@@ -1,150 +1,15 @@
 #include "layout_engine.hpp"
 
-#include <ogdf/basic/PreprocessorLayout.h>
-#include <ogdf/energybased/DavidsonHarelLayout.h>
-#include <ogdf/energybased/FMMMLayout.h>
-#include <ogdf/energybased/FastMultipoleEmbedder.h>
-#include <ogdf/energybased/GEMLayout.h>
-#include <ogdf/energybased/MultilevelLayout.h>
-// #include <ogdf/energybased/SpringEmbedderFR.h>
-#include <ogdf/energybased/SpringEmbedderFRExact.h>
-#include <ogdf/energybased/SpringEmbedderKK.h>
-#include <ogdf/energybased/StressMinimization.h>
-#include <ogdf/energybased/TutteLayout.h>
-// #include <ogdf/energybased/multilevel_mixer/MMMExampleFastLayout.h>
-// #include <ogdf/energybased/multilevel_mixer/MMMExampleNiceLayout.h>
-// #include <ogdf/energybased/multilevel_mixer/MMMExampleNoTwistLayout.h>
-// #include <ogdf/energybased/multilevel_mixer/MixedForceLayout.h>
-#include <ogdf/energybased/multilevel_mixer/ModularMultilevelMixer.h>
-#include <ogdf/energybased/multilevel_mixer/ScalingLayout.h>
 
-#include <ogdf/layered/SugiyamaLayout.h>
-#include <ogdf/misclayout/BalloonLayout.h>
-#include <ogdf/misclayout/CircularLayout.h>
-#include <ogdf/packing/ComponentSplitterLayout.h>
-#include <ogdf/planarity/PlanarizationGridLayout.h>
-#include <ogdf/planarity/PlanarizationLayout.h>
-#include <ogdf/planarlayout/FPPLayout.h>
-#include <ogdf/planarlayout/MixedModelLayout.h>
-#include <ogdf/planarlayout/PlanarDrawLayout.h>
-#include <ogdf/planarlayout/PlanarStraightLayout.h>
-#include <ogdf/planarlayout/SchnyderLayout.h>
-#include <ogdf/tree/RadialTreeLayout.h>
-#include <ogdf/tree/TreeLayout.h>
-#include <ogdf/upward/DominanceLayout.h>
-#include <ogdf/upward/UpwardPlanarizationLayout.h>
-#include <ogdf/upward/VisibilityLayout.h>
-
-
-LayoutEngine::LayoutEngine(GraphAlg alg)
+LayoutEngine::LayoutEngine()
     : m_graph(), m_attributes(m_graph,
                               ogdf::GraphAttributes::nodeGraphics |
                                   ogdf::GraphAttributes::edgeGraphics |
                                   ogdf::GraphAttributes::nodeLabel |
                                   ogdf::GraphAttributes::edgeStyle),
-      m_algorithm(alg), m_layout(new ogdf::FMMMLayout) {
-    setAlgorithm(GraphAlg::FMMMLayout);
-}
-
-void LayoutEngine::setAlgorithm(GraphAlg algo) {
-
-    ogdf::LayoutModule *layout = 0;
-    switch (algo) {
-        //=====================
-        // 1. Force Directed / Engergy Based
-        //====================
-    case GraphAlg::FMMMLayout: {
-        auto *fmmm = new ogdf::FMMMLayout();
-        fmmm->unitEdgeLength(100.0);
-        fmmm->repForcesStrength(10.0);
-        fmmm->pageRatio(1.0);
-        fmmm->randSeed(42);
-        layout = fmmm;
-        break;
-    }
-    case GraphAlg::GEMLayout: {
-        auto *gem = new ogdf::GEMLayout();
-        gem->attractionFormula(1);
-        layout = gem;
-        break;
-    }
-    case GraphAlg::SpringEmbedderFRExact: layout = new ogdf::SpringEmbedderFRExact; break;
-    case GraphAlg::SpringEmbedderKK: layout = new ogdf::SpringEmbedderKK; break;
-    case GraphAlg::DavidsonHarelLayout: layout = new ogdf::DavidsonHarelLayout; break;
-    case GraphAlg::StressMinimization: layout = new ogdf::StressMinimization; break;
-
-    //=====================
-    // 2.Tree / Hierarchical
-    //====================
-    case GraphAlg::TreeLayout: {
-        auto *tree = new ogdf::TreeLayout();
-        tree->levelDistance(100);
-        tree->siblingDistance(60);
-        tree->orientation(ogdf::Orientation::topToBottom);
-        layout = tree;
-        break;
-    }
-    case GraphAlg::RadialTreeLayout: layout = new ogdf::RadialTreeLayout; break;
-    case GraphAlg::SugiyamaLayout: layout = new ogdf::SugiyamaLayout; break;
-    case GraphAlg::UpwardPlanarizationLayout:
-        layout = new ogdf::UpwardPlanarizationLayout;
-        break;
-    case GraphAlg::DominanceLayout: layout = new ogdf::DominanceLayout; break;
-
-    //=====================
-    // 3. Planar / Geometric
-    //=====================
-    case GraphAlg::PlanarizationLayout: {
-        auto *planar = new ogdf::PlanarizationLayout();
-        layout = planar;
-        break;
-    }
-    case GraphAlg::PlanarStraightLayout: layout = new ogdf::PlanarStraightLayout; break;
-    case GraphAlg::SchnyderLayout: layout = new ogdf::SchnyderLayout; break;
-    case GraphAlg::FPPLayout: layout = new ogdf::FPPLayout; break;
-    case GraphAlg::TutteLayout: layout = new ogdf::TutteLayout; break;
-    case GraphAlg::PlanarDrawLayout: layout = new ogdf::PlanarDrawLayout; break;
-
-    //=====================
-    // 4. Circular / Ballon /Mixed
-    //=====================
-    case GraphAlg::CircularLayout: {
-        auto *circular = new ogdf::CircularLayout();
-        circular->minDistCircle(80);
-        circular->pageRatio(1.0);
-        layout = circular;
-        break;
-    }
-    case GraphAlg::BalloonLayout: layout = new ogdf::BalloonLayout(); break;
-    case GraphAlg::ComponentSplitterLayout:
-        layout = new ogdf::ComponentSplitterLayout;
-        break;
-    case GraphAlg::MixedModelLayout: layout = new ogdf::MixedModelLayout; break;
-    case GraphAlg::VisibilityLayout: layout = new ogdf::VisibilityLayout; break;
-
-    //=====================
-    // 5. MultiLevel/ Hybrid /Scalable
-    //=====================
-    case GraphAlg::MultilevelLayout: layout = new ogdf::MultilevelLayout; break;
-    case GraphAlg::ModularMultilevelMixer:
-        layout = new ogdf::ModularMultilevelMixer;
-        break;
-    case GraphAlg::ScalingLayout: layout = new ogdf::ScalingLayout; break;
-    case GraphAlg::FastMultipoleEmbedder: layout = new ogdf::FastMultipoleEmbedder; break;
-    case GraphAlg::FastMultipoleMultilevelEmbedder:
-        layout = new ogdf::FastMultipoleMultilevelEmbedder;
-        break;
-    case GraphAlg::PlanarizationGridLayout:
-        layout = new ogdf::PlanarizationGridLayout;
-        break;
-    case GraphAlg::PreprocessorLayout: layout = new ogdf::PreprocessorLayout; break;
-    //FALLBACK
-    default: layout = new ogdf::FMMMLayout(); break;
-    }
-    if (layout) {
-        m_layout.reset(layout);
-        m_algorithm = algo;
-    }
+      m_strategy{nullptr} {}
+void LayoutEngine::setStrategy(std::unique_ptr<LayoutStrategy> strategy) {
+    m_strategy = std::move(strategy);
 }
 
 
@@ -154,34 +19,12 @@ void LayoutEngine::calculateLayout() {
         return;
     }
     try {
-        m_layout->call(m_attributes);
+        if (!m_strategy) {
+            return;
+        }
+        m_strategy->apply(m_attributes);
         m_attributes.addNodeCenter2Bends();
-        for (auto &node : m_nodes) {
-            auto it = m_idToNode.find(node.id);
-            if (it == m_idToNode.end())
-                continue;
-            node.x = m_attributes.x(it->second);
-            node.y = m_attributes.y(it->second);
-        }
-        for (auto &edge : m_edges) {
-            auto src = m_idToNode.find(edge.from);
-            auto target = m_idToNode.find(edge.to);
-            if (src == m_idToNode.end() || target == m_idToNode.end())
-                continue;
-
-            edge.source_x = m_attributes.x(src->second);
-            edge.source_y = m_attributes.y(src->second);
-            edge.target_x = m_attributes.x(target->second);
-            edge.target_y = m_attributes.y(target->second);
-            auto e = m_idToEdge.find(edge.key);
-            if (e == m_idToEdge.end())
-                continue;
-            edge.bends.clear();
-            for (ogdf::DPoint &p : m_attributes.bends(e->second)) {
-                edge.bends.push_back(p);
-            }
-        }
-
+        updateNodesFromAttributes();
 
     } catch (ogdf::AlgorithmFailureException &e) {
         std::cerr << "Algorithmn Failure: " << (int)(e.exceptionCode()) << "\n";
@@ -189,7 +32,33 @@ void LayoutEngine::calculateLayout() {
         std::cerr << "unknown error\n";
     }
 }
+void LayoutEngine::updateNodesFromAttributes() {
+    for (auto &node : m_nodes) {
+        auto it = m_idToNode.find(node.id);
+        if (it == m_idToNode.end())
+            continue;
+        node.x = m_attributes.x(it->second);
+        node.y = m_attributes.y(it->second);
+    }
+    for (auto &edge : m_edges) {
+        auto src = m_idToNode.find(edge.from);
+        auto target = m_idToNode.find(edge.to);
+        if (src == m_idToNode.end() || target == m_idToNode.end())
+            continue;
 
+        edge.source_x = m_attributes.x(src->second);
+        edge.source_y = m_attributes.y(src->second);
+        edge.target_x = m_attributes.x(target->second);
+        edge.target_y = m_attributes.y(target->second);
+        auto e = m_idToEdge.find(edge.key);
+        if (e == m_idToEdge.end())
+            continue;
+        edge.bends.clear();
+        for (ogdf::DPoint &p : m_attributes.bends(e->second)) {
+            edge.bends.push_back(p);
+        }
+    }
+}
 void LayoutEngine::clear() {
     m_graph.clear();
     m_idToEdge.clear();
