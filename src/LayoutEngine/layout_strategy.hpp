@@ -1,16 +1,11 @@
 #pragma once
 
-#include <ogdf/basic/GraphAttributes.h>
-#include <ogdf/basic/LayoutModule.h>
+
+#include "layout_types.hpp"
+
 
 class LayoutStrategy {
 public:
     virtual ~LayoutStrategy() = default;
-    void apply(ogdf::GraphAttributes &GA) {
-        if (m_layout)
-            m_layout->call(GA);
-    }
-
-protected:
-    ogdf::LayoutModule *m_layout = nullptr;
+    virtual void apply(std::vector<GraphNode> &nodes, std::vector<GraphEdge> &edge) = 0;
 };

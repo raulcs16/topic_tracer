@@ -1,9 +1,9 @@
 #pragma once
 
-#include "layout_strategy.hpp"
+#include "ogdf_strategy.hpp"
 #include <ogdf/layered/SugiyamaLayout.h>
 
-class SugiyamaStrategy : public LayoutStrategy {
+class SugiyamaStrategy : public OGDFStrat {
 public:
-    SugiyamaStrategy();
+    explicit SugiyamaStrategy(OGDFContext &ctx);
 };

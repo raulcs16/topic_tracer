@@ -3,7 +3,7 @@
 #include <ogdf/layered/OptimalHierarchyLayout.h>
 #include <ogdf/layered/OptimalRanking.h>
 
-SugiyamaStrategy::SugiyamaStrategy() {
+SugiyamaStrategy::SugiyamaStrategy(OGDFContext &ctx) : OGDFStrat(ctx) {
 
     auto *sl = new ogdf::SugiyamaLayout;
     sl->setRanking(new ogdf::OptimalRanking);

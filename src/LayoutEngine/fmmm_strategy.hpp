@@ -1,10 +1,10 @@
 #pragma once
 
-#include "layout_strategy.hpp"
+#include "ogdf_strategy.hpp"
 #include <ogdf/energybased/FMMMLayout.h>
 
 
-class FMMMStrategy : public LayoutStrategy {
+class FMMMStrategy : public OGDFStrat {
 public:
-    FMMMStrategy();
+    explicit FMMMStrategy(OGDFContext &ctx);
 };

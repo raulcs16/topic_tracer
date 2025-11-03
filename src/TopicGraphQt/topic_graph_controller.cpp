@@ -147,11 +147,11 @@ void TopicGraphController::onStateChanged(const std::string &id,
 }
 
 void TopicGraphController::directedLayout() {
-    m_layout.setStrategy(std::make_unique<SugiyamaStrategy>());
+    m_layout.setStrategy(std::make_unique<SugiyamaStrategy>(m_layout.ogdfContext()));
     synchGraphView();
 }
 void TopicGraphController::treeLayout() {
-    m_layout.setStrategy(std::make_unique<FMMMStrategy>());
+    m_layout.setStrategy(std::make_unique<FMMMStrategy>(m_layout.ogdfContext()));
     synchGraphView();
 }
 void TopicGraphController::circularLayout() {}
