@@ -41,6 +41,7 @@ public:
     Q_INVOKABLE void noJoin(const QString &topicA, const QString &topicB);
     Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
 
+    Q_INVOKABLE void defaultLayout();
     Q_INVOKABLE void directedLayout();
     Q_INVOKABLE void treeLayout();
     Q_INVOKABLE void circularLayout();

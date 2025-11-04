@@ -10,6 +10,8 @@ add_library(LayoutEngine STATIC
     sugiyama_strategy.cpp
     fmmm_strategy.hpp
     fmmm_strategy.cpp
+    orthogonal_strategy.hpp
+    orthogonal_strategy.cpp
     # procedural strats
     fermatspiral_strategy.hpp
     fermatspiral_strategy.cpp

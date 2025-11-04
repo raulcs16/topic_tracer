@@ -1,4 +1,6 @@
+#include "fermatspiral_strategy.hpp"
 #include "fmmm_strategy.hpp"
+#include "orthogonal_strategy.hpp"
 #include "sugiyama_strategy.hpp"
 #include "topic_graph_controller.hpp"
 #include <QTimer>
@@ -147,13 +149,20 @@ void TopicGraphController::onStateChanged(const std::string &id,
 }
 
 void TopicGraphController::directedLayout() {
-    m_layout.setStrategy(std::make_unique<SugiyamaStrategy>(m_layout.ogdfContext()));
-    synchGraphView();
-}
-void TopicGraphController::treeLayout() {
     m_layout.setStrategy(std::make_unique<FMMMStrategy>(m_layout.ogdfContext()));
     synchGraphView();
 }
+void TopicGraphController::treeLayout() {}
 void TopicGraphController::circularLayout() {}
-void TopicGraphController::planarLayout() {}
-void TopicGraphController::multiLayout() {}
+void TopicGraphController::planarLayout() {
+    m_layout.setStrategy(std::make_unique<OrthogonalStrategy>(m_layout.ogdfContext()));
+    synchGraphView();
+}
+void TopicGraphController::defaultLayout() {
+    m_layout.setStrategy(std::make_unique<FermatSpiralStrategy>());
+    synchGraphView();
+}
+void TopicGraphController::multiLayout() {
+    m_layout.setStrategy(std::make_unique<SugiyamaStrategy>(m_layout.ogdfContext()));
+    synchGraphView();
+}

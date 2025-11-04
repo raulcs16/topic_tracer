@@ -80,6 +80,9 @@ ApplicationWindow {
                     return;
                 let layout = args[0];
                 switch (layout) {
+                case "default":
+                    topic_controller.defaultLayout();
+                    break;
                 case "directed":
                     topic_controller.directedLayout();
                     break;
