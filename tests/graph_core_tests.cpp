@@ -1,34 +1,31 @@
-#include "graph_engine.hpp"
+#include "path_analyzer.hpp"
+#include "topic_graph.hpp"
 #include <catch2/catch_test_macros.hpp>
 
-bool samePos(const GraphNode &a, const GraphNode &b) { return a.x == b.x && a.y == b.y; }
-TEST_CASE("GraphCore Test SUITE") {
-    GraphEngine engine;
-    GraphState state;
-    SECTION("Should have a single node") {
-        double initPos = -100;
-        state.nodes.push_back(GraphNode{.id = 1, .x = initPos, .y = initPos});
-        engine.setState(state);
-        engine.calculateLayout();
-        auto updatedNodes = engine.nodes();
+TEST_CASE("Path Test Suite") {
+    TopicGraph graph;
+    auto v1 = graph.addTopic("v1");
+    auto v2 = graph.addTopic("v2");
+    auto v3 = graph.addTopic("v3");
+    auto v4 = graph.addTopic("v4");
+    auto v5 = graph.addTopic("v5");
+    auto v6 = graph.addTopic("v1");
 
-        REQUIRE(updatedNodes.size() == 1);
-        REQUIRE(updatedNodes[0].x != initPos);
-        REQUIRE(updatedNodes[0].y != initPos);
-    }
-    SECTION("Should not place all nodes on same spot") {
-        state.nodes.clear();
-        for (uint32_t i = 0; i < 10; i++) {
-            double initPos = -100;
-            state.nodes.push_back(GraphNode{.id = i, .x = initPos, .y = initPos});
-        }
-        state.edges.push_back(GraphEdge{.from = 1, .to = 3});
-        state.edges.push_back(GraphEdge{.from = 1, .to = 4});
-        engine.setState(state);
-        engine.calculateLayout();
-        auto updatedNodes = engine.nodes();
-        REQUIRE(!samePos(state.nodes[1], state.nodes[3]));
-        REQUIRE(!samePos(state.nodes[1], state.nodes[4]));
-        REQUIRE(!samePos(state.nodes[3], state.nodes[4]));
+    graph.addEdge(v2, v1, Edge_Type::ComposedOf);
+    graph.addEdge(v1, v3, Edge_Type::Example);
+    graph.addEdge(v3, v2, Edge_Type::DependsOn);
+    graph.addEdge(v3, v5, Edge_Type::AlternativeTo);
+    graph.addEdge(v3, v4, Edge_Type::DependsOn);
+    graph.addEdge(v5, v2, Edge_Type::ComposedOf);
+    graph.addEdge(v5, v6, Edge_Type::AlternativeTo);
+    graph.addEdge(v6, v4, Edge_Type::Example);
+
+    SECTION("TEST SHORTEST PATH") {
+        auto path = PathAnalyzer::dijsktras(graph, v1, v2);
+
+
+        REQUIRE(path.find(v2) != path.end());
+        REQUIRE(path[v2] == v5);
+        REQUIRE(path[v1] == -1);
     }
 }
