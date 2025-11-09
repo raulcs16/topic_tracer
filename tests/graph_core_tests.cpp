@@ -21,11 +21,12 @@ TEST_CASE("Path Test Suite") {
     graph.addEdge(v6, v4, Edge_Type::Example);
 
     SECTION("TEST SHORTEST PATH") {
-        auto path = PathAnalyzer::dijsktras(graph, v1, v2);
+        auto parents = PathAnalyzer::dijsktras(graph, v1, v2);
+        auto path = PathAnalyzer::topicPath(parents, v2);
 
-
-        REQUIRE(path.find(v2) != path.end());
-        REQUIRE(path[v2] == v5);
-        REQUIRE(path[v1] == -1);
+        REQUIRE(path.size() == 3);
+        REQUIRE(path[0] == v1);
+        REQUIRE(path[1] == v3);
+        REQUIRE(path[2] == v2);
     }
 }

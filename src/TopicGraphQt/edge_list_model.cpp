@@ -76,6 +76,19 @@ void EdgeListModel::onEdgeStateChanged(uint32_t from, uint32_t to) {
         ++index;
     }
 }
+void EdgeListModel::onEdgeStateChanged(const std::string &key) {
+    auto it = m_edges.begin();
+    int index = 0;
+    while (it != m_edges.end()) {
+        if (it->key == key) {
+            QModelIndex midx = this->index(index);
+            emit dataChanged(midx, midx, {HighlightRole});
+            break;
+        }
+        ++it;
+        ++index;
+    }
+}
 // bool EdgeListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
 //     if (!index.isValid())
 //         return false;

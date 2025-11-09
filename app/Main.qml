@@ -64,6 +64,16 @@ ApplicationWindow {
                 topic_controller.noJoin(topicA, topicB);
                 break;
             }
+        case "path":
+            {
+                if (args.length < 2) {
+                    return;
+                }
+                let topicA = args[0];
+                let topicB = args[1];
+                topic_controller.path(topicA, topicB);
+                break;
+            }
         case "mv":
             {
                 if (args.length < 2) {

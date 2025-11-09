@@ -1,6 +1,7 @@
 #include "fermatspiral_strategy.hpp"
 #include "fmmm_strategy.hpp"
 #include "orthogonal_strategy.hpp"
+#include "path_analyzer.hpp"
 #include "sugiyama_strategy.hpp"
 #include "topic_graph_controller.hpp"
 #include <QTimer>
@@ -17,20 +18,26 @@ TopicGraphController::TopicGraphController(QObject *parent)
                 m_nodeList,
                 &NodeListModel::onNodeStateChanged);
     }
-    connect(&m_topicStates,
-            &UIStateManager::stateChanged,
-            this,
-            &TopicGraphController::onStateChanged);
+    // connect(&m_topicStates,
+    //         &UIStateManager::stateChanged,
+    //         this,
+    //         &TopicGraphController::onStateChanged);
 
-    createTopic("V1");
-    createTopic("V2");
-    createTopic("V3");
-    createTopic("V4");
-    createTopic("V5");
-    createTopic("V6");
-    join("V1", "V2");
-    join("V1", "V3");
-    join("V4", "V5");
+    createTopic("v1");
+    createTopic("v2");
+    createTopic("v3");
+    createTopic("v4");
+    createTopic("v5");
+    createTopic("v6");
+    join("v2", "v1", Edge_Type::ComposedOf);
+    join("v1", "v3", Edge_Type::Example);
+    join("v3", "v2", Edge_Type::DependsOn);
+    join("v3", "v5", Edge_Type::AlternativeTo);
+    join("v3", "v4", Edge_Type::DependsOn);
+    join("v5", "v2", Edge_Type::ComposedOf);
+    join("v5", "v6", Edge_Type::AlternativeTo);
+    join("v6", "v4", Edge_Type::Example);
+    directedLayout();
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
@@ -82,9 +89,10 @@ void TopicGraphController::rename(const QString &topic, const QString &new_name)
     synchGraphView();
 }
 
-void TopicGraphController::join(const QString &topicA, const QString &topicB) {
-    auto edge =
-        m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), Edge_Type::DependsOn);
+void TopicGraphController::join(const QString &topicA,
+                                const QString &topicB,
+                                Edge_Type type) {
+    auto edge = m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), type);
     if (edge == nullptr)
         return;
     m_edgeStates.setState(edge->key, StateFlag::Selectable);
@@ -113,6 +121,7 @@ void TopicGraphController::synchGraphView() {
             points.push_back({ogpoint.m_x, ogpoint.m_y});
         }
         edgeList.push_back(EdgeItem{
+            .key = gedge.key,
             .bends = points,
             .from = gedge.from,
             .to = gedge.to,
@@ -165,4 +174,25 @@ void TopicGraphController::defaultLayout() {
 void TopicGraphController::multiLayout() {
     m_layout.setStrategy(std::make_unique<SugiyamaStrategy>(m_layout.ogdfContext()));
     synchGraphView();
+}
+void TopicGraphController::path(const QString &topicA, const QString &topicB) {
+    auto ta = m_graph.getTopic(topicA.toStdString());
+    auto tb = m_graph.getTopic(topicB.toStdString());
+    if (ta == nullptr || tb == nullptr) {
+        return;
+    }
+    auto parents = PathAnalyzer::dijsktras(m_graph, ta->id, tb->id);
+    auto topics = PathAnalyzer::topicPath(parents, tb->id);
+
+    auto edges = PathAnalyzer::edgePath(topics);
+
+    for (const auto &v : topics) {
+        m_topicStates.setState(std::to_string(v), {StateFlag::Highlighted});
+    }
+
+
+    for (auto edge : edges) {
+        m_edgeStates.setState(edge, {StateFlag::Highlighted});
+        m_edgeList->onEdgeStateChanged(edge);
+    }
 }

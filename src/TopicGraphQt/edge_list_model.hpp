@@ -9,6 +9,7 @@
 #include <vector>
 
 struct EdgeItem {
+    std::string key;
     uint32_t from;
     uint32_t to;
     double source_x;
@@ -46,6 +47,7 @@ public:
     void resetEdges(const std::vector<EdgeItem> &edges);
 
 public slots:
+    void onEdgeStateChanged(const std::string &key);
     void onEdgeStateChanged(uint32_t from, uint32_t to);
 
 
