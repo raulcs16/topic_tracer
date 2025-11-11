@@ -19,6 +19,7 @@ add_library(LayoutEngine STATIC
 
 target_link_libraries(LayoutEngine
     PUBLIC OGDF
+    PUBLIC Utils
 )
 target_include_directories(LayoutEngine
     PUBLIC

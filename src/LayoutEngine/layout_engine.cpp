@@ -1,4 +1,5 @@
 #include "fermatspiral_strategy.hpp"
+#include "graph_keys.hpp"
 #include "layout_engine.hpp"
 
 
@@ -56,7 +57,7 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         return;
     }
     auto edge = m_ogdf.graph.newEdge(fromNode->second, toNode->second);
-    std::string k = key(from, to);
+    std::string k = GraphKeys::key(from, to);
     m_ogdf.keyToEdge[k] = edge;
     m_edges.push_back(GraphEdge{.key = k, .from = from, .to = to, .bends = {}});
 }
@@ -75,7 +76,4 @@ void LayoutEngine::removeEdge(const std::string &k) {
     if (nit != m_edges.end()) {
         m_edges.erase(nit);
     }
-}
-std::string LayoutEngine::key(uint32_t from, uint32_t to) {
-    return std::to_string(from) + "->" + std::to_string(to);
 }

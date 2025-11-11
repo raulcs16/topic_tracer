@@ -38,22 +38,6 @@ public:
 
 
 private:
-    std::string genKey(uint32_t from, uint32_t to);
-    inline uint32_t extractFrom(const std::string &key) {
-        auto arrowPos = key.find("->");
-        if (arrowPos == std::string::npos)
-            throw std::invalid_argument("Invalid edge key format: " + key);
-        return std::stoul(key.substr(0, arrowPos));
-    }
-
-    inline uint32_t extractTo(const std::string &key) {
-        auto arrowPos = key.find("->");
-        if (arrowPos == std::string::npos)
-            throw std::invalid_argument("Invalid edge key format: " + key);
-        return std::stoul(key.substr(arrowPos + 2));
-    }
-
-private:
     std::unordered_map<uint32_t, Topic> m_topicMap;
     std::unordered_map<uint32_t, std::vector<Edge>> m_adjOutMap;
     std::unordered_set<std::string> m_keySet;

@@ -1,5 +1,6 @@
 #include "fermatspiral_strategy.hpp"
 #include "fmmm_strategy.hpp"
+#include "graph_keys.hpp"
 #include "orthogonal_strategy.hpp"
 #include "path_analyzer.hpp"
 #include "sugiyama_strategy.hpp"
@@ -50,7 +51,7 @@ void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
         m_topicList->addConfirmedItem(id, name);
     }
 
-    m_topicStates.setState(std::to_string(id), StateFlag::Selectable);
+    m_topicStates.setState(GraphKeys::key(id), StateFlag::Selectable);
     m_layout.addNode(id);
     synchGraphView();
 }
@@ -105,7 +106,7 @@ void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) 
     if (ta == nullptr || tb == nullptr)
         return;
     m_graph.removeEdge(ta->id, tb->id);
-    m_layout.removeEdge(std::to_string(ta->id) + "->" + std::to_string(tb->id));
+    m_layout.removeEdge(GraphKeys::key(ta->id, tb->id));
     synchGraphView();
 }
 
@@ -187,7 +188,7 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     auto edges = PathAnalyzer::edgePath(topics);
 
     for (const auto &v : topics) {
-        m_topicStates.setState(std::to_string(v), {StateFlag::Highlighted});
+        m_topicStates.setState(GraphKeys::key(v), {StateFlag::Highlighted});
     }
 
 

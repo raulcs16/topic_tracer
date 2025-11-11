@@ -1,3 +1,4 @@
+#include "graph_keys.hpp"
 #include "topic_graph.hpp"
 
 
@@ -62,11 +63,7 @@ std::vector<std::shared_ptr<Topic>> TopicGraph::topics() const {
     return result;
 }
 
-//EDGE API
-std::string TopicGraph::genKey(uint32_t from, uint32_t to) {
-    std::string key = std::to_string(from) + "->" + std::to_string(to);
-    return key;
-}
+
 std::shared_ptr<const Edge> TopicGraph::addEdge(uint32_t from,
                                                 uint32_t to,
                                                 Edge_Type type) {
@@ -87,7 +84,7 @@ std::shared_ptr<const Edge> TopicGraph::addEdge(uint32_t from,
     case Edge_Type::Example: directed = true; break;
     default: directed = true; break;
     }
-    std::string key = genKey(from, to);
+    std::string key = GraphKeys::key(from, to);
     Edge edge{.key = key, .from = from, .to = to, .type = type, .directed = directed};
     m_adjOutMap[from].push_back(edge);
     m_keySet.insert(key);
@@ -105,7 +102,7 @@ std::shared_ptr<const Edge> TopicGraph::addEdge(const std::string &topicA,
     return addEdge(ta->id, tb->id, type);
 }
 bool TopicGraph::hasEdge(uint32_t from, uint32_t to) {
-    return !(m_keySet.find(genKey(from, to)) == m_keySet.end());
+    return !(m_keySet.find(GraphKeys::key(from, to)) == m_keySet.end());
 }
 bool TopicGraph::removeEdge(uint32_t from, uint32_t to) {
     if (!hasEdge(from, to)) {
@@ -134,7 +131,7 @@ bool TopicGraph::removeEdge(const std::string &topicA, const std::string &topicB
 std::shared_ptr<const Edge> TopicGraph::getEdge(std::string key) {
     if (m_keySet.find(key) == m_keySet.end())
         return nullptr;
-    uint32_t from = extractFrom(key);
+    uint32_t from = GraphKeys::extractFrom(key);
     auto edges = m_adjOutMap[from];
     for (int i = 0; i < edges.size(); i++) {
         if (edges[i].key == key) {
@@ -144,7 +141,7 @@ std::shared_ptr<const Edge> TopicGraph::getEdge(std::string key) {
     return nullptr;
 }
 std::shared_ptr<const Edge> TopicGraph::getEdge(uint32_t from, uint32_t to) {
-    return getEdge(genKey(from, to));
+    return getEdge(GraphKeys::key(from, to));
 }
 std::vector<std::shared_ptr<Edge>> TopicGraph::edges() const {
     std::vector<std::shared_ptr<Edge>> result;

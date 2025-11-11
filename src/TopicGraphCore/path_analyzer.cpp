@@ -1,3 +1,4 @@
+#include "graph_keys.hpp"
 #include "topic_graph.hpp"
 #include <queue>
 #include <vector>
@@ -28,8 +29,7 @@ std::vector<std::string> edgePath(std::vector<uint32_t> topicPath) {
     int j = 1;
     std::vector<std::string> edgeKeys;
     while (j < topicPath.size()) {
-        std::string key =
-            std::to_string(topicPath[i]) + "->" + std::to_string(topicPath[j]);
+        std::string key = GraphKeys::key(topicPath[i], topicPath[j]);
         edgeKeys.push_back(key);
         j++;
         i++;

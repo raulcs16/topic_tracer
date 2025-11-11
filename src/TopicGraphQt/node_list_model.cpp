@@ -1,3 +1,4 @@
+#include "graph_keys.hpp"
 #include "node_list_model.hpp"
 
 NodeListModel::NodeListModel(UIStateManager *uiManager, QObject *parent)
@@ -37,7 +38,7 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     case HighlightRole: {
-        return m_uiManager && m_uiManager->state(std::to_string(nodeInfo.id))
+        return m_uiManager && m_uiManager->state(GraphKeys::key(nodeInfo.id))
                                   ->has(StateFlag::Highlighted);
     }
     default: return QVariant();

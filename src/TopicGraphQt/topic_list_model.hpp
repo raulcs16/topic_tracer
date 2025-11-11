@@ -5,6 +5,7 @@
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
+#include <unordered_map>
 
 
 struct TopicItem {
@@ -32,6 +33,7 @@ public:
         IdRole = Qt::UserRole + 1,
         NameRole,
         PendingRole,
+        HoveredRole,
     };
     explicit TopicListModel(UIStateManager *stateManager, QObject *parent = nullptr);
 
@@ -46,6 +48,8 @@ public:
     Q_INVOKABLE void addConfirmedItem(uint32_t id, const QString &name);
     Q_INVOKABLE bool removeItem(int index);
     Q_INVOKABLE bool editItem(int index, const QString &newName);
+
+    Q_INVOKABLE void toggleHovered(uint32_t id);
 
     void deleteTopic(uint32_t id);
     void renameTopic(uint32_t id, const QString &newName);
@@ -88,6 +92,7 @@ private:
 private:
     QVector<TopicItem> m_topics;
     UIStateManager *m_stateManager;
+    std::unordered_map<uint32_t, ItemState> m_stateFlags;
 
     bool m_isAddingNewTopic = false;
     int m_editingIndex = -1;

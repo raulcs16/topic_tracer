@@ -24,8 +24,6 @@ public:
     inline const std::vector<GraphNode> &nodes() const { return m_nodes; }
     inline const std::vector<GraphEdge> &edges() const { return m_edges; }
 
-private:
-    static std::string key(uint32_t from, uint32_t to);
 
 private:
     OGDFContext m_ogdf;

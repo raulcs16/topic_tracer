@@ -1,3 +1,4 @@
+#include "graph_keys.hpp"
 #include "topic_list_model.hpp"
 
 
@@ -9,6 +10,7 @@ QHash<int, QByteArray> TopicListModel::roleNames() const {
     roles[IdRole] = "topicId";
     roles[NameRole] = "topicName";
     roles[PendingRole] = "pending";
+    roles[HoveredRole] = "beingHovered";
     return roles;
 }
 int TopicListModel::rowCount(const QModelIndex &parent) const {
@@ -33,6 +35,12 @@ QVariant TopicListModel::data(const QModelIndex &index, int role) const {
     case NameRole: return topic.name;
     case IdRole: return topic.id;
     case PendingRole: return topic.pending;
+    case HoveredRole: {
+        auto it = m_stateFlags.find(topic.id);
+        if (it == m_stateFlags.end())
+            return QVariant();
+        return it->second.has(StateFlag::Hovered);
+    }
     default: return QVariant();
     }
 }
@@ -95,6 +103,7 @@ void TopicListModel::addConfirmedItem(uint32_t id, const QString &name) {
 
     beginInsertRows(QModelIndex(), newRow, newRow);
     m_topics.push_back(TopicItem{.id = id, .name = name, .pending = false});
+    m_stateFlags.insert({id, ItemState{}});
     endInsertRows();
 }
 
@@ -176,7 +185,7 @@ void TopicListModel::setHoveredId(int id) {
         return;
     m_hoveredId = id;
     if (m_stateManager) {
-        m_stateManager->setHoveredId(std::to_string(id));
+        m_stateManager->setHoveredId(GraphKeys::key(id));
     }
     emit hoveredIdChanged(id);
 }
@@ -188,8 +197,18 @@ void TopicListModel::confirmTopic(int index, uint32_t new_id) {
     TopicItem &item = m_topics[index];
     item.id = new_id;
     item.pending = false;
+    m_stateFlags.insert({new_id, ItemState{}});
 
     // Notify any views or bindings that these fields changed
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {IdRole, PendingRole});
+}
+
+void TopicListModel::toggleHovered(uint32_t id) {
+    auto it = m_stateFlags.find(id);
+    if (it == m_stateFlags.end())
+        return;
+    it->second.toggle(StateFlag::Hovered);
+    const QModelIndex modelIndex = this->index(getTopicIndex(id));
+    emit dataChanged(modelIndex, modelIndex, {HoveredRole});
 }

@@ -133,6 +133,7 @@ Item {
             required property int topicId
             required property string topicName
             required property bool pending
+            required property bool beingHovered
 
             property ItemView listView: ListView.view
             required property int index //auto assigned by view
@@ -146,7 +147,7 @@ Item {
                 id: hoverBackground
                 anchors.fill: parent
                 color: Colors.selected
-                opacity: 0.0
+                opacity: delegateRect.beingHovered ? 0.2 : 0.0
                 z: -1
             }
 
@@ -200,14 +201,9 @@ Item {
                 hoverEnabled: true
 
                 cursorShape: Qt.PointingHandCursor
-                onEntered: {
-                    hoverBackground.opacity = 0.2;
-                    root.model.hoveredId = delegateRect.topicId;
-                }
-                onExited: {
-                    hoverBackground.opacity = 0.0;
-                    root.model.hoveredId = -1;//TODO:remove magic number
-                }
+
+                onEntered: root.model.toggleHovered(delegateRect.topicId)
+                onExited: root.model.toggleHovered(delegateRect.topicId)
 
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: mouse => {
