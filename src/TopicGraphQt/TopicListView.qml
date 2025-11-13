@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic // Keep Basic for compatibility if necessary
 
@@ -34,7 +33,7 @@ Item {
         MenuItemCard {
             text: qsTr("Rename...")
             onTriggered: {
-                root.model.editingIndex = delegateMenu.clickedIndex;
+                root.model.addFlags(delegateMenu.clickedIndex, ENUMS.StateFlag.EditMode);
             }
         }
         MenuItemCard {
@@ -50,7 +49,16 @@ Item {
         anchors.fill: parent
         bottomMargin: 30
         model: root.model
-        delegate: topicDelegate
+        delegate: TopicDelegate {
+            model: root.model
+            onContextMenuRequested: (i, pos) => {
+                delegateMenu.clickedIndex = i;
+                const global = mapToItem(topicView, pos.x, pos.y);
+                delegateMenu.x = global.x;
+                delegateMenu.y = global.y;
+                delegateMenu.open();
+            }
+        }
         orientation: ListView.Vertical
         currentIndex: model.currentIndex
 
@@ -118,106 +126,6 @@ Item {
                     if (!focus) {
                         root.model.isAddingNewTopic = false;
                         topicView.focus = true;
-                    }
-                }
-            }
-        }
-    }
-
-    Component {
-        id: topicDelegate
-
-        Rectangle {
-            id: delegateRect
-
-            required property int topicId
-            required property string topicName
-            required property bool pending
-            required property int flags
-
-            readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
-            readonly property bool selected: (flags & ENUMS.StateFlag.Selected) !== 0
-
-            property ItemView listView: ListView.view
-            required property int index //auto assigned by view
-
-            height: 30
-            width: listView.width
-
-            color: "transparent"
-
-            Rectangle {
-                anchors.fill: parent
-                color: Colors.selected
-                opacity: delegateRect.selected ? 0.6 : delegateRect.hover ? 0.2 : 0.0
-                z: -1
-            }
-
-            TextField {
-                id: editor
-                visible: root.model.editingIndex === delegateRect.index
-
-                anchors.fill: parent
-                anchors.leftMargin: 20
-                placeholderText: delegateRect.topicName
-                font.pointSize: 16
-                color: Colors.text_secondary
-
-                background: Rectangle {
-                    color: Colors.primary
-                    border.width: 2
-                    border.color: Colors.accent
-                }
-
-                Keys.onReturnPressed: {
-                    let newName = text.trim();
-                    if (newName.length > 0 && newName !== delegateRect.topicName) {
-                        root.model.editItem(delegateRect.index, newName);
-                    }
-                    root.model.editingIndex = -1;
-                    topicView.focus = true;
-                }
-
-                onFocusChanged: {
-                    if (!focus) {
-                        root.model.editingIndex = -1;
-                    }
-                }
-            }
-            Text {
-                visible: root.model.editingIndex !== delegateRect.index
-                text: delegateRect.topicName
-                font.pointSize: 16
-                font.weight: Font.DemiBold
-                color: delegateRect.pending ? Colors.primary : Colors.text_secondary
-                Layout.fillWidth: true
-                elide: Text.ElideRight
-                anchors {
-                    left: parent.left
-                    leftMargin: 20
-                    verticalCenter: parent.verticalCenter
-                }
-            }
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-
-                cursorShape: Qt.PointingHandCursor
-
-                onEntered: root.model.addFlags(delegateRect.index, ENUMS.StateFlag.Hovered)
-                onExited: root.model.removeFlags(delegateRect.index, ENUMS.StateFlag.Hovered)
-
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onClicked: mouse => {
-                    if (mouse.button == Qt.RightButton) {
-                        delegateMenu.clickedIndex = delegateRect.index;
-                        const pos = mapToItem(topicView, mouse.x, mouse.y);
-                        delegateMenu.x = pos.x;
-                        delegateMenu.y = pos.y;
-                        delegateMenu.open();
-                    } else {
-                        delegateRect.listView.currentIndex = delegateRect.index;
-                        root.model.addFlags(delegateRect.index, ENUMS.StateFlag.Selected);
                     }
                 }
             }

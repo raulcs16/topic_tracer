@@ -24,8 +24,6 @@ class TopicListModel : public QAbstractListModel {
                    NOTIFY isAddingNewTopicChanged)
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY
                    currentIndexChanged)
-    Q_PROPERTY(int editingIndex READ editingIndex WRITE setEditingIndex NOTIFY
-                   editingIndexChanged)
 
 public:
     enum Roles {
@@ -62,9 +60,6 @@ public:
     bool isAddingNewTopic() const { return m_isAddingNewTopic; }
     void setIsAddingNewTopic(bool value);
 
-    int editingIndex() const { return m_editingIndex; }
-    void setEditingIndex(int idx);
-
     int currentIndex() const { return m_currentIndex; }
     void setCurrentIndex(int idx);
 
@@ -92,6 +87,5 @@ private:
     std::unordered_map<uint32_t, ItemState> m_stateFlags;
 
     bool m_isAddingNewTopic = false;
-    int m_editingIndex = -1;
     int m_currentIndex = -1;
 };

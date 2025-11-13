@@ -49,8 +49,6 @@ void NodeListModel::onNodeStateChanged(const std::string &id, const StateFlags &
     QModelIndex modelIndex = this->index(idx);
 
     QVector<int> roles = {};
-    if (flags.testFlag(StateFlag::Highlighted))
-        roles.append(HighlightRole);
 
     if (roles.empty())
         return;

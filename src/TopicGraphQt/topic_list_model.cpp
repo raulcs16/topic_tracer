@@ -154,15 +154,6 @@ bool TopicListModel::editItem(int index, const QString &newName) {
     return true;
 }
 
-void TopicListModel::setEditingIndex(int idx) {
-    if (idx == m_editingIndex)
-        return;
-    //-1 non are set
-    if (idx < -1 || idx >= m_topics.size())
-        return;
-    m_editingIndex = idx;
-    emit editingIndexChanged(idx);
-}
 
 void TopicListModel::setIsAddingNewTopic(bool value) {
     if (value != m_isAddingNewTopic) {
