@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "ui_state_manager.hpp"
+#include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -26,7 +26,6 @@ class TopicListModel : public QAbstractListModel {
                    currentIndexChanged)
     Q_PROPERTY(int editingIndex READ editingIndex WRITE setEditingIndex NOTIFY
                    editingIndexChanged)
-    Q_PROPERTY(int hoveredId READ hoveredId WRITE setHoveredId NOTIFY hoveredIdChanged)
 
 public:
     enum Roles {
@@ -34,8 +33,9 @@ public:
         NameRole,
         PendingRole,
         HoveredRole,
+        FlagsRole,
     };
-    explicit TopicListModel(UIStateManager *stateManager, QObject *parent = nullptr);
+    explicit TopicListModel(QObject *parent = nullptr);
 
     //list interface override
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -43,13 +43,16 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
+    Q_INVOKABLE void addFlags(int index, StateFlag flag);
+    Q_INVOKABLE void removeFlags(int index, StateFlag flag);
+
+
     //API
     Q_INVOKABLE void addItem(const QString &name);
     Q_INVOKABLE void addConfirmedItem(uint32_t id, const QString &name);
     Q_INVOKABLE bool removeItem(int index);
     Q_INVOKABLE bool editItem(int index, const QString &newName);
 
-    Q_INVOKABLE void toggleHovered(uint32_t id);
 
     void deleteTopic(uint32_t id);
     void renameTopic(uint32_t id, const QString &newName);
@@ -65,9 +68,6 @@ public:
     int currentIndex() const { return m_currentIndex; }
     void setCurrentIndex(int idx);
 
-    int hoveredId() const { return m_hoveredId; }
-    void setHoveredId(int id);
-
 
 signals:
     //state changes
@@ -75,9 +75,7 @@ signals:
     //emit the id of the item whos state is being set
     void editingIndexChanged(int idx);
     void currentIndexChanged(int idx);
-    void hoveredIdChanged(int id);
 
-    //
     void requestAddTopic(int index, const QString &name);
     void deleteAddTopic(uint32_t id);
 
@@ -91,11 +89,9 @@ private:
 
 private:
     QVector<TopicItem> m_topics;
-    UIStateManager *m_stateManager;
     std::unordered_map<uint32_t, ItemState> m_stateFlags;
 
     bool m_isAddingNewTopic = false;
     int m_editingIndex = -1;
     int m_currentIndex = -1;
-    int m_hoveredId = -1;
 };

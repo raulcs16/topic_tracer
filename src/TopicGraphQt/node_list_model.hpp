@@ -1,8 +1,7 @@
 #pragma once
 
 
-#include "ui_state_manager.hpp"
-
+#include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -32,7 +31,7 @@ public:
         HighlightRole
     };
 
-    explicit NodeListModel(UIStateManager *uiManger, QObject *parent = nullptr);
+    explicit NodeListModel(QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -53,5 +52,4 @@ protected:
 
 private:
     std::vector<NodeItem> m_nodes;
-    UIStateManager *m_uiManager;
 };

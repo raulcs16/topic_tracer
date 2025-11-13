@@ -8,21 +8,9 @@
 #include <QTimer>
 
 TopicGraphController::TopicGraphController(QObject *parent)
-    : QObject{parent}, m_graph{}, m_layout{}, m_topicStates{}, m_edgeStates{},
-      m_topicList{new TopicListModel{&m_topicStates, this}},
-      m_nodeList(new NodeListModel(&m_topicStates, this)),
-      m_edgeList(new EdgeListModel(&m_edgeStates, this)) {
+    : QObject{parent}, m_graph{}, m_layout{}, m_topicList{new TopicListModel{this}},
+      m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)) {
 
-    if (m_nodeList) {
-        connect(&m_topicStates,
-                &UIStateManager::stateChanged,
-                m_nodeList,
-                &NodeListModel::onNodeStateChanged);
-    }
-    // connect(&m_topicStates,
-    //         &UIStateManager::stateChanged,
-    //         this,
-    //         &TopicGraphController::onStateChanged);
 
     createTopic("v1");
     createTopic("v2");
@@ -51,7 +39,6 @@ void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
         m_topicList->addConfirmedItem(id, name);
     }
 
-    m_topicStates.setState(GraphKeys::key(id), StateFlag::Selectable);
     m_layout.addNode(id);
     synchGraphView();
 }
@@ -96,7 +83,6 @@ void TopicGraphController::join(const QString &topicA,
     auto edge = m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), type);
     if (edge == nullptr)
         return;
-    m_edgeStates.setState(edge->key, StateFlag::Selectable);
     m_layout.addEdge(edge.get()->from, edge.get()->to);
     synchGraphView();
 }
@@ -153,7 +139,6 @@ void TopicGraphController::onStateChanged(const std::string &id,
 
     const auto &edges = m_graph.getOutEdges(std::stoi(id));
     for (auto edge : edges) {
-        m_edgeStates.setState(edge.key, flags);
         m_edgeList->onEdgeStateChanged(edge.from, edge.to);
     }
 }
@@ -188,12 +173,10 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     auto edges = PathAnalyzer::edgePath(topics);
 
     for (const auto &v : topics) {
-        m_topicStates.setState(GraphKeys::key(v), {StateFlag::Highlighted});
     }
 
 
     for (auto edge : edges) {
-        m_edgeStates.setState(edge, {StateFlag::Highlighted});
         m_edgeList->onEdgeStateChanged(edge);
     }
 }

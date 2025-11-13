@@ -133,7 +133,10 @@ Item {
             required property int topicId
             required property string topicName
             required property bool pending
-            required property bool beingHovered
+            required property int flags
+
+            readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
+            readonly property bool selected: (flags & ENUMS.StateFlag.Selected) !== 0
 
             property ItemView listView: ListView.view
             required property int index //auto assigned by view
@@ -144,10 +147,9 @@ Item {
             color: "transparent"
 
             Rectangle {
-                id: hoverBackground
                 anchors.fill: parent
                 color: Colors.selected
-                opacity: delegateRect.beingHovered ? 0.2 : 0.0
+                opacity: delegateRect.selected ? 0.6 : delegateRect.hover ? 0.2 : 0.0
                 z: -1
             }
 
@@ -202,8 +204,8 @@ Item {
 
                 cursorShape: Qt.PointingHandCursor
 
-                onEntered: root.model.toggleHovered(delegateRect.topicId)
-                onExited: root.model.toggleHovered(delegateRect.topicId)
+                onEntered: root.model.addFlags(delegateRect.index, ENUMS.StateFlag.Hovered)
+                onExited: root.model.removeFlags(delegateRect.index, ENUMS.StateFlag.Hovered)
 
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: mouse => {
@@ -215,6 +217,7 @@ Item {
                         delegateMenu.open();
                     } else {
                         delegateRect.listView.currentIndex = delegateRect.index;
+                        root.model.addFlags(delegateRect.index, ENUMS.StateFlag.Selected);
                     }
                 }
             }

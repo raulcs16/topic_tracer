@@ -28,8 +28,8 @@ qt_add_qml_module(TopicGraphQt
         node_list_model.hpp
         node_list_model.cpp
         
-        ui_state_manager.hpp
-        ui_state_manager.cpp
+        ui_states.hpp
+        ui_states.cpp
 
     QML_FILES
         TopicListView.qml

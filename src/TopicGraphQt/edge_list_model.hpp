@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "ui_state_manager.hpp"
+#include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QPointF>
@@ -36,7 +36,7 @@ public:
         HighlightRole,
     };
 
-    explicit EdgeListModel(UIStateManager *uiManager, QObject *parent = nullptr);
+    explicit EdgeListModel(QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -56,5 +56,4 @@ protected:
 
 private:
     std::vector<EdgeItem> m_edges;
-    UIStateManager *m_uiManager;
 };

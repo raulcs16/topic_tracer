@@ -1,8 +1,7 @@
 #include "graph_keys.hpp"
 #include "node_list_model.hpp"
 
-NodeListModel::NodeListModel(UIStateManager *uiManager, QObject *parent)
-    : QAbstractListModel{parent}, m_uiManager{uiManager} {}
+NodeListModel::NodeListModel(QObject *parent) : QAbstractListModel{parent} {}
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -38,8 +37,7 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     case HighlightRole: {
-        return m_uiManager && m_uiManager->state(GraphKeys::key(nodeInfo.id))
-                                  ->has(StateFlag::Highlighted);
+        return false;
     }
     default: return QVariant();
     }

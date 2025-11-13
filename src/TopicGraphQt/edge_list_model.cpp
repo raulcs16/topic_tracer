@@ -1,8 +1,7 @@
 #include "edge_list_model.hpp"
 #include "graph_keys.hpp"
 
-EdgeListModel::EdgeListModel(UIStateManager *uiManager, QObject *parent)
-    : QAbstractListModel{parent}, m_uiManager{uiManager} {}
+EdgeListModel::EdgeListModel(QObject *parent) : QAbstractListModel{parent} {}
 
 QHash<int, QByteArray> EdgeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -50,7 +49,7 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
         return points;
     }
     case HighlightRole: {
-        return m_uiManager && m_uiManager->state(edge.key)->has(StateFlag::Highlighted);
+        return false;
     }
     default: return QVariant();
     }

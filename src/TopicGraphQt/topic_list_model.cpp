@@ -2,15 +2,14 @@
 #include "topic_list_model.hpp"
 
 
-TopicListModel::TopicListModel(UIStateManager *stateManager, QObject *parent)
-    : QAbstractListModel{parent}, m_stateManager{stateManager} {}
+TopicListModel::TopicListModel(QObject *parent) : QAbstractListModel{parent} {}
 
 QHash<int, QByteArray> TopicListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "topicId";
     roles[NameRole] = "topicName";
     roles[PendingRole] = "pending";
-    roles[HoveredRole] = "beingHovered";
+    roles[FlagsRole] = "flags";
     return roles;
 }
 int TopicListModel::rowCount(const QModelIndex &parent) const {
@@ -35,11 +34,11 @@ QVariant TopicListModel::data(const QModelIndex &index, int role) const {
     case NameRole: return topic.name;
     case IdRole: return topic.id;
     case PendingRole: return topic.pending;
-    case HoveredRole: {
+    case FlagsRole: {
         auto it = m_stateFlags.find(topic.id);
         if (it == m_stateFlags.end())
             return QVariant();
-        return it->second.has(StateFlag::Hovered);
+        return static_cast<int>(it->second.flags);
     }
     default: return QVariant();
     }
@@ -180,15 +179,7 @@ void TopicListModel::setCurrentIndex(int idx) {
     m_currentIndex = idx;
     emit currentIndexChanged(idx);
 }
-void TopicListModel::setHoveredId(int id) {
-    if (id == m_hoveredId)
-        return;
-    m_hoveredId = id;
-    if (m_stateManager) {
-        m_stateManager->setHoveredId(GraphKeys::key(id));
-    }
-    emit hoveredIdChanged(id);
-}
+
 
 void TopicListModel::confirmTopic(int index, uint32_t new_id) {
     if (index < 0 || index >= m_topics.size())
@@ -204,11 +195,22 @@ void TopicListModel::confirmTopic(int index, uint32_t new_id) {
     emit dataChanged(modelIndex, modelIndex, {IdRole, PendingRole});
 }
 
-void TopicListModel::toggleHovered(uint32_t id) {
-    auto it = m_stateFlags.find(id);
-    if (it == m_stateFlags.end())
+
+void TopicListModel::addFlags(int index, StateFlag flags) {
+    if (index < 0 || index >= m_topics.size()) {
         return;
-    it->second.toggle(StateFlag::Hovered);
-    const QModelIndex modelIndex = this->index(getTopicIndex(id));
-    emit dataChanged(modelIndex, modelIndex, {HoveredRole});
+    }
+    uint32_t id = m_topics[index].id;
+    m_stateFlags[id].add(flags);
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+void TopicListModel::removeFlags(int index, StateFlag flags) {
+    if (index < 0 || index >= m_topics.size()) {
+        return;
+    }
+    uint32_t id = m_topics[index].id;
+    m_stateFlags[id].remove(flags);
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
