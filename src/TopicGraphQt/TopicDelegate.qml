@@ -46,8 +46,7 @@ Item {
             if (mouse.button == Qt.RightButton)
                 root.contextMenuRequested(root.index, Qt.point(mouse.x, mouse.y));
             else {
-                root.ListView.view.currentIndex = root.index;
-                root.model.addFlags(root.index, ENUMS.StateFlag.Selected);
+                root.model.selectIndex(root.index);
             }
         }
     }
@@ -97,10 +96,12 @@ Item {
     TextField {
         id: editor
         anchors.fill: parent
+        focus: root.editMode
         anchors.leftMargin: 20
         placeholderText: root.topicName
         font.pointSize: 16
         color: Colors.text_secondary
+
         background: Rectangle {
             color: Colors.primary
             border.width: 2
@@ -108,8 +109,17 @@ Item {
         }
 
         Keys.onReturnPressed: {
+            const newName = text.trim();
+            if (newName.length > 0)
+                root.model.editItem(root.index, newName);
             root.model.removeFlags(root.index, ENUMS.StateFlag.EditMode);
-            root.model.editItem(root.index, text.trim());
         }
+        Keys.onEscapePressed: {
+            root.model.removeFlags(root.index, ENUMS.StateFlag.EditMode);
+            text = root.topicName; // revert
+        }
+    }
+    Component.onCompleted: {
+        console.log([root.index, root.hover]);
     }
 }

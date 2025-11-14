@@ -60,11 +60,8 @@ Item {
             }
         }
         orientation: ListView.Vertical
-        currentIndex: model.currentIndex
-
         focus: true
         footer: addTopicInput
-        highlight: itemHighlight
 
         MouseArea {
             anchors {

@@ -161,15 +161,6 @@ void TopicListModel::setIsAddingNewTopic(bool value) {
         emit isAddingNewTopicChanged();
     }
 }
-void TopicListModel::setCurrentIndex(int idx) {
-    if (idx == m_currentIndex)
-        return;
-    //-1 no currentIndex
-    if (idx < -1 || idx >= m_topics.size())
-        return;
-    m_currentIndex = idx;
-    emit currentIndexChanged(idx);
-}
 
 
 void TopicListModel::confirmTopic(int index, uint32_t new_id) {
@@ -204,4 +195,15 @@ void TopicListModel::removeFlags(int index, StateFlag flags) {
     m_stateFlags[id].remove(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+
+void TopicListModel::selectIndex(int index) {
+    if (index < 0 || index >= m_topics.size())
+        return;
+    //unselect previous selection
+    if (m_lastSelectedIndex > 0) {
+        removeFlags(m_lastSelectedIndex, StateFlag::Selected);
+    }
+    m_lastSelectedIndex = index;
+    addFlags(index, StateFlag::Selected);
 }

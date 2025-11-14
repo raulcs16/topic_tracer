@@ -22,8 +22,6 @@ class TopicListModel : public QAbstractListModel {
     //list state properties
     Q_PROPERTY(bool isAddingNewTopic READ isAddingNewTopic WRITE setIsAddingNewTopic
                    NOTIFY isAddingNewTopicChanged)
-    Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY
-                   currentIndexChanged)
 
 public:
     enum Roles {
@@ -41,9 +39,13 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
+
+    //API USER ITEM STATE
     Q_INVOKABLE void addFlags(int index, StateFlag flag);
     Q_INVOKABLE void removeFlags(int index, StateFlag flag);
 
+    //API USER INTERACTIONS WITH LIST
+    Q_INVOKABLE void selectIndex(int index);
 
     //API
     Q_INVOKABLE void addItem(const QString &name);
@@ -60,17 +62,11 @@ public:
     bool isAddingNewTopic() const { return m_isAddingNewTopic; }
     void setIsAddingNewTopic(bool value);
 
-    int currentIndex() const { return m_currentIndex; }
-    void setCurrentIndex(int idx);
-
 
 signals:
     //state changes
     void isAddingNewTopicChanged();
     //emit the id of the item whos state is being set
-    void editingIndexChanged(int idx);
-    void currentIndexChanged(int idx);
-
     void requestAddTopic(int index, const QString &name);
     void deleteAddTopic(uint32_t id);
 
@@ -87,5 +83,5 @@ private:
     std::unordered_map<uint32_t, ItemState> m_stateFlags;
 
     bool m_isAddingNewTopic = false;
-    int m_currentIndex = -1;
+    int m_lastSelectedIndex = -1;
 };
