@@ -3,6 +3,8 @@ import QtQuick
 Canvas {
     property real viewWidth: 0
     property real viewHeight: 0
+    property int headSize: 10
+
     required property double sourceX
     required property double sourceY
     required property double targetX
@@ -49,7 +51,16 @@ Canvas {
                 context.lineTo(px, py);
         }
         // Draw head.
+        var fromX = bends.length > 0 ? (viewWidth / 3 + bends[bends.length - 2].x - x) : (sX - x);
+        var fromY = bends.length > 0 ? (viewHeight / 3 + bends[bends.length - 2].y - y) : (sY - y);
+        var toX = bends.length > 0 ? (viewWidth / 3 + bends[bends.length - 1].x - x) : (tX - x);
+        var toY = bends.length > 0 ? (viewHeight / 3 + bends[bends.length - 1].y - y) : (tY - y);
 
+        // Draw arrowhead like the original style
+        var angle = Math.atan2(toY - fromY, toX - fromX);
+        context.lineTo(toX - headSize * Math.cos(angle - Math.PI / 8), toY - headSize * Math.sin(angle - Math.PI / 8));
+        context.moveTo(toX, toY);
+        context.lineTo(toX - headSize * Math.cos(angle + Math.PI / 8), toY - headSize * Math.sin(angle + Math.PI / 8));
         //pop
         context.stroke();
         context.restore();

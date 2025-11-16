@@ -36,6 +36,7 @@ qt_add_qml_module(TopicGraphQt
         TopicDelegate.qml
         GraphView.qml
         EdgeSpline.qml
+        NodeDelegate.qml
 
     IMPORT_PATH 
         ${QT_QML_OUTPUT_DIRECTORY}
