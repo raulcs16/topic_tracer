@@ -33,7 +33,7 @@ public:
         TargetXRole,
         TargetYRole,
         BendsRole,
-        HighlightRole,
+        FlagsRole,
     };
 
     explicit EdgeListModel(QObject *parent = nullptr);
@@ -45,7 +45,8 @@ public:
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     void resetEdges(const std::vector<EdgeItem> &edges);
-
+    void setFlagsOnId(const std::string &key, StateFlag flags);
+    void unSetFlagsOnId(const std::string &key, StateFlag flags);
 public slots:
     void onEdgeStateChanged(const std::string &key);
     void onEdgeStateChanged(uint32_t from, uint32_t to);
@@ -56,4 +57,5 @@ protected:
 
 private:
     std::vector<EdgeItem> m_edges;
+    std::unordered_map<std::string, ItemState> m_stateFlags;
 };

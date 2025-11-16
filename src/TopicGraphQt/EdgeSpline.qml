@@ -8,9 +8,11 @@ Canvas {
     required property double targetX
     required property double targetY
     required property var bends
-    required property bool highlighted
+    required property int flags
 
-    property color color: highlighted ? '#4cb4e1' : '#ffffff'
+    readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
+
+    property color color: hover ? '#4cb4e1' : '#ffffff'
 
     // Compute translated coordinates (centered)
     property real sX: (viewWidth / 3) + sourceX
@@ -35,7 +37,7 @@ Canvas {
         context.save();
         context.clearRect(0, 0, width, height);
         context.strokeStyle = color;
-        context.lineWidth = highlighted ? 2 : 1;
+        context.lineWidth = hover ? 2 : 1;
         context.beginPath();
         // Draw line.
         for (var i = 0; i < bends.length; ++i) {

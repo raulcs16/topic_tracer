@@ -192,8 +192,16 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
 
 void TopicGraphController::onTopicHovered(uint32_t id) {
     m_nodeList->setFlagsOnId(id, StateFlag::Hovered);
+    auto outEdges = m_graph.getOutEdges(id);
+    for (const auto &e : outEdges) {
+        m_edgeList->setFlagsOnId(e.key, StateFlag::Hovered);
+    }
 }
 
 void TopicGraphController::onTopicUnHovered(uint32_t id) {
     m_nodeList->unSetFlagsOnId(id, StateFlag::Hovered);
+    auto outEdges = m_graph.getOutEdges(id);
+    for (const auto &e : outEdges) {
+        m_edgeList->unSetFlagsOnId(e.key, StateFlag::Hovered);
+    }
 }

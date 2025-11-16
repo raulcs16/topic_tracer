@@ -13,7 +13,7 @@ QHash<int, QByteArray> EdgeListModel::roleNames() const {
     roles[TargetXRole] = "targetX";
     roles[TargetYRole] = "targetY";
     roles[BendsRole] = "bends";
-    roles[HighlightRole] = "highlighted";
+    roles[FlagsRole] = "flags";
     return roles;
 }
 
@@ -48,8 +48,11 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
             points.append(p);
         return points;
     }
-    case HighlightRole: {
-        return false;
+    case FlagsRole: {
+        auto it = m_stateFlags.find(edge.key);
+        if (it == m_stateFlags.end())
+            return QVariant();
+        return static_cast<int>(it->second.flags);
     }
     default: return QVariant();
     }
@@ -67,7 +70,7 @@ void EdgeListModel::onEdgeStateChanged(uint32_t from, uint32_t to) {
     while (it != m_edges.end()) {
         if (it->from == from && it->to == to) {
             QModelIndex midx = this->index(index);
-            emit dataChanged(midx, midx, {HighlightRole});
+            emit dataChanged(midx, midx, {FlagsRole});
             break;
         }
         ++it;
@@ -80,7 +83,7 @@ void EdgeListModel::onEdgeStateChanged(const std::string &key) {
     while (it != m_edges.end()) {
         if (it->key == key) {
             QModelIndex midx = this->index(index);
-            emit dataChanged(midx, midx, {HighlightRole});
+            emit dataChanged(midx, midx, {FlagsRole});
             break;
         }
         ++it;
@@ -110,3 +113,30 @@ void EdgeListModel::onEdgeStateChanged(const std::string &key) {
 //     m_graph->layout()->invalidate();
 //     return true;
 // }
+
+void EdgeListModel::setFlagsOnId(const std::string &key, StateFlag flags) {
+    int index = 0;
+    while (index < m_edges.size()) {
+        if (m_edges[index].key == key)
+            break;
+        index++;
+    }
+    if (index == m_edges.size())
+        return;
+    m_stateFlags[key].add(flags);
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+void EdgeListModel::unSetFlagsOnId(const std::string &key, StateFlag flags) {
+    int index = 0;
+    while (index < m_edges.size()) {
+        if (m_edges[index].key == key)
+            break;
+        index++;
+    }
+    if (index == m_edges.size())
+        return;
+    m_stateFlags[key].remove(flags);
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
