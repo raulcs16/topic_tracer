@@ -20,6 +20,14 @@ TopicGraphController::TopicGraphController(QObject *parent)
             &TopicListModel::topicUnHovered,
             this,
             &TopicGraphController::onTopicUnHovered);
+    connect(m_topicList,
+            &TopicListModel::topicSelected,
+            this,
+            &TopicGraphController::onTopicSelected);
+    connect(m_topicList,
+            &TopicListModel::topicUnSelected,
+            this,
+            &TopicGraphController::onTopicUnSelected);
 
     createTopic("v1");
     createTopic("v2");
@@ -204,4 +212,10 @@ void TopicGraphController::onTopicUnHovered(uint32_t id) {
     for (const auto &e : outEdges) {
         m_edgeList->unSetFlagsOnId(e.key, StateFlag::Hovered);
     }
+}
+void TopicGraphController::onTopicSelected(uint32_t id) {
+    m_nodeList->setFlagsOnId(id, StateFlag::Selected);
+}
+void TopicGraphController::onTopicUnSelected(uint32_t id) {
+    m_nodeList->unSetFlagsOnId(id, StateFlag::Selected);
 }

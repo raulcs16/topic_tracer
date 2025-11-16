@@ -203,6 +203,7 @@ void TopicListModel::selectIndex(int index) {
     clearSelection();
 
     addFlags(index, StateFlag::Selected);
+    emit topicSelected(m_topics[index].id);
     m_selectedIndexes.push_back(index);
     m_lastSelectedIndex = index;
 }
@@ -211,6 +212,7 @@ void TopicListModel::toggleSelect(int index) {
         return;
     if (m_stateFlags[m_topics[index].id].has(StateFlag::Selected)) {
         removeFlags(index, StateFlag::Selected);
+        emit topicUnSelected(m_topics[index].id);
         auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), index);
         if (it != m_selectedIndexes.end()) {
             m_selectedIndexes.erase(it);
@@ -218,6 +220,7 @@ void TopicListModel::toggleSelect(int index) {
         return;
     }
     addFlags(index, StateFlag::Selected);
+    emit topicSelected(m_topics[index].id);
     m_selectedIndexes.push_back(index);
     m_lastSelectedIndex = index;
 }
@@ -239,6 +242,7 @@ void TopicListModel::rangeSelect(int target) {
         }
         for (int i : toRemove) {
             removeFlags(i, StateFlag::Selected);
+            emit topicUnSelected(m_topics[i].id);
             auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), i);
             if (it != m_selectedIndexes.end()) {
                 m_selectedIndexes.erase(it);
@@ -252,6 +256,7 @@ void TopicListModel::rangeSelect(int target) {
     for (; min <= max; min++) {
         if (min == m_lastSelectedIndex)
             continue;
+        emit topicSelected(m_topics[min].id);
         addFlags(min, StateFlag::Selected);
         m_selectedIndexes.push_back(min);
     }
@@ -260,6 +265,7 @@ void TopicListModel::rangeSelect(int target) {
 void TopicListModel::clearSelection() {
     for (auto i : m_selectedIndexes) {
         removeFlags(i, StateFlag::Selected);
+        emit topicUnSelected(m_topics[i].id);
     }
     m_selectedIndexes.clear();
     m_lastSelectedIndex = -1;

@@ -80,6 +80,8 @@ signals:
 
     void topicHovered(uint32_t id);
     void topicUnHovered(uint32_t id);
+    void topicSelected(uint32_t id);
+    void topicUnSelected(uint32_t id);
 
 
 protected:
