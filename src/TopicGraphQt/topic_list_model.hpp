@@ -45,7 +45,12 @@ public:
     Q_INVOKABLE void removeFlags(int index, StateFlag flag);
 
     //API USER INTERACTIONS WITH LIST
+    //single selection
     Q_INVOKABLE void selectIndex(int index);
+    //multiple selections
+    Q_INVOKABLE void toggleSelect(int index);
+    Q_INVOKABLE void rangeSelect(int target);
+    void clearSelection();
 
     //API
     Q_INVOKABLE void addItem(const QString &name);
@@ -81,7 +86,9 @@ private:
 private:
     QVector<TopicItem> m_topics;
     std::unordered_map<uint32_t, ItemState> m_stateFlags;
+    std::vector<int> m_selectedIndexes;
 
     bool m_isAddingNewTopic = false;
     int m_lastSelectedIndex = -1;
+    int m_rangeSelectedIndex = -1;
 };

@@ -198,12 +198,57 @@ void TopicListModel::removeFlags(int index, StateFlag flags) {
 }
 
 void TopicListModel::selectIndex(int index) {
+    if (index < 0 || index >= m_topics.size() || index == m_lastSelectedIndex)
+        return;
+    clearSelection();
+
+    addFlags(index, StateFlag::Selected);
+    m_selectedIndexes.push_back(index);
+    m_lastSelectedIndex = index;
+}
+void TopicListModel::toggleSelect(int index) {
     if (index < 0 || index >= m_topics.size())
         return;
-    //unselect previous selection
-    if (m_lastSelectedIndex > 0) {
-        removeFlags(m_lastSelectedIndex, StateFlag::Selected);
+    if (m_stateFlags[m_topics[index].id].has(StateFlag::Selected)) {
+        removeFlags(index, StateFlag::Selected);
+        return;
     }
-    m_lastSelectedIndex = index;
     addFlags(index, StateFlag::Selected);
+    m_selectedIndexes.push_back(index);
+    m_lastSelectedIndex = index;
+}
+void TopicListModel::rangeSelect(int target) {
+    if (target < 0 || target >= m_topics.size() || target == m_lastSelectedIndex) {
+        return;
+    }
+
+    //remove previous range
+    if (m_rangeSelectedIndex != -1) {
+        int min = qMin(m_lastSelectedIndex, m_rangeSelectedIndex);
+        int max = qMax(m_lastSelectedIndex, m_rangeSelectedIndex);
+        for (int i : m_selectedIndexes) {
+            if (i >= min && i <= max && i != m_lastSelectedIndex) {
+                removeFlags(i, StateFlag::Selected);
+            }
+        }
+    }
+
+    //add range
+    int min = qMin(m_lastSelectedIndex, target);
+    int max = qMax(m_lastSelectedIndex, target);
+    for (; min <= max; min++) {
+        if (min == m_lastSelectedIndex)
+            continue;
+        addFlags(min, StateFlag::Selected);
+        m_selectedIndexes.push_back(min);
+    }
+    m_rangeSelectedIndex = target;
+}
+void TopicListModel::clearSelection() {
+    for (auto i : m_selectedIndexes) {
+        removeFlags(i, StateFlag::Selected);
+    }
+    m_selectedIndexes.clear();
+    m_lastSelectedIndex = -1;
+    m_rangeSelectedIndex = -1;
 }

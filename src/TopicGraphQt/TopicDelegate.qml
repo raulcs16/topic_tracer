@@ -46,7 +46,16 @@ Item {
             if (mouse.button == Qt.RightButton)
                 root.contextMenuRequested(root.index, Qt.point(mouse.x, mouse.y));
             else {
-                root.model.selectIndex(root.index);
+                const mods = mouse.modifiers;
+                const meta = mods & Qt.MetaModifier || mods & Qt.ControlModifier;
+
+                if (meta) {
+                    root.model.toggleSelect(root.index);
+                } else if (mods & Qt.ShiftModifier) {
+                    root.model.rangeSelect(root.index);
+                } else {
+                    root.model.selectIndex(root.index);
+                }
             }
         }
     }
@@ -119,7 +128,5 @@ Item {
             text = root.topicName; // revert
         }
     }
-    Component.onCompleted: {
-        console.log([root.index, root.hover]);
-    }
+    Component.onCompleted: {}
 }
