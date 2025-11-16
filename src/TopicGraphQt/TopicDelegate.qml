@@ -38,8 +38,8 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        onEntered: root.model.addFlags(root.index, ENUMS.StateFlag.Hovered)
-        onExited: root.model.removeFlags(root.index, ENUMS.StateFlag.Hovered)
+        onEntered: root.model.setHovered(root.index)
+        onExited: root.model.unsetHovered(root.index)
 
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: mouse => {

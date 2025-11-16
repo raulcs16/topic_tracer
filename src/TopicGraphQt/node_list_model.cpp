@@ -9,7 +9,7 @@ QHash<int, QByteArray> NodeListModel::roleNames() const {
     roles[LabelRole] = "label";
     roles[XRole] = "posx";
     roles[YRole] = "posy";
-    roles[HighlightRole] = "highlighted";
+    roles[FlagsRole] = "flags";
     return roles;
 }
 
@@ -36,8 +36,11 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     case LabelRole: return nodeInfo.label;
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
-    case HighlightRole: {
-        return false;
+    case FlagsRole: {
+        auto it = m_stateFlags.find(nodeInfo.id);
+        if (it == m_stateFlags.end())
+            return QVariant();
+        return static_cast<int>(it->second.flags);
     }
     default: return QVariant();
     }
@@ -66,10 +69,42 @@ int NodeListModel::getNodeIndex(int id) {
 void NodeListModel::resetNodes(const std::vector<NodeItem> &nodes) {
     beginResetModel();
     m_nodes = nodes;
+    m_stateFlags.clear();
+
+    for (const auto &n : m_nodes) {
+        m_stateFlags.insert({n.id, {}});
+    }
     endResetModel();
 }
 void NodeListModel::onGaphChanged() {
     beginResetModel();
     m_nodes.clear();
     endResetModel();
+}
+
+void NodeListModel::setFlagsOnId(uint32_t id, StateFlag flags) {
+    int index = 0;
+    while (index < m_nodes.size()) {
+        if (m_nodes[index].id == id)
+            break;
+        index++;
+    }
+    if (index == m_nodes.size())
+        return;
+    m_stateFlags[id].add(flags);
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+void NodeListModel::unSetFlagsOnId(uint32_t id, StateFlag flags) {
+    int index = 0;
+    while (index < m_nodes.size()) {
+        if (m_nodes[index].id == id)
+            break;
+        index++;
+    }
+    if (index == m_nodes.size())
+        return;
+    m_stateFlags[id].remove(flags);
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }

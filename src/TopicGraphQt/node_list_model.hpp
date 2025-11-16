@@ -28,7 +28,7 @@ public:
         LabelRole,
         XRole,
         YRole,
-        HighlightRole
+        FlagsRole
     };
 
     explicit NodeListModel(QObject *parent = nullptr);
@@ -38,8 +38,11 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-
     void resetNodes(const std::vector<NodeItem> &nodes);
+
+    void setFlagsOnId(uint32_t id, StateFlag flags);
+    void unSetFlagsOnId(uint32_t id, StateFlag flags);
+
 public slots:
     void onGaphChanged();
     void onNodeStateChanged(const std::string &id, const StateFlags &flags);
@@ -52,4 +55,5 @@ protected:
 
 private:
     std::vector<NodeItem> m_nodes;
+    std::unordered_map<uint32_t, ItemState> m_stateFlags;
 };

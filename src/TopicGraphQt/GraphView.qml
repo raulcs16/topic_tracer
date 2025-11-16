@@ -31,7 +31,9 @@ Item {
             required property string label
             required property double posx
             required property double posy
-            required property bool highlighted
+            required property int flags
+
+            readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
             x: (root.viewWidth / 3) + posx
             y: (root.viewHeight / 3) + posy
             Rectangle {
@@ -43,7 +45,7 @@ Item {
                 color: '#dee0e7'
                 radius: 100
                 border.width: 2
-                border.color: parent.highlighted ? '#9806f3' : "#af9476"
+                border.color: parent.hover ? '#9806f3' : "#af9476"
             }
             Text {
                 text: parent.label
@@ -51,7 +53,7 @@ Item {
                 anchors.top: node.bottom
                 anchors.horizontalCenter: node.horizontalCenter
                 anchors.topMargin: 4
-                font.pointSize: parent.highlighted ? 16 : 12
+                font.pointSize: parent.hover ? 16 : 12
             }
         }
     }

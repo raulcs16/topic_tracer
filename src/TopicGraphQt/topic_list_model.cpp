@@ -265,3 +265,17 @@ void TopicListModel::clearSelection() {
     m_lastSelectedIndex = -1;
     m_rangeSelectedIndex = -1;
 }
+
+void TopicListModel::setHovered(int index) {
+    if (index < 0 || index >= m_topics.size())
+        return;
+    addFlags(index, StateFlag::Hovered);
+    emit topicHovered(m_topics[index].id);
+}
+
+void TopicListModel::unsetHovered(int index) {
+    if (index < 0 || index >= m_topics.size())
+        return;
+    removeFlags(index, StateFlag::Hovered);
+    emit topicUnHovered(m_topics[index].id);
+}

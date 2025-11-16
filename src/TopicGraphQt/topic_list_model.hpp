@@ -45,6 +45,9 @@ public:
     Q_INVOKABLE void removeFlags(int index, StateFlag flag);
 
     //API USER INTERACTIONS WITH LIST
+    Q_INVOKABLE void setHovered(int index);
+    Q_INVOKABLE void unsetHovered(int index);
+
     //single selection
     Q_INVOKABLE void selectIndex(int index);
     //multiple selections
@@ -74,6 +77,9 @@ signals:
     //emit the id of the item whos state is being set
     void requestAddTopic(int index, const QString &name);
     void deleteAddTopic(uint32_t id);
+
+    void topicHovered(uint32_t id);
+    void topicUnHovered(uint32_t id);
 
 
 protected:

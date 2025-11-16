@@ -12,6 +12,15 @@ TopicGraphController::TopicGraphController(QObject *parent)
       m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)) {
 
 
+    connect(m_topicList,
+            &TopicListModel::topicHovered,
+            this,
+            &TopicGraphController::onTopicHovered);
+    connect(m_topicList,
+            &TopicListModel::topicUnHovered,
+            this,
+            &TopicGraphController::onTopicUnHovered);
+
     createTopic("v1");
     createTopic("v2");
     createTopic("v3");
@@ -179,4 +188,12 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     for (auto edge : edges) {
         m_edgeList->onEdgeStateChanged(edge);
     }
+}
+
+void TopicGraphController::onTopicHovered(uint32_t id) {
+    m_nodeList->setFlagsOnId(id, StateFlag::Hovered);
+}
+
+void TopicGraphController::onTopicUnHovered(uint32_t id) {
+    m_nodeList->unSetFlagsOnId(id, StateFlag::Hovered);
 }
