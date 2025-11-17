@@ -187,14 +187,25 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     auto parents = PathAnalyzer::dijsktras(m_graph, ta->id, tb->id);
     auto topicIds = PathAnalyzer::topicPath(parents, tb->id);
 
-    auto edgeKeys = PathAnalyzer::edgePath(topicIds);
-
-    for (auto id : topicIds) {
-        m_nodeList->setFlagsOnId(id, StateFlag::InPath);
+    std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
+    for (const auto &topic : m_graph.topics()) {
+        StateFlag flag = StateFlag::None;
+        if (topicSet.contains(topic.get()->id))
+            flag = StateFlag::InPath;
+        else
+            flag = StateFlag::Hidden;
+        m_nodeList->setFlagsOnId(topic.get()->id, flag);
     }
 
-    for (auto key : edgeKeys) {
-        m_edgeList->setFlagsOnId(key, StateFlag::InPath);
+
+    auto edgeKeys = PathAnalyzer::edgePath(topicIds);
+    std::unordered_set<std::string> edgeSet(edgeKeys.begin(), edgeKeys.end());
+    for (const auto &edge : m_graph.edges()) {
+        StateFlag flag = StateFlag::None;
+        if (edgeSet.contains(edge.get()->key))
+            flag = StateFlag::InPath;
+        els e flag = StateFlag::Hidden;
+        m_edgeList->setFlagsOnId(edge.get()->key, flag);
     }
 }
 

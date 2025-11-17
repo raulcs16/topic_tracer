@@ -14,9 +14,10 @@ Canvas {
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
     readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
+    readonly property bool hidden: (flags & ENUMS.StateFlag.Hidden) !== 0
 
     property color color: highlight ? "yellow" : hover ? '#4cb4e1' : '#ffffff'
-
+    property real opacityFactor: hidden ? 0.1 : 1.0
     // Compute translated coordinates (centered)
     property real sX: (viewWidth / 3) + sourceX
     property real sY: (viewHeight / 3) + sourceY
@@ -41,6 +42,7 @@ Canvas {
         context.clearRect(0, 0, width, height);
         context.strokeStyle = color;
         context.lineWidth = hover ? 2 : 1;
+        context.globalAlpha = opacityFactor;
         context.beginPath();
         // Draw line.
         for (var i = 0; i < bends.length; ++i) {

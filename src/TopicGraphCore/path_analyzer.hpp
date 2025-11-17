@@ -1,5 +1,6 @@
 #pragma once
 #include "topic_graph.hpp"
+#include <set>
 #include <unordered_map>
 
 namespace PathAnalyzer {
