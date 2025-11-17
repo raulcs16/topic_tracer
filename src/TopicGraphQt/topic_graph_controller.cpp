@@ -204,7 +204,8 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
         StateFlag flag = StateFlag::None;
         if (edgeSet.contains(edge.get()->key))
             flag = StateFlag::InPath;
-        els e flag = StateFlag::Hidden;
+        else
+            flag = StateFlag::Hidden;
         m_edgeList->setFlagsOnId(edge.get()->key, flag);
     }
 }

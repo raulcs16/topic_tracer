@@ -35,14 +35,15 @@ Canvas {
     height: maxY - minY
     antialiasing: true
     onColorChanged: requestPaint()
+    onFlagsChanged: requestPaint()
     onPaint: {
         var context = getContext('2d');
         // Push.
         context.save();
         context.clearRect(0, 0, width, height);
+        context.globalAlpha = opacityFactor;
         context.strokeStyle = color;
         context.lineWidth = hover ? 2 : 1;
-        context.globalAlpha = opacityFactor;
         context.beginPath();
         // Draw line.
         for (var i = 0; i < bends.length; ++i) {
