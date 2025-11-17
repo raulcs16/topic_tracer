@@ -17,6 +17,7 @@ Item {
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
     readonly property bool selected: (flags & ENUMS.StateFlag.Selected) !== 0
+    readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
 
     x: (viewWidth / 3) + posx
     y: (viewHeight / 3) + posy
@@ -29,7 +30,7 @@ Item {
         color: root.selected ? "#9806f3" : '#dee0e7'
         radius: 100
         border.width: 2
-        border.color: root.hover ? '#9806f3' : "#af9476"
+        border.color: root.highlight ? "yellow" : root.hover ? '#9806f3' : "#af9476"
     }
     Text {
         text: root.label

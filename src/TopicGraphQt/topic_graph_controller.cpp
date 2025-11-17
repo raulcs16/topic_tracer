@@ -185,16 +185,16 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
         return;
     }
     auto parents = PathAnalyzer::dijsktras(m_graph, ta->id, tb->id);
-    auto topics = PathAnalyzer::topicPath(parents, tb->id);
+    auto topicIds = PathAnalyzer::topicPath(parents, tb->id);
 
-    auto edges = PathAnalyzer::edgePath(topics);
+    auto edgeKeys = PathAnalyzer::edgePath(topicIds);
 
-    for (const auto &v : topics) {
+    for (auto id : topicIds) {
+        m_nodeList->setFlagsOnId(id, StateFlag::InPath);
     }
 
-
-    for (auto edge : edges) {
-        m_edgeList->onEdgeStateChanged(edge);
+    for (auto key : edgeKeys) {
+        m_edgeList->setFlagsOnId(key, StateFlag::InPath);
     }
 }
 

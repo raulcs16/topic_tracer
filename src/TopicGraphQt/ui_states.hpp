@@ -11,9 +11,9 @@ enum class StateFlag : uint32_t {
     Selectable = 1 << 0,
     Selected = 1 << 1,
     EditMode = 1 << 2,
-    Dimmed = 1 << 3,
-    Hidden = 1 << 4,
-    Hovered = 1 << 5,
+    Hidden = 1 << 3,
+    Hovered = 1 << 4,
+    InPath = 1 << 5,
 };
 
 Q_DECLARE_FLAGS(StateFlags, StateFlag);
@@ -39,9 +39,9 @@ public:
         Selectable = 1 << 0,
         Selected = 1 << 1,
         EditMode = 1 << 2,
-        Dimmed = 1 << 3,
-        Hidden = 1 << 4,
-        Hovered = 1 << 5,
+        Hidden = 1 << 3,
+        Hovered = 1 << 4,
+        InPath = 1 << 5,
     };
 
     Q_ENUM(StateFlag);

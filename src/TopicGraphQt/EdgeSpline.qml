@@ -13,8 +13,9 @@ Canvas {
     required property int flags
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
+    readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
 
-    property color color: hover ? '#4cb4e1' : '#ffffff'
+    property color color: highlight ? "yellow" : hover ? '#4cb4e1' : '#ffffff'
 
     // Compute translated coordinates (centered)
     property real sX: (viewWidth / 3) + sourceX
