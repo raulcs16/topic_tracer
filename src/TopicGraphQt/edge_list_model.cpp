@@ -60,6 +60,7 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
 void EdgeListModel::resetEdges(const std::vector<EdgeItem> &edges) {
     beginResetModel();
     m_edges.clear();
+    m_stateFlags.clear();
     m_edges = edges;
     endResetModel();
 }

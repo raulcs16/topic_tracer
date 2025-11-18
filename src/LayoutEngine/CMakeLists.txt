@@ -1,4 +1,8 @@
 add_library(LayoutEngine STATIC
+    #ds helpers
+    disjoint_set.hpp
+    disjoint_set.cpp
+    #geometric data
     layout_types.hpp
     layout_engine.cpp
     layout_engine.hpp
