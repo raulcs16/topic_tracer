@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 
-enum class Topic_Type {
+enum class TopicType {
     Concept,
     Concrete
 };
@@ -10,11 +10,11 @@ enum class Topic_Type {
 struct Topic {
     uint32_t id;
     std::string name;
-    Topic_Type type;
+    TopicType type;
     bool covered;
 };
 
-enum class Edge_Type {
+enum class EdgeType {
     DependsOn,
     Example,
     ComposedOf,
@@ -26,6 +26,6 @@ struct Edge {
     std::string key;
     uint32_t from;
     uint32_t to;
-    Edge_Type type;
+    EdgeType type;
     bool directed = true;
 };
