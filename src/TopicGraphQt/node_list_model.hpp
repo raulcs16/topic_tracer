@@ -45,7 +45,6 @@ public:
 
 public slots:
     void onGaphChanged();
-    void onNodeStateChanged(const std::string &id, const StateFlags &flags);
 
 private:
     int getNodeIndex(int id);

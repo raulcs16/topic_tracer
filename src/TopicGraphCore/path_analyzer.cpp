@@ -7,7 +7,7 @@
 using nodeDist = std::pair<uint32_t, double>;
 
 namespace PathAnalyzer {
-double edgeWeight(Edge_Type type) { return static_cast<int>(type) * 1.0; }
+double edgeWeight(EdgeType type) { return static_cast<int>(type) * 1.0; }
 std::vector<uint32_t> topicPath(std::unordered_map<uint32_t, int> parents,
                                 uint32_t dest) {
     if (parents.find(dest) == parents.end() || parents[dest] == -1) {
@@ -65,9 +65,9 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
             return parents;
         }
         for (const auto &e : graph.getOutEdges(v)) {
-            uint32_t u = e.to;
-            if (dist[u] > dist[v] + edgeWeight(e.type)) {
-                dist[u] = edgeWeight(e.type) + dist[v];
+            uint32_t u = e->to;
+            if (dist[u] > dist[v] + edgeWeight(e->type)) {
+                dist[u] = edgeWeight(e->type) + dist[v];
                 parents[u] = v;
                 pq.emplace(u, dist[u]);
             }

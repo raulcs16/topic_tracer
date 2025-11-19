@@ -35,20 +35,20 @@ TopicGraphController::TopicGraphController(QObject *parent)
     createTopic("v4");
     createTopic("v5");
     createTopic("v6");
-    join("v2", "v1", Edge_Type::ComposedOf);
-    join("v1", "v3", Edge_Type::Example);
-    join("v3", "v2", Edge_Type::DependsOn);
-    join("v3", "v5", Edge_Type::AlternativeTo);
-    join("v3", "v4", Edge_Type::DependsOn);
-    join("v5", "v2", Edge_Type::ComposedOf);
-    join("v5", "v6", Edge_Type::AlternativeTo);
-    join("v6", "v4", Edge_Type::Example);
+    join("v2", "v1", EdgeType::ComposedOf);
+    join("v1", "v3", EdgeType::Example);
+    join("v3", "v2", EdgeType::DependsOn);
+    join("v3", "v5", EdgeType::AlternativeTo);
+    join("v3", "v4", EdgeType::DependsOn);
+    join("v5", "v2", EdgeType::ComposedOf);
+    join("v5", "v6", EdgeType::AlternativeTo);
+    join("v6", "v4", EdgeType::Example);
     directedLayout();
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
-void TopicGraphController::createTopic(const QString &name, Topic_Type type) {
-    uint32_t id = m_graph.addTopic(name.toStdString(), Topic_Type::Concept);
+void TopicGraphController::createTopic(const QString &name, TopicType type) {
+    uint32_t id = m_graph.addTopic(name.toStdString(), TopicType::Concept);
     if (!id) {
         return;
     }
@@ -66,10 +66,10 @@ void TopicGraphController::deleteTopic(const QString &topic) {
     auto outEdges = m_graph.getOutEdges(ptr->id);
     auto inEdges = m_graph.getInEdges(ptr->id);
     for (auto &edge : outEdges) {
-        m_layout.removeEdge(edge.key);
+        m_layout.removeEdge(edge->key);
     }
     for (auto &edge : inEdges) {
-        m_layout.removeEdge(edge.key);
+        m_layout.removeEdge(edge->key);
     }
     m_layout.removeNode(ptr->id);
     m_graph.deleteTopic(ptr->id);
@@ -96,7 +96,7 @@ void TopicGraphController::rename(const QString &topic, const QString &new_name)
 
 void TopicGraphController::join(const QString &topicA,
                                 const QString &topicB,
-                                Edge_Type type) {
+                                EdgeType type) {
     auto edge = m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), type);
     if (edge == nullptr)
         return;
@@ -149,16 +149,7 @@ void TopicGraphController::synchGraphView() {
     }
     m_nodeList->resetNodes(nodeList);
 }
-//TODO:
-//make api on node and edge list for TGC to directly invoke the changes
-void TopicGraphController::onStateChanged(const std::string &id,
-                                          const StateFlags &flags) {
 
-    const auto &edges = m_graph.getOutEdges(std::stoi(id));
-    for (auto edge : edges) {
-        m_edgeList->onEdgeStateChanged(edge.from, edge.to);
-    }
-}
 
 void TopicGraphController::directedLayout() {
     m_layout.setStrategy(std::make_unique<FMMMStrategy>(m_layout.ogdfContext()));
@@ -214,7 +205,7 @@ void TopicGraphController::onTopicHovered(uint32_t id) {
     m_nodeList->setFlagsOnId(id, StateFlag::Hovered);
     auto outEdges = m_graph.getOutEdges(id);
     for (const auto &e : outEdges) {
-        m_edgeList->setFlagsOnId(e.key, StateFlag::Hovered);
+        m_edgeList->setFlagsOnId(e->key, StateFlag::Hovered);
     }
 }
 
@@ -222,7 +213,7 @@ void TopicGraphController::onTopicUnHovered(uint32_t id) {
     m_nodeList->unSetFlagsOnId(id, StateFlag::Hovered);
     auto outEdges = m_graph.getOutEdges(id);
     for (const auto &e : outEdges) {
-        m_edgeList->unSetFlagsOnId(e.key, StateFlag::Hovered);
+        m_edgeList->unSetFlagsOnId(e->key, StateFlag::Hovered);
     }
 }
 void TopicGraphController::onTopicSelected(uint32_t id) {

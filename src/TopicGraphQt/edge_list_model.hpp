@@ -47,9 +47,6 @@ public:
     void resetEdges(const std::vector<EdgeItem> &edges);
     void setFlagsOnId(const std::string &key, StateFlag flags);
     void unSetFlagsOnId(const std::string &key, StateFlag flags);
-public slots:
-    void onEdgeStateChanged(const std::string &key);
-    void onEdgeStateChanged(uint32_t from, uint32_t to);
 
 
 protected:

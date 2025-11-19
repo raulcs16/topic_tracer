@@ -6,7 +6,7 @@
 namespace PathAnalyzer {
 
 
-double edgeWeight(Edge_Type type);
+double edgeWeight(EdgeType type);
 std::vector<uint32_t> topicPath(std::unordered_map<uint32_t, int> parents, uint32_t dest);
 std::vector<std::string> edgePath(std::vector<uint32_t> topicPath);
 std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,

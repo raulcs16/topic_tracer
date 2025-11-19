@@ -19,10 +19,10 @@ class TopicGraphController : public QObject {
 
 
 public:
-    using Topic_Type = ::Topic_Type;
-    using Edge_Type = ::Edge_Type;
-    Q_ENUM(Topic_Type);
-    Q_ENUM(Edge_Type);
+    using TopicType = ::TopicType;
+    using EdgeType = ::EdgeType;
+    Q_ENUM(TopicType);
+    Q_ENUM(EdgeType);
 
     explicit TopicGraphController(QObject *parent = nullptr);
     ~TopicGraphController();
@@ -34,12 +34,12 @@ public:
     //QML API
 
     Q_INVOKABLE void createTopic(const QString &name,
-                                 Topic_Type type = Topic_Type::Concept);
+                                 TopicType type = TopicType::Concept);
 
     Q_INVOKABLE void deleteTopic(const QString &name);
     Q_INVOKABLE void join(const QString &topicA,
                           const QString &topicB,
-                          Edge_Type type = Edge_Type::DependsOn);
+                          EdgeType type = EdgeType::DependsOn);
     Q_INVOKABLE void noJoin(const QString &topicA, const QString &topicB);
     Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
     Q_INVOKABLE void path(const QString &topicA, const QString &topicB);
@@ -53,14 +53,12 @@ public:
 
 
 public slots:
-    void onStateChanged(const std::string &id, const StateFlags &flags);
-
     void onTopicHovered(uint32_t id);
     void onTopicUnHovered(uint32_t id);
     void onTopicSelected(uint32_t id);
     void onTopicUnSelected(uint32_t id);
     // public slots:
-    //     void addTopic(int tempId, const QString &name, Topic_Type type = Topic_Type::Concept);
+    //     void addTopic(int tempId, const QString &name, TopicType type = TopicType::Concept);
     //     void renameTopic(uint32_t id, const QString &new_name);
     //     void deleteTopic(uint32_t id);
 

@@ -20,12 +20,13 @@ bool DisjointSet::merge(uint32_t x, uint32_t y) {
     auto a = find(x);
     auto b = find(y);
     if (a == b)
-        return;
+        return false;
     if (m_rank[a] > m_rank[b])
         std::swap(a, b);
     m_parent[b] = a;
     if (m_rank[a] == m_rank[b])
         m_rank[a]++;
+    return true;
 }
 bool DisjointSet::areDisjoint(uint32_t x, uint32_t y) {
     auto a = find(x);

@@ -11,14 +11,14 @@ TEST_CASE("Path Test Suite") {
     auto v5 = graph.addTopic("v5");
     auto v6 = graph.addTopic("v1");
 
-    graph.addEdge(v2, v1, Edge_Type::ComposedOf);
-    graph.addEdge(v1, v3, Edge_Type::Example);
-    graph.addEdge(v3, v2, Edge_Type::DependsOn);
-    graph.addEdge(v3, v5, Edge_Type::AlternativeTo);
-    graph.addEdge(v3, v4, Edge_Type::DependsOn);
-    graph.addEdge(v5, v2, Edge_Type::ComposedOf);
-    graph.addEdge(v5, v6, Edge_Type::AlternativeTo);
-    graph.addEdge(v6, v4, Edge_Type::Example);
+    graph.addEdge(v2, v1, EdgeType::ComposedOf);
+    graph.addEdge(v1, v3, EdgeType::Example);
+    graph.addEdge(v3, v2, EdgeType::DependsOn);
+    graph.addEdge(v3, v5, EdgeType::AlternativeTo);
+    graph.addEdge(v3, v4, EdgeType::DependsOn);
+    graph.addEdge(v5, v2, EdgeType::ComposedOf);
+    graph.addEdge(v5, v6, EdgeType::AlternativeTo);
+    graph.addEdge(v6, v4, EdgeType::Example);
 
     SECTION("TEST SHORTEST PATH") {
         auto parents = PathAnalyzer::dijsktras(graph, v1, v2);
