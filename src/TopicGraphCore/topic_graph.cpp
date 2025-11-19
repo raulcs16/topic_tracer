@@ -9,8 +9,11 @@ uint32_t TopicGraph::addTopic(const std::string &name, TopicType topic_type) {
     if (getTopic(name) != nullptr)
         return 0;
     uint32_t id = nextId();
-    auto ptr = std::make_shared<Topic>(
-        Topic{.id = id, .name = name, .type = topic_type, .covered = false});
+    auto ptr = std::make_shared<Topic>(Topic{
+        .id = id,
+        .name = name,
+        .type = topic_type,
+    });
     m_topicMap[id] = ptr;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
@@ -121,8 +124,8 @@ std::shared_ptr<const Edge> TopicGraph::addEdge(uint32_t from,
     default: directed = true; break;
     }
     std::string key = makeKey(from, to);
-    auto edgePtr = std::make_shared<Edge>(
-        Edge{.key = key, .from = from, .to = to, .type = type, .directed = directed});
+    auto edgePtr =
+        std::make_shared<Edge>(Edge{.key = key, .from = from, .to = to, .type = type});
     m_edgeMap[key] = edgePtr;
     m_adjOutMap[from].push_back(edgePtr);
     m_adjInMap[to].push_back(edgePtr);
