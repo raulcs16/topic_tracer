@@ -44,7 +44,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(ogdf)
 
 add_subdirectory(src)
-add_subdirectory(app)
+# add_subdirectory(app)
 
 if(TESTING)
 add_subdirectory(tests)

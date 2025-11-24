@@ -2,10 +2,50 @@
 #include "topic_graph.hpp"
 
 
-TopicGraph::TopicGraph() {}
+TopicGraph::TopicGraph() {
+    m_validators = {
+        {EdgeType::ComposedOf,
+         {
+             [](auto f, auto t) { return isConcept(f); },
+             [](auto f, auto t) { return isConcept(t); },
+             [this](auto f, auto t) { return !hasParent(t->id, EdgeType::ComposedOf); },
+             [this](auto f, auto t) {
+                 return !makesCycle(f->id, t->id, EdgeType::ComposedOf);
+             },
+         }},
+
+        {EdgeType::Example,
+         {
+             [](auto f, auto t) { return isConcept(f); },
+             [](auto f, auto t) { return isConcrete(t); },
+             [this](auto f, auto t) { return !hasParent(t->id, EdgeType::Example); },
+             [this](auto f, auto t) {
+                 return !makesCycle(f->id, t->id, EdgeType::Example);
+             },
+         }},
+
+        {EdgeType::DependsOn,
+         {
+             [](auto f, auto t) { return isConcrete(f); },
+             [](auto f, auto t) { return isConcrete(t); },
+             [this](auto f, auto t) { return sameParent(f, t); },
+         }},
+
+        {EdgeType::AlternativeTo,
+         {
+             [](auto f, auto t) { return isConcrete(f); },
+             [](auto f, auto t) { return isConcrete(t); },
+             [this](auto f, auto t) { return sameParent(f, t); },
+         }},
+        {EdgeType::RelatedTo,
+         {
+             [](auto f, auto t) { return sameType(f, t); },
+         }}};
+}
 
 //Topic API
-uint32_t TopicGraph::addTopic(const std::string &name, TopicType topic_type) {
+std::shared_ptr<const Topic> TopicGraph::addTopic(const std::string &name,
+                                                  TopicType topic_type) {
     if (getTopic(name) != nullptr)
         return 0;
     uint32_t id = nextId();
@@ -17,7 +57,7 @@ uint32_t TopicGraph::addTopic(const std::string &name, TopicType topic_type) {
     m_topicMap[id] = ptr;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    return id;
+    return ptr;
 }
 bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
     auto it = m_topicMap.find(id);
@@ -102,27 +142,65 @@ std::vector<std::shared_ptr<const Topic>> TopicGraph::topics() const {
     return result;
 }
 
+/*
+Enforce Rules such as making sure EdgeType matches TopicType(s) beign connected
+*/
 
+std::shared_ptr<const Edge> TopicGraph::addEdge(const Topic *a,
+                                                const Topic *b,
+                                                EdgeType type) {
+    if (!a || !b)
+        return nullptr;
+    if (!m_topicMap.contains(a->id) || !m_topicMap.contains(b->id)) {
+        return nullptr;
+    }
+    auto [parent, child] = normalizeJoin(a, b, type);
+    std::string key = makeKey(parent->id, child->id);
+
+    if (hasEdge(key))
+        return nullptr;
+
+    auto it = m_validators.find(type);
+    if (it == m_validators.end())
+        return nullptr;
+    for (auto &rule : it->second) {
+        if (!rule(parent, child))
+            return nullptr;
+    }
+
+    auto edgePtr = std::make_shared<Edge>(
+        Edge{.key = key, .from = parent->id, .to = child->id, .type = type});
+    m_edgeMap[key] = edgePtr;
+    m_adjOutMap[parent->id].push_back(edgePtr);
+    m_adjInMap[child->id].push_back(edgePtr);
+    return edgePtr;
+}
 std::shared_ptr<const Edge> TopicGraph::addEdge(uint32_t from,
                                                 uint32_t to,
                                                 EdgeType type) {
+
+    //graph invarient check
     if (from == to)
         return nullptr;
-    //aka key edge already exists
+    auto pFrom = getTopic(from);
+    auto pTo = getTopic(to);
+    if (!pFrom || !pTo)
+        return nullptr;
+    auto [parent, child] = normalizeJoin(pFrom.get(), pTo.get(), type);
+    from = parent->id;
+    to = child->id;
     if (hasEdge(makeKey(from, to)))
         return nullptr;
-    //topics id's do not exist
-    if (getTopic(from) == nullptr || getTopic(to) == nullptr)
+
+    //semantic rule validatation check
+    auto it = m_validators.find(type);
+    if (it == m_validators.end())
         return nullptr;
-    bool directed = true;
-    switch (type) {
-    case EdgeType::ComposedOf: directed = true; break;
-    case EdgeType::AlternativeTo: directed = true; break;
-    case EdgeType::RelatedTo: directed = false; break;
-    case EdgeType::DependsOn: directed = true; break;
-    case EdgeType::Example: directed = true; break;
-    default: directed = true; break;
+    for (auto &rule : it->second) {
+        if (!rule(parent, child))
+            return nullptr;
     }
+    //safe to create edges
     std::string key = makeKey(from, to);
     auto edgePtr =
         std::make_shared<Edge>(Edge{.key = key, .from = from, .to = to, .type = type});
@@ -189,6 +267,19 @@ std::vector<std::shared_ptr<Edge>> TopicGraph::getOutEdges(uint32_t from) const 
 std::vector<std::shared_ptr<Edge>> TopicGraph::getInEdges(uint32_t to) const {
     auto it = m_adjInMap.find(to);
     return it != m_adjInMap.end() ? it->second : std::vector<std::shared_ptr<Edge>>{};
+}
+
+std::shared_ptr<const Topic> TopicGraph::parent(uint32_t id) {
+    auto it = m_adjInMap.find(id);
+    if (it == m_adjInMap.end())
+        return nullptr;
+
+    for (const auto &edge : it->second) {
+        if (edge->type == EdgeType::ComposedOf || edge->type == EdgeType::Example) {
+            return getTopic(edge->from);
+        }
+    }
+    return nullptr;
 }
 
 uint32_t TopicGraph::nextId() { return m_id_ref++; }
