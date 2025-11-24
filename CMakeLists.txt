@@ -19,7 +19,7 @@ qt_standard_project_setup(REQUIRES 6.5)
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
 set(QML_IMPORT_PATH "${QT_QML_OUTPUT_DIRECTORY}" CACHE STRING "QML import paths")
 
-set(TESTING ON)
+set(TESTING OFF)
 
 # FetchContent
 include(FetchContent)
@@ -44,7 +44,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(ogdf)
 
 add_subdirectory(src)
-# add_subdirectory(app)
+
+if (NOT TESTING)
+add_subdirectory(app)
+endif( )
 
 if(TESTING)
 add_subdirectory(tests)

@@ -29,34 +29,25 @@ TopicGraphController::TopicGraphController(QObject *parent)
             this,
             &TopicGraphController::onTopicUnSelected);
 
-    createTopic("v1");
-    createTopic("v2");
-    createTopic("v3");
-    createTopic("v4");
-    createTopic("v5");
-    createTopic("v6");
-    join("v2", "v1", EdgeType::ComposedOf);
-    join("v1", "v3", EdgeType::Example);
-    join("v3", "v2", EdgeType::DependsOn);
-    join("v3", "v5", EdgeType::AlternativeTo);
-    join("v3", "v4", EdgeType::DependsOn);
-    join("v5", "v2", EdgeType::ComposedOf);
-    join("v5", "v6", EdgeType::AlternativeTo);
-    join("v6", "v4", EdgeType::Example);
-    directedLayout();
+    createTopic("c1");
+    createTopic("c2");
+    createTopic("c3");
+    createTopic("x1");
+    createTopic("x2");
+    createTopic("x3");
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
 void TopicGraphController::createTopic(const QString &name, TopicType type) {
-    uint32_t id = m_graph.addTopic(name.toStdString(), TopicType::Concept);
-    if (!id) {
+    auto topic = m_graph.addTopic(name.toStdString(), TopicType::Concept);
+    if (!topic) {
         return;
     }
     if (m_topicList) {
-        m_topicList->addConfirmedItem(id, name);
+        m_topicList->addConfirmedItem(topic->id, name);
     }
 
-    m_layout.addNode(id);
+    m_layout.addNode(topic->id);
     synchGraphView();
 }
 void TopicGraphController::deleteTopic(const QString &topic) {

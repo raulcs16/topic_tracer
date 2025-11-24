@@ -39,7 +39,7 @@ public:
     Q_INVOKABLE void deleteTopic(const QString &name);
     Q_INVOKABLE void join(const QString &topicA,
                           const QString &topicB,
-                          EdgeType type = EdgeType::DependsOn);
+                          EdgeType type = EdgeType::ComposedOf);
     Q_INVOKABLE void noJoin(const QString &topicA, const QString &topicB);
     Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
     Q_INVOKABLE void path(const QString &topicA, const QString &topicB);
