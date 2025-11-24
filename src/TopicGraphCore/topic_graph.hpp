@@ -42,24 +42,17 @@ public:
     size_t topicCount() const { return m_topicMap.size(); }
 
     std::shared_ptr<const Topic> parent(uint32_t);
+    std::vector<std::shared_ptr<const Topic>> childrenOf(uint32_t id);
+    std::vector<uint32_t> ancestorsOf(uint32_t id);
+    std::vector<uint32_t> descendantsOf(uint32_t id);
 
     inline static bool isConcept(const Topic *t) { return t->type == TopicType::Concept; }
     inline static bool isConcrete(const Topic *t) {
         return t->type == TopicType::Concrete;
     }
+    bool hasParent(uint32_t node, EdgeType parentType) const;
     inline static bool sameType(const Topic *a, const Topic *b) {
         return a->type == b->type;
-    }
-    inline bool hasParent(uint32_t node, EdgeType parentType) const {
-        auto it = m_adjInMap.find(node);
-        if (it == m_adjInMap.end())
-            return false;
-
-        for (auto &e : it->second) {
-            if (e->type == parentType)
-                return true;
-        }
-        return false;
     }
     inline bool sameParent(const Topic *a, const Topic *b) {
         auto pa = parent(a->id);
@@ -71,47 +64,16 @@ public:
         auto pb = parent(b);
         return pa != nullptr && pa == pb;
     }
+    bool makesCycle(uint32_t from, uint32_t to, EdgeType type);
+    bool dfsReachable(uint32_t start,
+                      uint32_t target,
+                      std::unordered_set<uint32_t> &visited);
 
 
-    inline bool makesCycle(uint32_t from, uint32_t to, EdgeType type) {
-        // Only enforce for hierarchical edges
-        if (type != EdgeType::ComposedOf && type != EdgeType::Example)
-            return false;
+    std::pair<const Topic *, const Topic *> normalizeJoin(const Topic *a,
+                                                          const Topic *b,
+                                                          EdgeType type);
 
-        // Perform DFS from `to` to see if we can reach `from`
-        std::unordered_set<uint32_t> visited;
-        return dfsReachable(to, from, visited);
-    }
-    inline bool dfsReachable(uint32_t start,
-                             uint32_t target,
-                             std::unordered_set<uint32_t> &visited) {
-        if (start == target)
-            return true;
-        visited.insert(start);
-
-        for (auto &edge : m_adjOutMap[start]) {
-            if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example)
-                continue;
-
-            uint32_t next = edge->to;
-            if (!visited.count(next) && dfsReachable(next, target, visited))
-                return true;
-        }
-        return false;
-    }
-
-
-    inline std::pair<const Topic *, const Topic *> normalizeJoin(const Topic *a,
-                                                                 const Topic *b,
-                                                                 EdgeType type) {
-        if (type != EdgeType::Example)
-            return {a, b};
-        if (a->type == TopicType::Concept && b->type == TopicType::Concrete)
-            return {a, b};
-        if (b->type == TopicType::Concept && a->type == TopicType::Concrete)
-            return {b, a}; // swap
-        return {a, b};
-    }
 
 private:
     uint32_t nextId();

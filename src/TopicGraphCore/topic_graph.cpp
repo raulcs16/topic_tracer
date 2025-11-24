@@ -179,44 +179,16 @@ std::shared_ptr<const Edge> TopicGraph::addEdge(uint32_t from,
                                                 uint32_t to,
                                                 EdgeType type) {
 
-    //graph invarient check
-    if (from == to)
-        return nullptr;
     auto pFrom = getTopic(from);
     auto pTo = getTopic(to);
-    if (!pFrom || !pTo)
-        return nullptr;
-    auto [parent, child] = normalizeJoin(pFrom.get(), pTo.get(), type);
-    from = parent->id;
-    to = child->id;
-    if (hasEdge(makeKey(from, to)))
-        return nullptr;
-
-    //semantic rule validatation check
-    auto it = m_validators.find(type);
-    if (it == m_validators.end())
-        return nullptr;
-    for (auto &rule : it->second) {
-        if (!rule(parent, child))
-            return nullptr;
-    }
-    //safe to create edges
-    std::string key = makeKey(from, to);
-    auto edgePtr =
-        std::make_shared<Edge>(Edge{.key = key, .from = from, .to = to, .type = type});
-    m_edgeMap[key] = edgePtr;
-    m_adjOutMap[from].push_back(edgePtr);
-    m_adjInMap[to].push_back(edgePtr);
-    return edgePtr;
+    return addEdge(pFrom.get(), pTo.get(), type);
 }
 std::shared_ptr<const Edge> TopicGraph::addEdge(const std::string &topicA,
                                                 const std::string &topicB,
                                                 EdgeType type) {
     auto ta = getTopic(topicA);
     auto tb = getTopic(topicB);
-    if (ta == nullptr || tb == nullptr)
-        return nullptr;
-    return addEdge(ta->id, tb->id, type);
+    return addEdge(ta.get(), tb.get(), type);
 }
 bool TopicGraph::hasEdge(const std::string &key) { return m_edgeMap.count(key); }
 bool TopicGraph::removeEdge(uint32_t from, uint32_t to) {
@@ -280,6 +252,75 @@ std::shared_ptr<const Topic> TopicGraph::parent(uint32_t id) {
         }
     }
     return nullptr;
+}
+std::vector<std::shared_ptr<const Topic>> TopicGraph::childrenOf(uint32_t id) {
+    auto it = m_adjOutMap.find(id);
+    if (it == m_adjOutMap.end()) {
+        return {};
+    }
+    std::vector<std::shared_ptr<const Topic>> children;
+    for (const auto &e : it->second) {
+        auto topic = getTopic(e->to);
+        if (topic) {
+            children.push_back(topic);
+        }
+    }
+    return children;
+}
+std::vector<uint32_t> TopicGraph::ancestorsOf(uint32_t id) {
+    std::vector<uint32_t> ancestors;
+    auto pt = parent(id);
+    while (pt != nullptr) {
+        ancestors.push_back(pt->id);
+        pt = parent(pt->id);
+    }
+    return ancestors;
+}
+bool TopicGraph::hasParent(uint32_t node, EdgeType parentType) const {
+    auto it = m_adjInMap.find(node);
+    if (it == m_adjInMap.end())
+        return false;
+
+    for (auto &e : it->second) {
+        if (e->type == parentType)
+            return true;
+    }
+    return false;
+}
+bool TopicGraph::makesCycle(uint32_t from, uint32_t to, EdgeType type) {
+    if (type != EdgeType::ComposedOf && type != EdgeType::Example)
+        return false;
+    std::unordered_set<uint32_t> visited;
+    return dfsReachable(to, from, visited);
+}
+bool TopicGraph::dfsReachable(uint32_t start,
+                              uint32_t target,
+                              std::unordered_set<uint32_t> &visited) {
+    if (start == target)
+        return true;
+    visited.insert(start);
+
+    for (auto &edge : m_adjOutMap[start]) {
+        if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example)
+            continue;
+
+        uint32_t next = edge->to;
+        if (!visited.count(next) && dfsReachable(next, target, visited))
+            return true;
+    }
+    return false;
+}
+std::pair<const Topic *, const Topic *> TopicGraph::normalizeJoin(const Topic *a,
+                                                                  const Topic *b,
+                                                                  EdgeType type) {
+
+    if (type != EdgeType::Example)
+        return {a, b};
+    if (a->type == TopicType::Concept && b->type == TopicType::Concrete)
+        return {a, b};
+    if (b->type == TopicType::Concept && a->type == TopicType::Concrete)
+        return {b, a}; // swap
+    return {a, b};
 }
 
 uint32_t TopicGraph::nextId() { return m_id_ref++; }
