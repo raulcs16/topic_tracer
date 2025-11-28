@@ -44,7 +44,7 @@ public:
     std::shared_ptr<const Topic> parent(uint32_t);
     std::vector<std::shared_ptr<const Topic>> childrenOf(uint32_t id);
     std::vector<uint32_t> ancestorsOf(uint32_t id);
-    std::vector<uint32_t> descendantsOf(uint32_t id);
+    // std::vector<uint32_t> descendantsOf(uint32_t id);
 
     inline static bool isConcept(const Topic *t) { return t->type == TopicType::Concept; }
     inline static bool isConcrete(const Topic *t) {

@@ -1,4 +1,5 @@
 #include "graph_keys.hpp"
+#include "path_analyzer.hpp"
 #include "topic_graph.hpp"
 #include <queue>
 #include <vector>
@@ -6,7 +7,128 @@
 
 using nodeDist = std::pair<uint32_t, double>;
 
-namespace PathAnalyzer {
+namespace TG::PathAnalyzer {
+
+BFSResult bfs(const TopicGraph &g, uint32_t start) {
+    BFSResult result;
+    std::queue<uint32_t> q;
+    std::unordered_set<uint32_t> visited;
+
+    visited.insert(start);
+    q.push(start);
+    result.parent[start] = UINT32_MAX;
+    result.dist[start] = 0;
+
+    while (!q.empty()) {
+        uint32_t u = q.front();
+        q.pop();
+        result.order.push_back(u);
+        //traverse hirarichal edges
+        for (auto &edge : g.getOutEdges(u)) {
+            if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example) {
+                continue;
+            }
+            uint32_t v = edge->to;
+            if (!visited.count(v)) {
+                visited.insert(v);
+                q.push(v);
+                result.parent[v] = u;
+                result.dist[v] = result.dist[u] + 1;
+            }
+        }
+    }
+    return result;
+}
+void dfsVist(const TopicGraph &g,
+             uint32_t u,
+             std::unordered_set<uint32_t> &visited,
+             std::unordered_map<uint32_t, uint32_t> &parent,
+             std::vector<uint32_t> &order,
+             std::unordered_map<uint32_t, int> &entry,
+             std::unordered_map<uint32_t, int> &exit,
+             int &time) {
+    visited.insert(u);
+    entry[u] = time++;
+    order.push_back(u);
+    for (auto &edge : g.getOutEdges(u)) {
+        if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example) {
+            continue;
+        }
+        uint32_t v = edge->to;
+        if (!visited.count(v)) {
+            parent[v] = u;
+            dfsVist(g, v, visited, parent, order, entry, exit, time);
+        }
+    }
+    exit[u] = time++;
+}
+
+DFSResult dfs(const TopicGraph &g, uint32_t start) {
+    DFSResult result;
+    std::unordered_set<uint32_t> visited;
+    int time = 0;
+
+    result.parent[start] = UINT32_MAX;
+
+    dfsVist(g,
+            start,
+            visited,
+            result.parent,
+            result.order,
+            result.entry,
+            result.exit,
+            time);
+
+
+    return result;
+}
+std::vector<uint32_t> topologicalSort(const TopicGraph &g) {
+    std::unordered_map<uint32_t, int> inDegree;
+    std::queue<uint32_t> q;
+    std::vector<uint32_t> sorted;
+
+    // Initialize in-degree counts for hierarchical edges
+    for (auto &topic : g.topics()) {
+        uint32_t id = topic->id;
+        inDegree[id] = 0;
+    }
+    for (auto &topic : g.topics()) {
+        uint32_t u = topic->id;
+        for (auto &edge : g.getOutEdges(u)) {
+            if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example)
+                continue;
+            inDegree[edge->to]++;
+        }
+    }
+
+    // Start with nodes of in-degree 0
+    for (auto &[id, deg] : inDegree) {
+        if (deg == 0)
+            q.push(id);
+    }
+
+    while (!q.empty()) {
+        uint32_t u = q.front();
+        q.pop();
+        sorted.push_back(u);
+
+        for (auto &edge : g.getOutEdges(u)) {
+            if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example)
+                continue;
+
+            uint32_t v = edge->to;
+            inDegree[v]--;
+            if (inDegree[v] == 0)
+                q.push(v);
+        }
+    }
+    // If sorted size != total nodes, there is a cycle
+    if (sorted.size() != g.topicCount()) {
+        throw std::runtime_error("Cycle detected in hierarchical edges");
+    }
+
+    return sorted;
+}
 double edgeWeight(EdgeType type) { return static_cast<int>(type) * 1.0; }
 std::vector<uint32_t> topicPath(std::unordered_map<uint32_t, int> parents,
                                 uint32_t dest) {
@@ -76,4 +198,4 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
     return parents;
 }
 
-} // namespace PathAnalyzer
+} // namespace TG::PathAnalyzer
