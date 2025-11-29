@@ -2,7 +2,7 @@ add_library(TopicGraphCore STATIC
     topic_graph_types.hpp
     topic_graph.cpp
     topic_graph.hpp
-    # edge_sematic.hppke
+    edge_semantic.hpp
     path_analyzer.hpp
     path_analyzer.cpp
 )

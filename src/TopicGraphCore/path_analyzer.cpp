@@ -1,3 +1,4 @@
+#include "edge_semantic.hpp"
 #include "graph_keys.hpp"
 #include "path_analyzer.hpp"
 #include "topic_graph.hpp"
@@ -25,7 +26,8 @@ BFSResult bfs(const TopicGraph &g, uint32_t start) {
         result.order.push_back(u);
         //traverse hirarichal edges
         for (auto &edge : g.getOutEdges(u)) {
-            if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example) {
+            if (TG::Semantic::of(edge->type) !=
+                TG::Semantic::EdgeSemantic::Hierarchical) {
                 continue;
             }
             uint32_t v = edge->to;
@@ -51,7 +53,7 @@ void dfsVist(const TopicGraph &g,
     entry[u] = time++;
     order.push_back(u);
     for (auto &edge : g.getOutEdges(u)) {
-        if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example) {
+        if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::Hierarchical) {
             continue;
         }
         uint32_t v = edge->to;
@@ -95,8 +97,10 @@ std::vector<uint32_t> topologicalSort(const TopicGraph &g) {
     for (auto &topic : g.topics()) {
         uint32_t u = topic->id;
         for (auto &edge : g.getOutEdges(u)) {
-            if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example)
+            if (TG::Semantic::of(edge->type) !=
+                TG::Semantic::EdgeSemantic::Hierarchical) {
                 continue;
+            }
             inDegree[edge->to]++;
         }
     }
@@ -113,8 +117,10 @@ std::vector<uint32_t> topologicalSort(const TopicGraph &g) {
         sorted.push_back(u);
 
         for (auto &edge : g.getOutEdges(u)) {
-            if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example)
+            if (TG::Semantic::of(edge->type) !=
+                TG::Semantic::EdgeSemantic::Hierarchical) {
                 continue;
+            }
 
             uint32_t v = edge->to;
             inDegree[v]--;
