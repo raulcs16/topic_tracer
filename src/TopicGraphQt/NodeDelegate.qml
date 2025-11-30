@@ -14,12 +14,29 @@ Item {
     required property double posx
     required property double posy
     required property int flags
+    required property int heatScore
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
     readonly property bool selected: (flags & ENUMS.StateFlag.Selected) !== 0
     readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
     readonly property bool hidden: (flags & ENUMS.StateFlag.Hidden) !== 0
+    function heatColor(heat) {
+        if (heat <= 0)
+            return Qt.rgba(0.9, 0.9, 0.9, 1.0); // white/light gray for 0
 
+        // Normalize heat to 0–1 based on maxHeatScore
+        let t = Math.min(heat / 100, 1);
+
+        // Apply nonlinear scaling to make low scores pale
+        t = Math.sqrt(t); // makes small values stand out more gradually
+
+        // Blend from watery color (light orange) → matte red
+        let r = 0.8 * t + 0.2; // start pale, end vivid
+        let g = 0.5 * (1 - t); // less green as t increases
+        let b = 0.2 * (1 - t); // less blue as t increases
+
+        return Qt.rgba(r, g, b, 1.0);
+    }
     x: (viewWidth / 3) + posx
     y: (viewHeight / 3) + posy
     Rectangle {
@@ -28,7 +45,7 @@ Item {
         height: 20
         x: -width / 2
         y: -height / 2
-        color: root.selected ? "#9806f3" : '#dee0e7'
+        color: root.heatColor(root.heatScore)
         opacity: root.hidden ? 0.1 : 1
         radius: 100
         border.width: 2

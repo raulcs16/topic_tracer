@@ -22,14 +22,14 @@ struct Project {
 class EvidenceDB {
 public:
     void addProject(const Project &project);
-    void addEvidence(const std::string &projectName, const EvidenceItem &item);
-    const std::vector<EvidenceItem *> &getEvidenceForTopic(
-        const std::string &topic) const;
-    std::unordered_map<std::string, std::vector<EvidenceItem *>> topics() {
+    bool addEvidence(const std::string &projectName, const EvidenceItem &item);
+    const std::vector<EvidenceItem *> &getEvidenceForTopic(const std::string &topic);
+    const std::unordered_map<std::string, std::vector<EvidenceItem *>> topics() {
         return m_topicIndex;
     }
 
 private:
-    std::unordered_map<std::string, Project> m_projects;
     std::unordered_map<std::string, std::vector<EvidenceItem *>> m_topicIndex;
+
+    std::unordered_map<std::string, Project> m_projects;
 };

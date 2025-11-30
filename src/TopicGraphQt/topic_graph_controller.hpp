@@ -1,6 +1,8 @@
 #pragma once
 
 #include "edge_list_model.hpp"
+#include "evidence.hpp"
+#include "heat_score.hpp"
 #include "layout_engine.hpp"
 #include "node_list_model.hpp"
 #include "topic_graph.hpp"
@@ -30,7 +32,7 @@ public:
     NodeListModel *nodeListModel() const { return m_nodeList; }
     EdgeListModel *edgeListModel() const { return m_edgeList; }
 
-
+    void calculateHeatScores();
     //QML API
 
     Q_INVOKABLE void createTopic(const QString &name,
@@ -78,6 +80,9 @@ private:
 private:
     TopicGraph m_graph;
     LayoutEngine m_layout;
+    EvidenceDB m_evidenceDb;
+    HeatScoreSystem *m_heatScore;
+
 
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;

@@ -8,6 +8,7 @@ target_link_libraries(TopicGraphQt
     PRIVATE Qt6::Core
     PRIVATE Qt6::Quick
     PUBLIC TopicGraphCore
+    PUBLIC Evidence
     PUBLIC LayoutEngine
     PUBLIC OGDF
 )

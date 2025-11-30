@@ -13,6 +13,7 @@
 struct NodeItem {
     uint32_t id;
     QString label;
+    int heat = 0;
     double x;
     double y;
 };
@@ -28,7 +29,8 @@ public:
         LabelRole,
         XRole,
         YRole,
-        FlagsRole
+        FlagsRole,
+        HeatRole,
     };
 
     explicit NodeListModel(QObject *parent = nullptr);
@@ -42,6 +44,7 @@ public:
 
     void setFlagsOnId(uint32_t id, StateFlag flags);
     void unSetFlagsOnId(uint32_t id, StateFlag flags);
+    void updateHeatScore(uint32_t id, int score);
 
 public slots:
     void onGaphChanged();

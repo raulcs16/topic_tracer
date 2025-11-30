@@ -41,9 +41,13 @@ TEST_CASE("Evidence test SUIT") {
                           .signature = "abd",
                           .topic = d1->name};
         db.addEvidence(A.name, item);
+        for (int i = 0; i < 100; i++) {
+            db.addEvidence(A.name, EvidenceItem{.topic = a1->name});
+        }
         auto scores = heat.computeAllHeatScores();
         REQUIRE(scores.size() == tg.topicCount());
         REQUIRE(scores[d1.get()] == 1);
+        REQUIRE(scores[a1.get()] == 100);
     }
     SECTION("Calculate Concept Score based off children") {
         tg.addEdge(ca.get(), a1.get(), EdgeType::Example);
@@ -94,11 +98,11 @@ TEST_CASE("Evidence test SUIT") {
                            .signature = "sig",
                            .topic = a1->name};
 
-        EvidenceItem ea2_1 = {.filePath = "//",
-                              .lineStart = 0,
-                              .lineEnd = 0,
-                              .signature = "sig",
-                              .topic = a2->name};
+        EvidenceItem ea2_1{.filePath = "//",
+                           .lineStart = 0,
+                           .lineEnd = 0,
+                           .signature = "sig",
+                           .topic = a2->name};
 
         db.addEvidence(A.name, ea1_1);
         db.addEvidence(A.name, ea1_2);

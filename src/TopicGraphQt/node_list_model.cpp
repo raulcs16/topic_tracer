@@ -10,6 +10,7 @@ QHash<int, QByteArray> NodeListModel::roleNames() const {
     roles[XRole] = "posx";
     roles[YRole] = "posy";
     roles[FlagsRole] = "flags";
+    roles[HeatRole] = "heatScore";
     return roles;
 }
 
@@ -42,6 +43,7 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
             return QVariant();
         return static_cast<int>(it->second.flags);
     }
+    case HeatRole: return nodeInfo.heat;
     default: return QVariant();
     }
 }
@@ -95,4 +97,17 @@ void NodeListModel::unSetFlagsOnId(uint32_t id, StateFlag flags) {
     m_stateFlags[id].remove(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+void NodeListModel::updateHeatScore(uint32_t id, int score) {
+    int index = 0;
+    while (index < m_nodes.size()) {
+        if (m_nodes[index].id == id)
+            break;
+        index++;
+    }
+    if (index == m_nodes.size())
+        return;
+    m_nodes[index].heat = score;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {HeatRole});
 }

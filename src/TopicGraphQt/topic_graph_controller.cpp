@@ -9,21 +9,25 @@
 
 TopicGraphController::TopicGraphController(QObject *parent)
     : QObject{parent}, m_graph{}, m_layout{}, m_topicList{new TopicListModel{this}},
-      m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)) {
+      m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)),
+      m_heatScore(new HeatScoreSystem{m_evidenceDb, m_graph}) {
 
 
     connect(m_topicList,
             &TopicListModel::topicHovered,
             this,
             &TopicGraphController::onTopicHovered);
+
     connect(m_topicList,
             &TopicListModel::topicUnHovered,
             this,
             &TopicGraphController::onTopicUnHovered);
+
     connect(m_topicList,
             &TopicListModel::topicSelected,
             this,
             &TopicGraphController::onTopicSelected);
+
     connect(m_topicList,
             &TopicListModel::topicUnSelected,
             this,
@@ -32,14 +36,26 @@ TopicGraphController::TopicGraphController(QObject *parent)
     createTopic("c1");
     createTopic("c2");
     createTopic("c3");
-    createTopic("x1");
-    createTopic("x2");
-    createTopic("x3");
+    createTopic("x1", TopicType::Concrete);
+    createTopic("x2", TopicType::Concrete);
+    createTopic("x3", TopicType::Concrete);
+
+    Project A{.rootPath = "..", .name = "A", .evidence{}};
+    m_evidenceDb.addProject(A);
+    EvidenceItem x3_1{.topic = "x3"};
+    EvidenceItem x3_2{.topic = "x3"};
+    m_evidenceDb.addEvidence("A", x3_1);
+
+    m_evidenceDb.addEvidence("A", x3_2);
+    for (size_t i = 0; i < 100; i++) {
+        m_evidenceDb.addEvidence("A", EvidenceItem{.topic = "x1"});
+    }
+    calculateHeatScores();
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
 void TopicGraphController::createTopic(const QString &name, TopicType type) {
-    auto topic = m_graph.addTopic(name.toStdString(), TopicType::Concept);
+    auto topic = m_graph.addTopic(name.toStdString(), type);
     if (!topic) {
         return;
     }
@@ -166,8 +182,8 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     if (ta == nullptr || tb == nullptr) {
         return;
     }
-    auto parents = PathAnalyzer::dijsktras(m_graph, ta->id, tb->id);
-    auto topicIds = PathAnalyzer::topicPath(parents, tb->id);
+    auto parents = TG::PathAnalyzer::dijsktras(m_graph, ta->id, tb->id);
+    auto topicIds = TG::PathAnalyzer::topicPath(parents, tb->id);
 
     std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
     for (const auto &topic : m_graph.topics()) {
@@ -180,7 +196,7 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     }
 
 
-    auto edgeKeys = PathAnalyzer::edgePath(topicIds);
+    auto edgeKeys = TG::PathAnalyzer::edgePath(topicIds);
     std::unordered_set<std::string> edgeSet(edgeKeys.begin(), edgeKeys.end());
     for (const auto &edge : m_graph.edges()) {
         StateFlag flag = StateFlag::None;
@@ -212,4 +228,15 @@ void TopicGraphController::onTopicSelected(uint32_t id) {
 }
 void TopicGraphController::onTopicUnSelected(uint32_t id) {
     m_nodeList->unSetFlagsOnId(id, StateFlag::Selected);
+}
+
+void TopicGraphController::calculateHeatScores() {
+    qDebug() << "calculating scores";
+    auto map = m_heatScore->computeAllHeatScores();
+    for (const auto [topic, score] : map) {
+        qDebug() << topic->name << score;
+        if (!score)
+            continue;
+        m_nodeList->updateHeatScore(topic->id, score);
+    }
 }
