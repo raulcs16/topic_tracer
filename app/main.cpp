@@ -1,3 +1,4 @@
+#include "config.hpp"
 #include "topic_graph.hpp"
 #include "topic_graph_controller.hpp"
 #include "topic_list_model.hpp"
@@ -19,9 +20,11 @@ int main(int argc, char *argv[]) {
         Qt::QueuedConnection);
 
 
-    // engine.setInitialProperties(
-    //     {{"topicListModel", QVariant::fromValue(&topicListModel)},
-    //      {"graphController", QVariant::fromValue(&graphController)}});
+    engine.setInitialProperties({
+        {"major", project_version_major},
+        {"minor", project_version_minor},
+        {"patch", project_version_patch},
+    });
 
 
     engine.loadFromModule("App", "Main");

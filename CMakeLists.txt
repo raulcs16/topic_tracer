@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-
-
 project(TopicTracer VERSION 0.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -43,8 +41,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(ogdf)
 
-add_subdirectory(src)
 
+add_subdirectory(configured)
+add_subdirectory(src)
 if (NOT TESTING)
 add_subdirectory(app)
 endif( )

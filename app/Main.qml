@@ -13,6 +13,10 @@ ApplicationWindow {
     title: qsTr("Topic Tracer")
     visible: true
 
+    required property int major
+    required property int minor
+    required property int patch
+
     function parseCommand(cmd) {
         const parts = cmd.split(" ");
         const command = parts[0];
@@ -141,6 +145,14 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
+                Text {
+                    text: `v${app.major}.${app.minor}.${app.patch}`
+                    font.bold: true
+                    font.pointSize: 14
+                    color: "#F5F5F5"
+                    padding: 10
+                }
+
                 CanvasView {
                     anchors.fill: parent
                     clip: true
@@ -199,7 +211,7 @@ ApplicationWindow {
             }
         }
 
-        // Sidebar
+        // // Sidebar
         ColumnLayout {
             spacing: 0
             Layout.preferredWidth: 300 // fixed width

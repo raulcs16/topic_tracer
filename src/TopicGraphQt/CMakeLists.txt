@@ -45,4 +45,5 @@ qt_add_qml_module(TopicGraphQt
 
 target_include_directories(TopicGraphQt PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}  
+        "${CMAKE_BINARY_DIR}/configured_files/include"
 )
