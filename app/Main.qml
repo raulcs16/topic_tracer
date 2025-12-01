@@ -211,7 +211,7 @@ ApplicationWindow {
             }
         }
 
-        // // Sidebar
+        // Sidebar
         ColumnLayout {
             spacing: 0
             Layout.preferredWidth: 300 // fixed width
