@@ -231,10 +231,8 @@ void TopicGraphController::onTopicUnSelected(uint32_t id) {
 }
 
 void TopicGraphController::calculateHeatScores() {
-    qDebug() << "calculating scores";
     auto map = m_heatScore->computeAllHeatScores();
     for (const auto [topic, score] : map) {
-        qDebug() << topic->name << score;
         if (!score)
             continue;
         m_nodeList->updateHeatScore(topic->id, score);

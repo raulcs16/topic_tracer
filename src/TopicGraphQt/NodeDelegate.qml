@@ -20,25 +20,21 @@ Item {
     readonly property bool selected: (flags & ENUMS.StateFlag.Selected) !== 0
     readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
     readonly property bool hidden: (flags & ENUMS.StateFlag.Hidden) !== 0
+
     function heatColor(heat) {
         if (heat <= 0)
-            return Qt.rgba(0.9, 0.9, 0.9, 1.0); // white/light gray for 0
-
-        // Normalize heat to 0–1 based on maxHeatScore
+            return Qt.rgba(0.9, 0.9, 0.9, 1.0);
         let t = Math.min(heat / 100, 1);
-
-        // Apply nonlinear scaling to make low scores pale
-        t = Math.sqrt(t); // makes small values stand out more gradually
-
-        // Blend from watery color (light orange) → matte red
-        let r = 0.8 * t + 0.2; // start pale, end vivid
-        let g = 0.5 * (1 - t); // less green as t increases
-        let b = 0.2 * (1 - t); // less blue as t increases
-
+        t = Math.sqrt(t);
+        let r = 0.8 * t + 0.2;
+        let g = 0.5 * (1 - t);
+        let b = 0.2 * (1 - t);
         return Qt.rgba(r, g, b, 1.0);
     }
+
     x: (viewWidth / 3) + posx
     y: (viewHeight / 3) + posy
+
     Rectangle {
         id: node
         width: 20
