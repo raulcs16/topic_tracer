@@ -19,6 +19,9 @@ ApplicationWindow {
         const args = parts.slice(1);
 
         switch (command) {
+        case "save":
+            topic_controller.save();
+            break;
         case "touch":
             {
                 if (args.length < 1) {

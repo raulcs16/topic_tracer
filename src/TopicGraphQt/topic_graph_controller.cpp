@@ -10,7 +10,7 @@
 TopicGraphController::TopicGraphController(QObject *parent)
     : QObject{parent}, m_graph{}, m_layout{}, m_topicList{new TopicListModel{this}},
       m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)),
-      m_heatScore(new HeatScoreSystem{m_evidenceDb, m_graph}) {
+      m_heatScore(new HeatScoreSystem{m_evidenceDb, m_graph}), m_repo("data") {
 
 
     connect(m_topicList,
@@ -217,5 +217,12 @@ void TopicGraphController::calculateHeatScores() {
         if (!score)
             continue;
         m_nodeList->updateHeatScore(topic->id, score);
+    }
+}
+void TopicGraphController::save() {
+    QString *error = nullptr;
+    m_repo.save(m_graph, "topic_list", error);
+    if (error) {
+        qDebug() << error;
     }
 }

@@ -6,6 +6,7 @@
 #include "layout_engine.hpp"
 #include "node_list_model.hpp"
 #include "topic_graph.hpp"
+#include "topic_graph_repo.hpp"
 #include "topic_list_model.hpp"
 #include "ui_states.hpp"
 #include <QObject>
@@ -48,6 +49,8 @@ public:
     Q_INVOKABLE void planarLayout();
     Q_INVOKABLE void multiLayout();
 
+    Q_INVOKABLE void save();
+
 
 public slots:
     void onTopicHovered(uint32_t id);
@@ -62,9 +65,9 @@ private:
     TopicGraph m_graph;
     LayoutEngine m_layout;
     EvidenceDB m_evidenceDb;
+
+    TopicGraphRepository m_repo;
     HeatScoreSystem *m_heatScore;
-
-
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;
