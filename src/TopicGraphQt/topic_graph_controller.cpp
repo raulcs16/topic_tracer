@@ -39,18 +39,6 @@ TopicGraphController::TopicGraphController(QObject *parent)
     createTopic("x1", TopicType::Concrete);
     createTopic("x2", TopicType::Concrete);
     createTopic("x3", TopicType::Concrete);
-
-    Project A{.rootPath = "..", .name = "A", .evidence{}};
-    m_evidenceDb.addProject(A);
-    EvidenceItem x3_1{.topic = "x3"};
-    EvidenceItem x3_2{.topic = "x3"};
-    m_evidenceDb.addEvidence("A", x3_1);
-
-    m_evidenceDb.addEvidence("A", x3_2);
-    for (size_t i = 0; i < 100; i++) {
-        m_evidenceDb.addEvidence("A", EvidenceItem{.topic = "x1"});
-    }
-    calculateHeatScores();
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 

@@ -21,11 +21,6 @@ class TopicGraphController : public QObject {
 
 
 public:
-    using TopicType = ::TopicType;
-    using EdgeType = ::EdgeType;
-    Q_ENUM(TopicType);
-    Q_ENUM(EdgeType);
-
     explicit TopicGraphController(QObject *parent = nullptr);
     ~TopicGraphController();
     TopicListModel *topicListModel() const { return m_topicList; }
@@ -59,21 +54,7 @@ public slots:
     void onTopicUnHovered(uint32_t id);
     void onTopicSelected(uint32_t id);
     void onTopicUnSelected(uint32_t id);
-    // public slots:
-    //     void addTopic(int tempId, const QString &name, TopicType type = TopicType::Concept);
-    //     void renameTopic(uint32_t id, const QString &new_name);
-    //     void deleteTopic(uint32_t id);
 
-    // private slots:
-    //     void onRequestAddTopic(int tempId, const QString &name);
-
-    // signals:
-    //     void topicAdded(int tempId, bool success, uint32_t id);
-    //     void topicDelelted(bool success, uint32_t id);
-    //     void topicRenamed(bool success, uint32_t id);
-
-    //     void topicListModelChanged();
-    //     void graphControllerChanged();
 private:
     void synchGraphView();
 
