@@ -32,6 +32,9 @@ qt_add_qml_module(TopicGraphQt
         ui_states.hpp
         ui_states.cpp
 
+        enums.hpp
+        enums.cpp
+
     QML_FILES
         TopicListView.qml
         TopicDelegate.qml

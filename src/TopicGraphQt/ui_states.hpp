@@ -28,21 +28,3 @@ struct ItemState {
     void toggle(StateFlag f) { flags ^= f; }
     void clear() { flags = StateFlag::None; }
 };
-
-class ENUMS : public QObject {
-    Q_OBJECT
-    QML_ELEMENT
-    QML_UNCREATABLE("EXPOSE FLAGS TO QML")
-public:
-    enum class StateFlag : uint32_t {
-        None = 0,
-        Selectable = 1 << 0,
-        Selected = 1 << 1,
-        EditMode = 1 << 2,
-        Hidden = 1 << 3,
-        Hovered = 1 << 4,
-        InPath = 1 << 5,
-    };
-
-    Q_ENUM(StateFlag);
-};
