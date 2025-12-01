@@ -25,21 +25,47 @@ ApplicationWindow {
                     console.warn("Usage: touch <name>");
                     return;
                 }
+                let type = ENUMS.TopicType.Concept;
+                if (args[0] === "-concrete") {
+                    type = ENUMS.TopicType.Concrete;
+                    args.shift(); // Remove the flag from args
+                }
                 for (let i = 0; i < args.length; i++) {
                     const topicName = args[i];
-                    topic_controller.createTopic(topicName);
+                    topic_controller.createTopic(topicName, type);
                 }
                 break;
             }
         case "join":
             {
-                if (args.length < 2 || args.length > 2) {
+                if (args.length < 2 || args.length > 3) {
                     console.warn("Usage: join <topicA> <topicB>");
                     return;
                 }
+                let type = ENUMS.EdgeType.ComposedOf;
+                if (args[0] === "-ComposedOf") {
+                    type = ENUMS.EdgeType.ComposedOf;
+                    args.shift(); // Remove the flag from args
+                }
+                if (args[0] === "-Example") {
+                    type = ENUMS.EdgeType.Example;
+                    args.shift(); // Remove the flag from args
+                }
+                if (args[0] === "-DependsOn") {
+                    type = ENUMS.EdgeType.DependsOn;
+                    args.shift(); // Remove the flag from args
+                }
+                if (args[0] === "-AlternativeTo") {
+                    type = ENUMS.EdgeType.AlternativeTo;
+                    args.shift(); // Remove the flag from args
+                }
+                if (args[0] === "-RelatedTo") {
+                    type = ENUMS.EdgeType.RelatedTo;
+                    args.shift(); // Remove the flag from args
+                }
                 let topicA = args[0];
                 let topicB = args[1];
-                topic_controller.join(topicA, topicB);
+                topic_controller.join(topicA, topicB, type);
                 break;
             }
         case "remove":
