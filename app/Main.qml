@@ -38,6 +38,8 @@ ApplicationWindow {
 
                 for (let i = 0; i < args.length; i++) {
                     const topicName = args[i];
+                    if (topicName.length == 0)
+                        continue;
                     topic_controller.createTopic(topicName, type);
                     if (joinConcept) {
                         topic_controller.join(topicName, joinConcept, ENUMS.EdgeType.Example);
