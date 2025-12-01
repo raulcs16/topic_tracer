@@ -27,7 +27,7 @@ ApplicationWindow {
                 }
                 for (let i = 0; i < args.length; i++) {
                     const topicName = args[i];
-                    topic_controller.createTopic(topicName, TopicGraphController.EdgeType.Example);
+                    topic_controller.createTopic(topicName);
                 }
                 break;
             }
