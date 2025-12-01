@@ -32,13 +32,6 @@ TopicGraphController::TopicGraphController(QObject *parent)
             &TopicListModel::topicUnSelected,
             this,
             &TopicGraphController::onTopicUnSelected);
-
-    createTopic("c1");
-    createTopic("c2");
-    createTopic("c3");
-    createTopic("x1", TopicType::Concrete);
-    createTopic("x2", TopicType::Concrete);
-    createTopic("x3", TopicType::Concrete);
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 

@@ -26,14 +26,24 @@ ApplicationWindow {
                     return;
                 }
                 let type = ENUMS.TopicType.Concept;
+                let joinConcept = null;
                 if (args[0] === "-concrete") {
                     type = ENUMS.TopicType.Concrete;
                     args.shift(); // Remove the flag from args
+                    if (args[args.length - 1][0] == ">") {
+                        joinConcept = args[args.length - 1].substring(1); // remove the ">" prefix
+                        args.pop();
+                    }
                 }
+
                 for (let i = 0; i < args.length; i++) {
                     const topicName = args[i];
                     topic_controller.createTopic(topicName, type);
+                    if (joinConcept) {
+                        topic_controller.join(topicName, joinConcept, ENUMS.EdgeType.Example);
+                    }
                 }
+
                 break;
             }
         case "join":
