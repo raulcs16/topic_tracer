@@ -256,13 +256,17 @@ ApplicationWindow {
                         background: Rectangle {
                             color: "transparent"
                         }
-
+                        onTextChanged: topic_controller.updateBuffer(commandInput.text)
                         Keys.onReturnPressed: {
                             const cmd = commandInput.text.trim();
                             if (cmd.length === 0)
                                 return;
                             app.parseCommand(cmd);
                             commandInput.text = "";
+                        }
+                        Keys.onTabPressed: {
+                            let suggestion = topic_controller.handleAutoComplete();
+                            commandInput.text = suggestion;
                         }
                     }
                 }

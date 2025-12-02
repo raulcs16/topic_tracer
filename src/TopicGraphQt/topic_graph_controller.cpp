@@ -252,3 +252,100 @@ void TopicGraphController::clearAll() {
     m_topicList->clear();
     synchGraphView();
 }
+void TopicGraphController::updateBuffer(const QString &buffer) {
+    m_currentBuffer = buffer;
+}
+void TopicGraphController::executeCurrentCommand() {
+    if (m_currentBuffer.length() == 0)
+        return;
+}
+
+QString TopicGraphController::handleAutoComplete() {
+
+    QString buffer = m_currentBuffer.trimmed();
+    QStringList parts = buffer.split(" ", Qt::SkipEmptyParts);
+
+    if (parts.isEmpty()) {
+        // Autocomplete at start → commands
+        return autoCompleteCommand("", parts);
+    }
+
+    if (parts.size() == 1) {
+        // Completing the first word → command
+        return autoCompleteCommand(parts[0], parts);
+    }
+
+    // Completing arguments
+    QString command = parts[0];
+    QString argPrefix = parts.last();
+
+    if (command == "join" || command == "touch" || command == "rm") {
+        return autoCompleteTopics(parts, argPrefix);
+    }
+
+    return buffer; // Unknown command type
+}
+QString TopicGraphController::autoCompleteCommand(const QString &buffer,
+                                                  const QStringList &parts) {
+    static QStringList commands = {"touch", "join", "rm", "ls", "info"};
+
+    QStringList matches;
+    for (auto &cmd : commands)
+        if (cmd.startsWith(buffer))
+            matches << cmd;
+    return processAutocomplete(buffer, matches, parts);
+}
+
+QString TopicGraphController::autoCompleteTopics(const QStringList &parts,
+                                                 const QString &prefix) {
+    QStringList matches;
+
+    for (const auto &t : m_graph.topics()) {
+        QString name = QString::fromStdString(t->name);
+        if (name.startsWith(prefix))
+            matches << name;
+    }
+
+    return processAutocomplete(prefix, matches, parts);
+}
+QString TopicGraphController::processAutocomplete(const QString &prefix,
+                                                  const QStringList &matches,
+                                                  const QStringList &parts) {
+    if (matches.isEmpty()) {
+        qDebug() << "No matches";
+        m_lastPrefix.clear();
+        m_lastMatches.clear();
+        m_cycleIndex = -1;
+        return m_currentBuffer;
+    }
+
+    // SAME prefix as last time → cycle
+    if (prefix == m_lastPrefix) {
+        m_cycleIndex = (m_cycleIndex + 1) % matches.size();
+        qDebug() << "Cycle:" << matches[m_cycleIndex];
+        return buildNewBuffer(matches[m_cycleIndex], parts);
+    }
+
+    // NEW prefix → reset + show suggestions
+    m_lastPrefix = prefix;
+    m_lastMatches = matches;
+    m_cycleIndex = 0;
+
+    if (matches.size() == 1) {
+        qDebug() << "Autocomplete:" << matches[0];
+    } else {
+        qDebug() << "Suggestions:" << matches;
+        qDebug() << "Starting with:" << matches[0];
+    }
+
+    return buildNewBuffer(matches[0], parts);
+}
+QString TopicGraphController::buildNewBuffer(const QString &replacement,
+                                             const QStringList &parts) {
+    QStringList newParts = parts;
+    newParts[newParts.size() - 1] = replacement;
+
+    QString newBuffer = newParts.join(" ");
+    m_currentBuffer = newBuffer;
+    return newBuffer;
+}

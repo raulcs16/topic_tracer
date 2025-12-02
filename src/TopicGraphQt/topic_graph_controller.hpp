@@ -53,6 +53,9 @@ public:
     Q_INVOKABLE void load(QString fileName);
     Q_INVOKABLE void clearAll();
 
+    Q_INVOKABLE void updateBuffer(const QString &buffer);
+    Q_INVOKABLE void executeCurrentCommand();
+    Q_INVOKABLE QString handleAutoComplete();
 
 public slots:
     void onTopicHovered(uint32_t id);
@@ -62,6 +65,13 @@ public slots:
 
 private:
     void synchGraphView();
+    QString autoCompleteCommand(const QString &buffer, const QStringList &parts);
+    QString autoCompleteTopics(const QStringList &parts, const QString &prefix);
+    QString processAutocomplete(const QString &prefix,
+                                const QStringList &matches,
+                                const QStringList &parts);
+    QString buildNewBuffer(const QString &replacement, const QStringList &parts);
+
 
 private:
     TopicGraph m_graph;
@@ -73,4 +83,8 @@ private:
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;
+    QString m_currentBuffer;
+    QString m_lastPrefix;
+    QStringList m_lastMatches;
+    int m_cycleIndex = -1;
 };
