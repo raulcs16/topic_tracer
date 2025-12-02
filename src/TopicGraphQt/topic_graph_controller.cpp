@@ -221,7 +221,7 @@ void TopicGraphController::calculateHeatScores() {
 }
 void TopicGraphController::save() {
     QString *error = nullptr;
-    m_repo.save(m_graph, "topic_list", error);
+    m_repo.save(m_graph, "topic_list.json", error);
     if (error) {
         qDebug() << error;
     }
