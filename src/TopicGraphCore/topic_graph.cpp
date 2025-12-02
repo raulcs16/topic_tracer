@@ -327,3 +327,34 @@ uint32_t TopicGraph::nextId() { return m_id_ref++; }
 std::string TopicGraph::makeKey(uint32_t from, uint32_t to) {
     return GraphKeys::key(from, to);
 }
+std::shared_ptr<const Topic> TopicGraph::addTopic(uint32_t id,
+                                                  const std::string &name,
+                                                  TopicType type) {
+    if (getTopic(name) != nullptr || getTopic(id) != nullptr)
+        return nullptr;
+
+    m_id_ref = id + 1;
+    auto ptr = std::make_shared<Topic>(Topic{
+        .id = id,
+        .name = name,
+        .type = type,
+    });
+
+    m_topicMap[id] = ptr;
+    m_adjOutMap[id] = {};
+    m_adjInMap[id] = {};
+    return ptr;
+}
+std::shared_ptr<const Edge> TopicGraph::addEdge(Edge edge) {
+    if (!m_topicMap.contains(edge.from) || !m_topicMap.contains(edge.to)) {
+        return nullptr;
+    }
+
+    if (hasEdge(edge.key))
+        return nullptr;
+    auto edgePtr = std::make_shared<Edge>(edge);
+    m_edgeMap[edge.key] = edgePtr;
+    m_adjOutMap[edge.from].push_back(edgePtr);
+    m_adjInMap[edge.to].push_back(edgePtr);
+    return edgePtr;
+}

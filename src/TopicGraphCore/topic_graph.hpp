@@ -12,6 +12,9 @@ public:
     //Topic API
     std::shared_ptr<const Topic> addTopic(const std::string &name,
                                           TopicType type = TopicType::Concept);
+    std::shared_ptr<const Topic> addTopic(uint32_t id,
+                                          const std::string &name,
+                                          TopicType type);
     bool renameTopic(uint32_t id, const std::string &new_name);
     bool deleteTopic(uint32_t id);
     //getters
@@ -24,6 +27,7 @@ public:
     std::shared_ptr<const Edge> addEdge(const std::string &topicA,
                                         const std::string &topicB,
                                         EdgeType type);
+    std::shared_ptr<const Edge> addEdge(Edge edge);
     std::shared_ptr<const Edge> addEdge(const Topic *a, const Topic *b, EdgeType type);
 
     bool removeEdge(uint32_t from, uint32_t to);
