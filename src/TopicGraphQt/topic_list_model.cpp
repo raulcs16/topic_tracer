@@ -285,3 +285,12 @@ void TopicListModel::unsetHovered(int index) {
     removeFlags(index, StateFlag::Hovered);
     emit topicUnHovered(m_topics[index].id);
 }
+void TopicListModel::clear() {
+    if (m_topics.isEmpty())
+        return;
+
+    beginResetModel();
+    m_topics.clear();
+    m_stateFlags.clear();
+    endResetModel();
+}

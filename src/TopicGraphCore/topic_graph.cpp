@@ -358,3 +358,11 @@ std::shared_ptr<const Edge> TopicGraph::addEdge(Edge edge) {
     m_adjInMap[edge.to].push_back(edgePtr);
     return edgePtr;
 }
+
+void TopicGraph::clear() {
+    m_topicMap.clear();
+    m_edgeMap.clear();
+    m_adjInMap.clear();
+    m_adjOutMap.clear();
+    m_id_ref = 1;
+}

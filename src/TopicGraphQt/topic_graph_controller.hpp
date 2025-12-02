@@ -49,8 +49,9 @@ public:
     Q_INVOKABLE void planarLayout();
     Q_INVOKABLE void multiLayout();
 
-    Q_INVOKABLE void save();
-    Q_INVOKABLE void load();
+    Q_INVOKABLE void save(QString fileName);
+    Q_INVOKABLE void load(QString fileName);
+    Q_INVOKABLE void clearAll();
 
 
 public slots:
