@@ -219,17 +219,18 @@ void TopicGraphController::calculateHeatScores() {
         m_nodeList->updateHeatScore(topic->id, score);
     }
 }
-void TopicGraphController::save() {
+void TopicGraphController::save(QString fileName) {
     QString *error = nullptr;
-    m_repo.save(m_graph, "topic_list", error);
+    m_repo.save(m_graph, fileName, error);
     if (error) {
         qDebug() << error;
     }
 }
-void TopicGraphController::load() {
+void TopicGraphController::load(QString fileName) {
+    clearAll();
     QString *error = nullptr;
 
-    bool load = m_repo.load(m_graph, "topic_list", error);
+    bool load = m_repo.load(m_graph, fileName, error);
     if (error != nullptr) {
         qDebug() << error;
     }
@@ -243,5 +244,11 @@ void TopicGraphController::load() {
     for (auto edge : m_graph.edges()) {
         m_layout.addEdge(edge.get()->from, edge.get()->to);
     }
+    synchGraphView();
+}
+void TopicGraphController::clearAll() {
+    m_graph.clear();
+    m_layout.clear();
+    m_topicList->clear();
     synchGraphView();
 }

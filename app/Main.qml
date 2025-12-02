@@ -23,11 +23,25 @@ ApplicationWindow {
         const args = parts.slice(1);
 
         switch (command) {
+        case "clear":
+            topic_controller.clearAll();
         case "save":
-            topic_controller.save();
+            if (args.length < 1) {
+                console.warn("Usage: save <file>");
+                return;
+            }
+            if (args[0].length == 0)
+                break;
+            topic_controller.save(args[0]);
             break;
         case "load":
-            topic_controller.load();
+            if (args.length < 1) {
+                console.warn("Usage: load <file>");
+                return;
+            }
+            if (args[0].length == 0)
+                break;
+            topic_controller.load(args[0]);
             break;
         case "touch":
             {

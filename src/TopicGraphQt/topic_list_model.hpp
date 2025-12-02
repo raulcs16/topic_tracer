@@ -69,7 +69,7 @@ public:
     // list state API
     bool isAddingNewTopic() const { return m_isAddingNewTopic; }
     void setIsAddingNewTopic(bool value);
-
+    void clear();
 
 signals:
     //state changes

@@ -78,6 +78,8 @@ public:
                                                           const Topic *b,
                                                           EdgeType type);
 
+    void clear();
+
 
 private:
     uint32_t nextId();
