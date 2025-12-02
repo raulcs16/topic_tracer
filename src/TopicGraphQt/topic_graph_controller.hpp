@@ -50,6 +50,7 @@ public:
     Q_INVOKABLE void multiLayout();
 
     Q_INVOKABLE void save();
+    Q_INVOKABLE void load();
 
 
 public slots:

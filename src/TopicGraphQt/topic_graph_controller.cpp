@@ -221,8 +221,27 @@ void TopicGraphController::calculateHeatScores() {
 }
 void TopicGraphController::save() {
     QString *error = nullptr;
-    m_repo.save(m_graph, "topic_list.json", error);
+    m_repo.save(m_graph, "topic_list", error);
     if (error) {
         qDebug() << error;
     }
+}
+void TopicGraphController::load() {
+    QString *error = nullptr;
+
+    bool load = m_repo.load(m_graph, "topic_list", error);
+    if (error != nullptr) {
+        qDebug() << error;
+    }
+    for (auto topic : m_graph.topics()) {
+        if (m_topicList) {
+            m_topicList->addConfirmedItem(topic->id, QString::fromStdString(topic->name));
+        }
+
+        m_layout.addNode(topic->id);
+    }
+    for (auto edge : m_graph.edges()) {
+        m_layout.addEdge(edge.get()->from, edge.get()->to);
+    }
+    synchGraphView();
 }

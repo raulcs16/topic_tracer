@@ -18,11 +18,11 @@ private:
 
     static bool decodeTopic(const QJsonObject &obj,
                             TopicGraph &graph,
-                            QHash<int, Topic *> &idMap,
+                            QHash<int, const Topic *> &idMap,
                             QString *error);
     static bool decodeEdge(const QJsonObject &obj,
                            TopicGraph &graph,
-                           const QHash<int, Topic *> &idMap,
+                           const QHash<int, const Topic *> &idMap,
                            QString *error);
 };
 
@@ -30,7 +30,7 @@ class TopicGraphRepository {
 public:
     TopicGraphRepository(QString basePath);
     bool save(const TopicGraph &graph, QString file_name, QString *error = nullptr);
-    bool load(const TopicGraph &graph, QString file_name, QString *error = nullptr);
+    bool load(TopicGraph &graph, QString file_name, QString *error = nullptr);
 
 private:
     QString m_basePath;
