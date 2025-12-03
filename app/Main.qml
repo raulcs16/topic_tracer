@@ -25,6 +25,7 @@ ApplicationWindow {
         switch (command) {
         case "clear":
             topic_controller.clearAll();
+            break;
         case "save":
             if (args.length < 1) {
                 console.warn("Usage: save <file>");

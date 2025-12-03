@@ -245,6 +245,7 @@ void TopicGraphController::load(QString fileName) {
         m_layout.addEdge(edge.get()->from, edge.get()->to);
     }
     synchGraphView();
+    calculateHeatScores();
 }
 void TopicGraphController::clearAll() {
     m_graph.clear();

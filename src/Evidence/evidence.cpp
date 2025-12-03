@@ -1,5 +1,35 @@
 #include "evidence.hpp"
+#include <fstream>
+#include <nlohmann/json.hpp>
 
+//TODO:refactor out later
+EvidenceDB::EvidenceDB() {
+    std::ifstream f("data/evidence.json");
+    if (!f)
+        return;
+
+    nlohmann::json jsonData;
+    f >> jsonData;
+
+    for (auto &proj : jsonData) {
+        Project project;
+        project.name = proj["name"];
+        project.rootPath = proj["rootPath"];
+
+        for (auto &e : proj["evidence"]) {
+            EvidenceItem item;
+            item.topic = e["topic"];
+            item.filePath = e["filePath"];
+            item.lineStart = e["lineStart"];
+            item.lineEnd = e["lineEnd"];
+            item.signature = e["signature"];
+
+            project.evidence.push_back(item);
+            m_topicIndex[item.topic].push_back(&project.evidence.back());
+        }
+        addProject(project);
+    }
+}
 void EvidenceDB::addProject(const Project &project) {
     if (project.name.length() == 0)
         return;

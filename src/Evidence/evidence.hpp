@@ -21,6 +21,7 @@ struct Project {
 
 class EvidenceDB {
 public:
+    EvidenceDB();
     void addProject(const Project &project);
     bool addEvidence(const std::string &projectName, const EvidenceItem &item);
     const std::vector<EvidenceItem *> &getEvidenceForTopic(const std::string &topic);

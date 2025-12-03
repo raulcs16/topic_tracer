@@ -5,7 +5,10 @@ add_library(Evidence STATIC
     heat_score.cpp
 )
 
-target_link_libraries(Evidence PUBLIC TopicGraphCore)
+target_link_libraries(Evidence 
+PUBLIC TopicGraphCore
+PRIVATE nlohmann_json::nlohmann_json
+)
 
 target_include_directories(Evidence
     PUBLIC
