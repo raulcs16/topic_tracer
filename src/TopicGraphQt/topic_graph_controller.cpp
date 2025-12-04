@@ -101,6 +101,24 @@ void TopicGraphController::join(const QString &topicA,
             m_nodeList->updatePos(node.id, node.x, node.y);
     }
     if (m_edgeList) {
+        std::vector<EdgeItem> edgeList;
+        for (const auto &gedge : data.edges) {
+            std::vector<QPointF> points;
+            for (const auto &ogpoint : gedge.bends) {
+                points.push_back({ogpoint.m_x, ogpoint.m_y});
+            }
+            edgeList.push_back(EdgeItem{
+                .key = gedge.key,
+                .bends = points,
+                .from = gedge.from,
+                .to = gedge.to,
+                .source_x = gedge.source_x,
+                .source_y = gedge.source_y,
+                .target_x = gedge.target_x,
+                .target_y = gedge.target_y,
+            });
+        }
+        m_edgeList->resetEdges(edgeList);
     }
 }
 void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) {

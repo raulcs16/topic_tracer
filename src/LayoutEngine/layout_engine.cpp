@@ -29,9 +29,8 @@ GraphData LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     if (fromIt == m_componetMap.end() || toIt == m_componetMap.end()) {
         throw std::invalid_argument("invalid id");
     }
-    //same component
     std::shared_ptr<IComponentLayout> merger;
-    if (fromIt == toIt) {
+    if (fromIt->second == toIt->second) {
         //exist in pool
         if (fromIt->second == m_pool && toIt->second == m_pool) {
             merger = makeComponentFromPool(from, to);
@@ -39,9 +38,7 @@ GraphData LayoutEngine::addEdge(uint32_t from, uint32_t to) {
             fromIt->second->addEdge(from, to);
             merger = fromIt->second;
         }
-    }
-    //one in pool one not
-    else if (fromIt->second == m_pool) {
+    } else if (fromIt->second == m_pool) {
         m_pool->removeNode(from);
         toIt->second->addNode(from);
         toIt->second->addEdge(from, to);
