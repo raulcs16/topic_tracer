@@ -2,13 +2,13 @@
 #include "fmmm_strategy.hpp"
 #include "graph_keys.hpp"
 #include "layout_engine.hpp"
-#include "ogdf_component.hpp"
+#include "ogdf_cluster.hpp"
 
 
 LayoutEngine::LayoutEngine() {
     m_poolStrat = std::make_shared<FermatSpiralStrategy>();
     m_ogdfStrat = std::make_shared<FMMMStrategy>();
-    m_pool = std::make_shared<PoolComponent>(m_poolStrat, 100);
+    m_pool = std::make_shared<PoolCluster>(m_poolStrat, 100);
 }
 
 void LayoutEngine::clear() {}
@@ -29,11 +29,11 @@ GraphData LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     if (fromIt == m_componetMap.end() || toIt == m_componetMap.end()) {
         throw std::invalid_argument("invalid id");
     }
-    std::shared_ptr<IComponentLayout> merger;
+    std::shared_ptr<IClusterLayout> merger;
     if (fromIt->second == toIt->second) {
         //exist in pool
         if (fromIt->second == m_pool && toIt->second == m_pool) {
-            merger = makeComponentFromPool(from, to);
+            merger = makeClusterFromPool(from, to);
         } else {
             fromIt->second->addEdge(from, to);
             merger = fromIt->second;
@@ -80,9 +80,9 @@ void LayoutEngine::removeEdge(const std::string &k) {
     }
     fromIt->second->removeEdge(fromIt->first, toIt->first);
 }
-std::shared_ptr<OGDFComponent> LayoutEngine::makeComponentFromPool(uint32_t from,
-                                                                   uint32_t to) {
-    auto newComponent = std::make_shared<OGDFComponent>(m_ogdfStrat);
+std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
+                                                               uint32_t to) {
+    auto newComponent = std::make_shared<OGDFCluster>(m_ogdfStrat);
     m_pool->removeNode(from);
     m_pool->removeNode(to);
     newComponent->appendNode(from);

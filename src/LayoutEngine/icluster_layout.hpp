@@ -6,7 +6,7 @@
 #include <string>
 
 
-class IComponentLayout {
+class IClusterLayout {
 public:
     virtual GraphNode &addNode(uint32_t id) = 0;
     //silent add

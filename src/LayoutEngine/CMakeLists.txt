@@ -3,11 +3,11 @@ add_library(LayoutEngine STATIC
     disjoint_set.hpp
     disjoint_set.cpp
     #interface
-    icomponent_layout.hpp
-    pool_component.hpp
-    pool_component.cpp
-    ogdf_component.hpp
-    ogdf_component.cpp
+    icluster_layout.hpp
+    pool_cluster.hpp
+    pool_cluster.cpp
+    ogdf_cluster.hpp
+    ogdf_cluster.cpp
     #geometric data
     layout_types.hpp
     layout_engine.cpp
@@ -16,12 +16,12 @@ add_library(LayoutEngine STATIC
     ogdf_strategy.hpp
     ogdf_strategy.cpp
     #ogdf strats
-    sugiyama_strategy.hpp
-    sugiyama_strategy.cpp
     fmmm_strategy.hpp
     fmmm_strategy.cpp
-    orthogonal_strategy.hpp
-    orthogonal_strategy.cpp
+    # sugiyama_strategy.hpp
+    # sugiyama_strategy.cpp
+    # orthogonal_strategy.hpp
+    # orthogonal_strategy.cpp
     # procedural strats
     fermatspiral_strategy.hpp
     fermatspiral_strategy.cpp

@@ -1,14 +1,14 @@
 #pragma once
 
 
-#include "icomponent_layout.hpp"
+#include "icluster_layout.hpp"
 #include "ogdf_strategy.hpp"
 
 
-class OGDFComponent : public IComponentLayout {
+class OGDFCluster : public IClusterLayout {
 
 public:
-    OGDFComponent(std::shared_ptr<OGDFStrategy> strategy);
+    OGDFCluster(std::shared_ptr<OGDFStrategy> strategy);
     GraphNode &addNode(uint32_t id) override;
     void appendNode(uint32_t id) override;
     void removeNode(uint32_t id) override;

@@ -2,7 +2,9 @@
 
 
 OGDFStrategy::OGDFStrategy() {}
-void OGDFStrategy::apply(std::vector<GraphNode> &nodes, std::vector<GraphEdge> &edges) {
+void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
+                         std::vector<GraphEdge> &edges,
+                         BoundingBox &bbox) {
     if (!m_layout)
         return;
     try {
@@ -13,8 +15,14 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes, std::vector<GraphEdge> &
                 auto it = ctx->idToNode.find(node.id);
                 if (it == ctx->idToNode.end())
                     continue;
-                node.x = ctx->attributes.x(it->second);
-                node.y = ctx->attributes.y(it->second);
+                double x = ctx->attributes.x(it->second);
+                double y = ctx->attributes.y(it->second);
+                node.x = x;
+                node.y = y;
+                bbox.max_x = x > bbox.max_x ? x : bbox.max_x;
+                bbox.min_x = x < bbox.min_x ? x : bbox.min_x;
+                bbox.max_y = y > bbox.max_y ? y : bbox.max_y;
+                bbox.min_y = y < bbox.min_y ? y : bbox.min_y;
             }
             for (auto &edge : edges) {
                 auto src = ctx->idToNode.find(edge.from);

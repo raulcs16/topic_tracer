@@ -1,13 +1,13 @@
 #pragma once
 
-#include "icomponent_layout.hpp"
+#include "icluster_layout.hpp"
 #include <unordered_map>
 
 
-class PoolComponent : public IComponentLayout {
+class PoolCluster : public IClusterLayout {
 
 public:
-    PoolComponent(std::shared_ptr<LayoutStrategy> strategy, size_t capacity);
+    PoolCluster(std::shared_ptr<LayoutStrategy> strategy, size_t capacity);
 
     GraphNode &addNode(uint32_t id) override;
     void appendNode(uint32_t id) override;

@@ -1,6 +1,6 @@
-#include "pool_component.hpp"
+#include "pool_cluster.hpp"
 
-PoolComponent::PoolComponent(std::shared_ptr<LayoutStrategy> strategy, size_t capacity)
+PoolCluster::PoolCluster(std::shared_ptr<LayoutStrategy> strategy, size_t capacity)
     : m_strategy{strategy} {
     m_capacity = capacity;
     m_nodes.reserve(capacity);
@@ -13,7 +13,7 @@ PoolComponent::PoolComponent(std::shared_ptr<LayoutStrategy> strategy, size_t ca
     apply();
 }
 
-GraphNode &PoolComponent::addNode(uint32_t id) {
+GraphNode &PoolCluster::addNode(uint32_t id) {
     size_t slot = getFreeSlot();
     m_slots[slot].used = true;
     m_slots[slot].id = id;
@@ -23,11 +23,11 @@ GraphNode &PoolComponent::addNode(uint32_t id) {
     node.id = id;
     return node;
 }
-void PoolComponent::appendNode(uint32_t id) { addNode(id); }
+void PoolCluster::appendNode(uint32_t id) { addNode(id); }
 
 
 //WARNING: currently returns last slot position if none available
-size_t PoolComponent::getFreeSlot() {
+size_t PoolCluster::getFreeSlot() {
     size_t i = 0;
     for (; i < m_slots.size(); i++) {
         if (!m_slots[i].used)
@@ -35,7 +35,7 @@ size_t PoolComponent::getFreeSlot() {
     }
     return i--;
 }
-void PoolComponent::removeNode(uint32_t id) {
+void PoolCluster::removeNode(uint32_t id) {
     auto it = m_indexMap.find(id);
     if (it == m_indexMap.end())
         return;
@@ -44,14 +44,14 @@ void PoolComponent::removeNode(uint32_t id) {
     m_slots[slot].used = false;
     m_indexMap.erase(it);
 }
-void PoolComponent::addEdge(uint32_t from, uint32_t to) {}
-void PoolComponent::removeEdge(uint32_t from, uint32_t to) {}
-void PoolComponent::clear() {}
-void PoolComponent::apply() {
+void PoolCluster::addEdge(uint32_t from, uint32_t to) {}
+void PoolCluster::removeEdge(uint32_t from, uint32_t to) {}
+void PoolCluster::clear() {}
+void PoolCluster::apply() {
     if (m_strategy) {
         std::vector<GraphEdge> edges;
-        m_strategy->apply(m_nodes, edges);
+        m_strategy->apply(m_nodes, edges, m_bbox);
     }
 }
-BoundingBox PoolComponent::boundingBox() const { return m_bbox; }
-void PoolComponent::setStrategy(std::shared_ptr<LayoutStrategy> s) { m_strategy = s; }
+BoundingBox PoolCluster::boundingBox() const { return m_bbox; }
+void PoolCluster::setStrategy(std::shared_ptr<LayoutStrategy> s) { m_strategy = s; }
