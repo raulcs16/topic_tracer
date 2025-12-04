@@ -115,34 +115,37 @@ bool TopicListModel::removeItem(int index) {
     beginRemoveRows(QModelIndex(), index, index);
     m_topics.removeAt(index);
     endRemoveRows();
-
-
+    emit topicDeleted(id);
     return true;
 }
 void TopicListModel::deleteTopic(uint32_t id) {
-    int index = getTopicIndex(id);
-    if (index == -1)
+    size_t index = getIndex(id);
+    if (index >= m_topics.size()) {
         return;
+    }
     beginRemoveRows(QModelIndex(), index, index);
     m_topics.removeAt(index);
     endRemoveRows();
+    emit topicDeleted(id);
 }
+//TODO: set to pending, add wait for response
 void TopicListModel::renameTopic(uint32_t id, const QString &newName) {
-    int index = getTopicIndex(id);
-    if (index == -1) {
+    size_t index = getIndex(id);
+    if (index >= m_topics.size()) {
         return;
     }
-    editItem(index, newName);
+    QModelIndex modelIndex = this->index(index);
+    QString name = newName.trimmed();
+    setData(modelIndex, name, NameRole);
+    emit topicRenamed(id, name);
 }
-int TopicListModel::getTopicIndex(uint32_t id) {
-    int index = 0;
+size_t TopicListModel::getIndex(uint32_t id) {
+    size_t index = 0;
     while (index < m_topics.size()) {
         if (m_topics[index].id == id)
             break;
         index++;
     }
-    if (index >= m_topics.size())
-        return -1;
     return index;
 }
 bool TopicListModel::editItem(int index, const QString &newName) {

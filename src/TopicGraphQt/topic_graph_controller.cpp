@@ -32,6 +32,14 @@ TopicGraphController::TopicGraphController(QObject *parent)
             &TopicListModel::topicUnSelected,
             this,
             &TopicGraphController::onTopicUnSelected);
+    connect(m_topicList,
+            &TopicListModel::topicDeleted,
+            this,
+            &TopicGraphController::onTopicDeleted);
+    connect(m_topicList,
+            &TopicListModel::topicRenamed,
+            this,
+            &TopicGraphController::onTopicRenamed);
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
@@ -349,4 +357,28 @@ QString TopicGraphController::buildNewBuffer(const QString &replacement,
     QString newBuffer = newParts.join(" ");
     m_currentBuffer = newBuffer;
     return newBuffer;
+}
+void TopicGraphController::onTopicDeleted(uint32_t id) {
+    auto in = m_graph.getOutEdges(id);
+    auto out = m_graph.getInEdges(id);
+    m_graph.deleteTopic(id);
+    if (m_nodeList) {
+        m_nodeList->deleteNode(id);
+    }
+    if (m_edgeList) {
+        for (const auto &e : in) {
+            m_edgeList->deleteEdge(e->key);
+        }
+        for (const auto &e : out) {
+            m_edgeList->deleteEdge(e->key);
+        }
+    }
+}
+void TopicGraphController::onTopicRenamed(uint32_t id, const QString &label) {
+    bool success = m_graph.renameTopic(id, label.toStdString());
+    if (!success)
+        return;
+    if (m_nodeList) {
+        m_nodeList->updateLabel(id, label);
+    }
 }

@@ -62,6 +62,8 @@ public slots:
     void onTopicUnHovered(uint32_t id);
     void onTopicSelected(uint32_t id);
     void onTopicUnSelected(uint32_t id);
+    void onTopicDeleted(uint32_t id);
+    void onTopicRenamed(uint32_t id, const QString &name);
 
 private:
     void synchGraphView();

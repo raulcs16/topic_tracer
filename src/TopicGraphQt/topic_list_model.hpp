@@ -76,20 +76,20 @@ signals:
     void isAddingNewTopicChanged();
     //emit the id of the item whos state is being set
     void requestAddTopic(int index, const QString &name);
-    void deleteAddTopic(uint32_t id);
 
     void topicHovered(uint32_t id);
     void topicUnHovered(uint32_t id);
     void topicSelected(uint32_t id);
     void topicUnSelected(uint32_t id);
+    void topicDeleted(uint32_t id);
+    void topicRenamed(uint32_t id, const QString &name);
 
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    //<-1 for not found
-    int getTopicIndex(uint32_t id);
+    size_t getIndex(uint32_t id);
 
 private:
     QVector<TopicItem> m_topics;
