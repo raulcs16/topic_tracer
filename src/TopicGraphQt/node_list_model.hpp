@@ -46,11 +46,14 @@ public:
     void unSetFlagsOnId(uint32_t id, StateFlag flags);
     void updateHeatScore(uint32_t id, int score);
 
+    void deleteNode(uint32_t id);
+    void updateLabel(uint32_t id, const QString &name);
+
 public slots:
     void onGaphChanged();
 
 private:
-    int getNodeIndex(int id);
+    size_t getIndex(uint32_t id);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

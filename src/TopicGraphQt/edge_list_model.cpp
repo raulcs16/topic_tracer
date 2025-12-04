@@ -64,7 +64,16 @@ void EdgeListModel::resetEdges(const std::vector<EdgeItem> &edges) {
     m_edges = edges;
     endResetModel();
 }
+size_t EdgeListModel::getIndex(const std::string &key) {
+    size_t index = 0;
+    while (index < m_edges.size()) {
+        if (m_edges[index].key == key)
+            break;
+        index++;
+    }
 
+    return index;
+}
 // bool EdgeListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
 //     if (!index.isValid())
 //         return false;
@@ -103,15 +112,19 @@ void EdgeListModel::setFlagsOnId(const std::string &key, StateFlag flags) {
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 void EdgeListModel::unSetFlagsOnId(const std::string &key, StateFlag flags) {
-    int index = 0;
-    while (index < m_edges.size()) {
-        if (m_edges[index].key == key)
-            break;
-        index++;
-    }
-    if (index == m_edges.size())
+    size_t index = getIndex(key);
+    if (index >= m_edges.size())
         return;
     m_stateFlags[key].remove(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+void EdgeListModel::deleteEdge(const std::string &key) {
+    size_t index = getIndex(key);
+    if (index >= m_edges.size())
+        return;
+    m_stateFlags.erase(key);
+    beginRemoveRows(QModelIndex(), index, index);
+    m_edges.erase(m_edges.begin() + index);
+    endRemoveRows();
 }

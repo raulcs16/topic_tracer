@@ -49,8 +49,14 @@ public:
     void unSetFlagsOnId(const std::string &key, StateFlag flags);
 
 
+    void deleteEdge(const std::string &key);
+
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
+
+private:
+    size_t getIndex(const std::string &key);
 
 private:
     std::vector<EdgeItem> m_edges;

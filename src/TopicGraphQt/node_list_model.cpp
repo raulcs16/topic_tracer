@@ -48,12 +48,14 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     }
 }
 
-int NodeListModel::getNodeIndex(int id) {
-    for (int i = 0; i < m_nodes.size(); i++) {
-        if (m_nodes[i].id == id)
-            return i;
+size_t NodeListModel::getIndex(uint32_t id) {
+    size_t index = 0;
+    while (index < m_nodes.size()) {
+        if (m_nodes[index].id == id)
+            break;
+        index++;
     }
-    return -1;
+    return index;
 }
 
 void NodeListModel::resetNodes(const std::vector<NodeItem> &nodes) {
@@ -73,41 +75,45 @@ void NodeListModel::onGaphChanged() {
 }
 
 void NodeListModel::setFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = 0;
-    while (index < m_nodes.size()) {
-        if (m_nodes[index].id == id)
-            break;
-        index++;
-    }
-    if (index == m_nodes.size())
+    size_t index = getIndex(id);
+    if (index >= m_nodes.size())
         return;
     m_stateFlags[id].add(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 void NodeListModel::unSetFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = 0;
-    while (index < m_nodes.size()) {
-        if (m_nodes[index].id == id)
-            break;
-        index++;
-    }
-    if (index == m_nodes.size())
+    size_t index = getIndex(id);
+    if (index >= m_nodes.size())
         return;
     m_stateFlags[id].remove(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 void NodeListModel::updateHeatScore(uint32_t id, int score) {
-    int index = 0;
-    while (index < m_nodes.size()) {
-        if (m_nodes[index].id == id)
-            break;
-        index++;
-    }
-    if (index == m_nodes.size())
+    size_t index = getIndex(id);
+    if (index >= m_nodes.size())
         return;
     m_nodes[index].heat = score;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {HeatRole});
+}
+void NodeListModel::deleteNode(uint32_t id) {
+    size_t index = getIndex(id);
+    if (index >= m_nodes.size()) {
+        return;
+    }
+    m_stateFlags.erase(id);
+    beginRemoveRows(QModelIndex(), index, index);
+    m_nodes.erase(m_nodes.begin() + index);
+    endRemoveRows();
+}
+void NodeListModel::updateLabel(uint32_t id, const QString &label) {
+    size_t index = getIndex(id);
+    if (index >= m_nodes.size()) {
+        return;
+    }
+    m_nodes[index].label = label;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {LabelRole});
 }
