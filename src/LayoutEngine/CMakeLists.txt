@@ -2,6 +2,12 @@ add_library(LayoutEngine STATIC
     #ds helpers
     disjoint_set.hpp
     disjoint_set.cpp
+    #interface
+    icomponent_layout.hpp
+    pool_component.hpp
+    pool_component.cpp
+    ogdf_component.hpp
+    ogdf_component.cpp
     #geometric data
     layout_types.hpp
     layout_engine.cpp

@@ -6,7 +6,7 @@
 #include <ogdf/planarity/SubgraphPlanarizer.h>
 #include <ogdf/planarity/VariableEmbeddingInserter.h>
 
-OrthogonalStrategy::OrthogonalStrategy(OGDFContext &context) : OGDFStrat{context} {
+OrthogonalStrategy::OrthogonalStrategy() {
     ogdf::PlanarizationLayout *pl = new ogdf::PlanarizationLayout;
 
     ogdf::SubgraphPlanarizer *crossMin = new ogdf::SubgraphPlanarizer;

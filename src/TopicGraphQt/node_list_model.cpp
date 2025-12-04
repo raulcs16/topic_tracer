@@ -73,41 +73,42 @@ void NodeListModel::onGaphChanged() {
 }
 
 void NodeListModel::setFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = 0;
-    while (index < m_nodes.size()) {
-        if (m_nodes[index].id == id)
-            break;
-        index++;
-    }
-    if (index == m_nodes.size())
+    int index = getNodeIndex(id);
+    if (index < 0)
         return;
     m_stateFlags[id].add(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 void NodeListModel::unSetFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = 0;
-    while (index < m_nodes.size()) {
-        if (m_nodes[index].id == id)
-            break;
-        index++;
-    }
-    if (index == m_nodes.size())
+    int index = getNodeIndex(id);
+    if (index < 0)
         return;
     m_stateFlags[id].remove(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 void NodeListModel::updateHeatScore(uint32_t id, int score) {
-    int index = 0;
-    while (index < m_nodes.size()) {
-        if (m_nodes[index].id == id)
-            break;
-        index++;
-    }
-    if (index == m_nodes.size())
+    int index = getNodeIndex(id);
+    if (index < 0)
         return;
     m_nodes[index].heat = score;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {HeatRole});
+}
+
+void NodeListModel::addItem(NodeItem item) {
+    const int newIndex = m_nodes.size();
+    beginInsertRows(QModelIndex(), newIndex, newIndex);
+    m_nodes.push_back(item);
+    endInsertRows();
+}
+void NodeListModel::updatePos(uint32_t id, double x, double y) {
+    int index = getNodeIndex(id);
+    if (index < 0)
+        return;
+    m_nodes[index].x = x;
+    m_nodes[index].y = y;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {XRole, YRole});
 }
