@@ -6,6 +6,9 @@ Item {
     anchors.fill: parent
     focus: true
 
+    width: 600
+    height: 400
+
     property real zoom: 1.0
     property real minZoom: 0.2
     property real maxZoom: 3.0
@@ -17,6 +20,13 @@ Item {
         id: contentItem
         scale: root.zoom
         transformOrigin: Item.TopLeft
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: 20
+            height: 20
+            color: "red"
+        }
 
         DragHandler {
             id: pan
