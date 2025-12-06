@@ -48,12 +48,14 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     }
 }
 
-int NodeListModel::getNodeIndex(int id) {
-    for (int i = 0; i < m_nodes.size(); i++) {
+size_t NodeListModel::getIndex(uint32_t id) {
+    size_t i = 0;
+    while (i < rowCount()) {
         if (m_nodes[i].id == id)
-            return i;
+            break;
+        i++;
     }
-    return -1;
+    return i;
 }
 
 void NodeListModel::resetNodes(const std::vector<NodeItem> &nodes) {
@@ -73,24 +75,24 @@ void NodeListModel::onGaphChanged() {
 }
 
 void NodeListModel::setFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = getNodeIndex(id);
-    if (index < 0)
+    int index = getIndex(id);
+    if (index >= m_nodes.size())
         return;
     m_stateFlags[id].add(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 void NodeListModel::unSetFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = getNodeIndex(id);
-    if (index < 0)
+    int index = getIndex(id);
+    if (index >= m_nodes.size())
         return;
     m_stateFlags[id].remove(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 void NodeListModel::updateHeatScore(uint32_t id, int score) {
-    int index = getNodeIndex(id);
-    if (index < 0)
+    int index = getIndex(id);
+    if (index >= m_nodes.size())
         return;
     m_nodes[index].heat = score;
     const QModelIndex modelIndex = this->index(index);
@@ -104,11 +106,13 @@ void NodeListModel::addItem(NodeItem item) {
     endInsertRows();
 }
 void NodeListModel::updatePos(uint32_t id, double x, double y) {
-    int index = getNodeIndex(id);
-    if (index < 0)
+    int index = getIndex(id);
+    if (index >= m_nodes.size())
         return;
     m_nodes[index].x = x;
     m_nodes[index].y = y;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {XRole, YRole});
 }
+void NodeListModel::deleteNode(uint32_t id) {}
+void NodeListModel::updateLabel(uint32_t id, const QString &name) {}
