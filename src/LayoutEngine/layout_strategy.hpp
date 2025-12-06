@@ -7,5 +7,7 @@
 class LayoutStrategy {
 public:
     virtual ~LayoutStrategy() = default;
-    virtual void apply(std::vector<GraphNode> &nodes, std::vector<GraphEdge> &edge) = 0;
+    virtual void apply(std::vector<GraphNode> &nodes,
+                       std::vector<GraphEdge> &edge,
+                       BoundingBox &bbox) = 0;
 };

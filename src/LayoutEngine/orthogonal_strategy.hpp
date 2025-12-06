@@ -2,7 +2,7 @@
 #include "ogdf_strategy.hpp"
 
 
-class OrthogonalStrategy : public OGDFStrat {
+class OrthogonalStrategy : public OGDFStrategy {
 public:
-    explicit OrthogonalStrategy(OGDFContext &context);
+    OrthogonalStrategy();
 };

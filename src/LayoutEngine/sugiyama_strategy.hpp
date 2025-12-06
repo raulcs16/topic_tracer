@@ -3,7 +3,7 @@
 #include "ogdf_strategy.hpp"
 #include <ogdf/layered/SugiyamaLayout.h>
 
-class SugiyamaStrategy : public OGDFStrat {
+class SugiyamaStrategy : public OGDFStrategy {
 public:
-    explicit SugiyamaStrategy(OGDFContext &ctx);
+    SugiyamaStrategy();
 };

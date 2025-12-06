@@ -1,15 +1,23 @@
 #include "fermatspiral_strategy.hpp"
 
+//TODO: add  coordinate translations
 void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
-                                 std::vector<GraphEdge> &edges) {
+                                 std::vector<GraphEdge> &edges,
+                                 BoundingBox &bbox) {
 
     const double golden = M_PI * (3 - std::sqrt(5));
     const double scale = 50.0;
     for (int i = 0; i < nodes.size(); i++) {
         double r = scale * std::sqrt(i + 1);
         double theta = i * golden;
-        nodes[i].x = r * std::cos(theta);
-        nodes[i].y = r * std::sin(theta);
+        double x = r * std::cos(theta);
+        double y = r * std::sin(theta);
+        nodes[i].x = x;
+        nodes[i].y = y;
+        bbox.max_x = x > bbox.max_x ? x : bbox.max_x;
+        bbox.min_x = x < bbox.min_x ? x : bbox.min_x;
+        bbox.max_y = y > bbox.max_y ? y : bbox.max_y;
+        bbox.min_y = y < bbox.min_y ? y : bbox.min_y;
     }
     //for each edge find the nodes with matching from and to's
     //set source x to from.x and source y to from.y similarly for target using to

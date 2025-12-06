@@ -4,7 +4,7 @@
 #include <ogdf/energybased/FMMMLayout.h>
 
 
-class FMMMStrategy : public OGDFStrat {
+class FMMMStrategy : public OGDFStrategy {
 public:
-    explicit FMMMStrategy(OGDFContext &ctx);
+    FMMMStrategy();
 };

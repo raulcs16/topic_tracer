@@ -3,14 +3,17 @@
 #include "layout_strategy.hpp"
 
 
-class OGDFStrat : public LayoutStrategy {
+class OGDFStrategy : public LayoutStrategy {
 
 public:
-    explicit OGDFStrat(OGDFContext &ctx) : m_ctx(ctx) {}
-    virtual ~OGDFStrat() = default;
-    void apply(std::vector<GraphNode> &nodes, std::vector<GraphEdge> &edges) override;
+    OGDFStrategy();
+    virtual ~OGDFStrategy() = default;
+    void apply(std::vector<GraphNode> &nodes,
+               std::vector<GraphEdge> &edges,
+               BoundingBox &bbox) override;
+    void setContext(std::weak_ptr<OGDFContext> context);
 
 protected:
     ogdf::LayoutModule *m_layout = nullptr;
-    OGDFContext &m_ctx;
+    std::weak_ptr<OGDFContext> m_ctx;
 };

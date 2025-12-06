@@ -39,6 +39,10 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
+    //Incremental API
+    void addItem(NodeItem item);
+    void updatePos(uint32_t id, double x, double y);
+
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     void resetNodes(const std::vector<NodeItem> &nodes);
 

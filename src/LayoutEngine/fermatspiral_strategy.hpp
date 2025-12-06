@@ -5,5 +5,7 @@
 class FermatSpiralStrategy : public LayoutStrategy {
 public:
     FermatSpiralStrategy() {};
-    void apply(std::vector<GraphNode> &nodes, std::vector<GraphEdge> &edges) override;
+    void apply(std::vector<GraphNode> &nodes,
+               std::vector<GraphEdge> &edges,
+               BoundingBox &bbox) override;
 };

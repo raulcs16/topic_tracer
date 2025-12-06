@@ -52,8 +52,15 @@ void TopicGraphController::createTopic(const QString &name, TopicType type) {
         m_topicList->addConfirmedItem(topic->id, name);
     }
 
-    m_layout.addNode(topic->id);
-    synchGraphView();
+    auto gNode = m_layout.addNode(topic->id);
+    if (m_nodeList) {
+        m_nodeList->addItem(NodeItem{.label = name,
+                                     .x = gNode.x,
+                                     .y = gNode.y,
+                                     .id = topic->id,
+                                     .heat = 0});
+    }
+    // synchGraphView();
 }
 void TopicGraphController::deleteTopic(const QString &topic) {
     auto ptr = m_graph.getTopic(topic.toStdString());
@@ -96,8 +103,31 @@ void TopicGraphController::join(const QString &topicA,
     auto edge = m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), type);
     if (edge == nullptr)
         return;
-    m_layout.addEdge(edge.get()->from, edge.get()->to);
-    synchGraphView();
+    GraphData data = m_layout.addEdge(edge.get()->from, edge.get()->to);
+    if (m_nodeList) {
+        for (const auto &node : data.nodes)
+            m_nodeList->updatePos(node.id, node.x, node.y);
+    }
+    if (m_edgeList) {
+        std::vector<EdgeItem> edgeList;
+        for (const auto &gedge : data.edges) {
+            std::vector<QPointF> points;
+            for (const auto &ogpoint : gedge.bends) {
+                points.push_back({ogpoint.m_x, ogpoint.m_y});
+            }
+            edgeList.push_back(EdgeItem{
+                .key = gedge.key,
+                .bends = points,
+                .from = gedge.from,
+                .to = gedge.to,
+                .source_x = gedge.source_x,
+                .source_y = gedge.source_y,
+                .target_x = gedge.target_x,
+                .target_y = gedge.target_y,
+            });
+        }
+        m_edgeList->resetEdges(edgeList);
+    }
 }
 void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) {
     auto ta = m_graph.getTopic(topicA.toStdString());
@@ -110,60 +140,60 @@ void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) 
 }
 
 void TopicGraphController::synchGraphView() {
-    if (!m_nodeList || !m_edgeList)
-        return;
-    m_layout.calculateLayout();
-    std::vector<EdgeItem> edgeList;
-    auto gEdges = m_layout.edges();
-    for (const auto &gedge : gEdges) {
-        std::vector<QPointF> points;
-        for (const auto &ogpoint : gedge.bends) {
-            points.push_back({ogpoint.m_x, ogpoint.m_y});
-        }
-        edgeList.push_back(EdgeItem{
-            .key = gedge.key,
-            .bends = points,
-            .from = gedge.from,
-            .to = gedge.to,
-            .source_x = gedge.source_x,
-            .source_y = gedge.source_y,
-            .target_x = gedge.target_x,
-            .target_y = gedge.target_y,
-        });
-    }
-    m_edgeList->resetEdges(edgeList);
+    // if (!m_nodeList || !m_edgeList)
+    //     return;
+    // m_layout.calculateLayout();
+    // std::vector<EdgeItem> edgeList;
+    // auto gEdges = m_layout.edges();
+    // for (const auto &gedge : gEdges) {
+    //     std::vector<QPointF> points;
+    //     for (const auto &ogpoint : gedge.bends) {
+    //         points.push_back({ogpoint.m_x, ogpoint.m_y});
+    //     }
+    //     edgeList.push_back(EdgeItem{
+    //         .key = gedge.key,
+    //         .bends = points,
+    //         .from = gedge.from,
+    //         .to = gedge.to,
+    //         .source_x = gedge.source_x,
+    //         .source_y = gedge.source_y,
+    //         .target_x = gedge.target_x,
+    //         .target_y = gedge.target_y,
+    //     });
+    // }
+    // m_edgeList->resetEdges(edgeList);
 
-    auto gNodes = m_layout.nodes();
-    std::vector<NodeItem> nodeList;
-    for (const auto &gnode : gNodes) {
-        auto ptr = m_graph.getTopic(gnode.id);
-        if (ptr == nullptr)
-            continue;
-        QString label = QString::fromStdString(ptr->name);
-        nodeList.push_back(
-            NodeItem{.id = gnode.id, .x = gnode.x, .y = gnode.y, .label = label});
-    }
-    m_nodeList->resetNodes(nodeList);
+    // auto gNodes = m_layout.nodes();
+    // std::vector<NodeItem> nodeList;
+    // for (const auto &gnode : gNodes) {
+    //     auto ptr = m_graph.getTopic(gnode.id);
+    //     if (ptr == nullptr)
+    //         continue;
+    //     QString label = QString::fromStdString(ptr->name);
+    //     nodeList.push_back(
+    //         NodeItem{.id = gnode.id, .x = gnode.x, .y = gnode.y, .label = label});
+    // }
+    // m_nodeList->resetNodes(nodeList);
 }
 
 
 void TopicGraphController::directedLayout() {
-    m_layout.setStrategy(std::make_unique<FMMMStrategy>(m_layout.ogdfContext()));
-    synchGraphView();
+    // m_layout.setStrategy(std::make_unique<FMMMStrategy>(m_layout.ogdfContext()));
+    // synchGraphView();
 }
 void TopicGraphController::treeLayout() {}
 void TopicGraphController::circularLayout() {}
 void TopicGraphController::planarLayout() {
-    m_layout.setStrategy(std::make_unique<OrthogonalStrategy>(m_layout.ogdfContext()));
-    synchGraphView();
+    // m_layout.setStrategy(std::make_unique<OrthogonalStrategy>(m_layout.ogdfContext()));
+    // synchGraphView();
 }
 void TopicGraphController::defaultLayout() {
-    m_layout.setStrategy(std::make_unique<FermatSpiralStrategy>());
-    synchGraphView();
+    // m_layout.setStrategy(std::make_unique<FermatSpiralStrategy>());
+    // synchGraphView();
 }
 void TopicGraphController::multiLayout() {
-    m_layout.setStrategy(std::make_unique<SugiyamaStrategy>(m_layout.ogdfContext()));
-    synchGraphView();
+    // m_layout.setStrategy(std::make_unique<SugiyamaStrategy>(m_layout.ogdfContext()));
+    // synchGraphView();
 }
 void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     auto ta = m_graph.getTopic(topicA.toStdString());

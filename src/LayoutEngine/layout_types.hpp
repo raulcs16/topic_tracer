@@ -6,6 +6,12 @@
 #include <string>
 
 
+struct BoundingBox {
+    double min_x;
+    double max_x;
+    double min_y;
+    double max_y;
+};
 struct OGDFContext {
     ogdf::Graph graph;
     ogdf::GraphAttributes attributes;
@@ -28,4 +34,9 @@ struct GraphEdge {
     double target_x;
     double target_y;
     std::vector<ogdf::DPoint> bends;
+};
+
+struct GraphData {
+    std::vector<GraphNode> nodes;
+    std::vector<GraphEdge> edges;
 };

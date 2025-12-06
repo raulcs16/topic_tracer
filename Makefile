@@ -1,4 +1,4 @@
-.Phony: all clean build compile graph show tests
+.Phony: all clean build compile graph show tests 
 
 .DEFAULT_GOAL := compile
 BUILD_DIR := build
@@ -14,7 +14,6 @@ build:
 
 compile:
 	cmake --build $(BUILD_DIR)
-	
 graph: 
 	cmake -S . -B $(BUILD_DIR) --graphviz=$(GRAPH_DOT)
 	dot -Tpng $(GRAPH_DOT) -o $(GRAPH_IMG)
@@ -25,4 +24,4 @@ run:
 	./build/app/TopicTracer.app/Contents/MacOS/TopicTracer
 
 test:
-	./$(BUILD_DIR)/tests/unit_tests "Evidence test SUIT" -v normal
+	./$(BUILD_DIR)/tests/unit_tests "LayoutTest" -v normal

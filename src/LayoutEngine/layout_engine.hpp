@@ -1,34 +1,36 @@
 #pragma once
 
+#include "disjoint_set.hpp"
+#include "icluster_layout.hpp"
 #include "layout_strategy.hpp"
 #include "layout_types.hpp"
+#include "ogdf_cluster.hpp"
+#include "ogdf_strategy.hpp"
+#include "pool_cluster.hpp"
 
 
 class LayoutEngine {
 
 public:
     explicit LayoutEngine();
-    void setStrategy(std::unique_ptr<LayoutStrategy> strategy);
-
-    inline OGDFContext &ogdfContext() { return m_ogdf; }
-
     //incremental ops
-    void addNode(uint32_t id);
+    GraphNode addNode(uint32_t id);
     void removeNode(uint32_t id);
-    void addEdge(uint32_t from, uint32_t to);
+    GraphData addEdge(uint32_t from, uint32_t to);
     void removeEdge(const std::string &key);
     void clear();
 
-    void calculateLayout();
-
-    inline const std::vector<GraphNode> &nodes() const { return m_nodes; }
-    inline const std::vector<GraphEdge> &edges() const { return m_edges; }
+private:
+    std::shared_ptr<OGDFCluster> makeClusterFromPool(uint32_t from, uint32_t to);
+    inline bool intersects(const BoundingBox &a, const BoundingBox &b) {
+        return !(a.max_x < b.min_y || a.min_y > b.max_y || a.max_y < b.min_y ||
+                 a.min_y > b.max_y);
+    }
 
 
 private:
-    OGDFContext m_ogdf;
-
-    std::unique_ptr<LayoutStrategy> m_strategy;
-    std::vector<GraphNode> m_nodes;
-    std::vector<GraphEdge> m_edges;
+    std::shared_ptr<LayoutStrategy> m_poolStrat;
+    std::shared_ptr<OGDFStrategy> m_ogdfStrat;
+    std::shared_ptr<PoolCluster> m_pool;
+    std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_componetMap;
 };
