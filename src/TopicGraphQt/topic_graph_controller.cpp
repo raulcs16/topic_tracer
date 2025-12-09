@@ -60,7 +60,6 @@ void TopicGraphController::createTopic(const QString &name, TopicType type) {
                                      .id = topic->id,
                                      .heat = 0});
     }
-    // synchGraphView();
 }
 void TopicGraphController::deleteTopic(const QString &topic) {
     auto ptr = m_graph.getTopic(topic.toStdString());
@@ -268,22 +267,54 @@ void TopicGraphController::load(QString fileName) {
     clearAll();
     QString *error = nullptr;
 
-    bool load = m_repo.load(m_graph, fileName, error);
+    TopicGraph temp;
+    bool load = m_repo.load(temp, fileName, error);
     if (error != nullptr) {
         qDebug() << error;
     }
-    for (auto topic : m_graph.topics()) {
+    for (auto topic : temp.topics()) {
+
+        m_graph.addTopic(topic->id, topic->name, topic->type);
+
+        QString name = QString::fromStdString(topic->name);
         if (m_topicList) {
-            m_topicList->addConfirmedItem(topic->id, QString::fromStdString(topic->name));
+            m_topicList->addConfirmedItem(topic->id, name);
         }
 
-        m_layout.addNode(topic->id);
+        auto gNode = m_layout.addNode(topic->id);
+        if (m_nodeList) {
+            m_nodeList->addItem(NodeItem{.label = name,
+                                         .x = gNode.x,
+                                         .y = gNode.y,
+                                         .id = topic->id,
+                                         .heat = 0});
+        }
     }
-    for (auto edge : m_graph.edges()) {
-        m_layout.addEdge(edge.get()->from, edge.get()->to);
+    for (const auto &e : temp.edges()) {
+        auto gData = m_layout.addEdge(e->from, e->to);
+        if (m_nodeList) {
+            for (const auto &node : gData.nodes)
+                m_nodeList->updatePos(node.id, node.x, node.y);
+        }
+        if (m_edgeList) {
+            for (const auto &gedge : gData.edges) {
+                std::vector<QPointF> points;
+                for (const auto &ogpoint : gedge.bends) {
+                    points.push_back({ogpoint.m_x, ogpoint.m_y});
+                }
+                m_edgeList->addItem(EdgeItem{
+                    .key = gedge.key,
+                    .bends = points,
+                    .from = gedge.from,
+                    .to = gedge.to,
+                    .source_x = gedge.source_x,
+                    .source_y = gedge.source_y,
+                    .target_x = gedge.target_x,
+                    .target_y = gedge.target_y,
+                });
+            }
+        }
     }
-    synchGraphView();
-    calculateHeatScores();
 }
 void TopicGraphController::clearAll() {
     m_graph.clear();

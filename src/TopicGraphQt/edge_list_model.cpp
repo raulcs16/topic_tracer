@@ -128,3 +128,9 @@ void EdgeListModel::deleteEdge(const std::string &key) {
     m_edges.erase(m_edges.begin() + index);
     endRemoveRows();
 }
+void EdgeListModel::addItem(EdgeItem item) {
+    const int newIndex = m_edges.size();
+    beginInsertRows(QModelIndex(), newIndex, newIndex);
+    m_edges.push_back(item);
+    endInsertRows();
+}

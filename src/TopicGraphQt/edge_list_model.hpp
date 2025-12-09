@@ -48,7 +48,7 @@ public:
     void setFlagsOnId(const std::string &key, StateFlag flags);
     void unSetFlagsOnId(const std::string &key, StateFlag flags);
 
-
+    void addItem(EdgeItem edge);
     void deleteEdge(const std::string &key);
 
 
