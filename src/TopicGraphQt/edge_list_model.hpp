@@ -47,7 +47,7 @@ public:
     void resetEdges(const std::vector<EdgeItem> &edges);
     void setFlagsOnId(const std::string &key, StateFlag flags);
     void unSetFlagsOnId(const std::string &key, StateFlag flags);
-
+    //adds or updates edge item
     void addItem(EdgeItem edge);
     void deleteEdge(const std::string &key);
 

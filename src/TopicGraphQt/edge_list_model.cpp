@@ -129,8 +129,23 @@ void EdgeListModel::deleteEdge(const std::string &key) {
     endRemoveRows();
 }
 void EdgeListModel::addItem(EdgeItem item) {
-    const int newIndex = m_edges.size();
-    beginInsertRows(QModelIndex(), newIndex, newIndex);
-    m_edges.push_back(item);
-    endInsertRows();
+
+    size_t index = getIndex(item.key);
+    if (index >= m_edges.size()) {
+
+        const int newIndex = m_edges.size();
+        beginInsertRows(QModelIndex(), newIndex, newIndex);
+        m_edges.push_back(item);
+        m_stateFlags[item.key] = {};
+        endInsertRows();
+    }
+    m_edges[index].bends = item.bends;
+    m_edges[index].source_x = item.source_x;
+    m_edges[index].source_y = item.source_y;
+    m_edges[index].target_x = item.target_x;
+    m_edges[index].target_y = item.target_y;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex,
+                     modelIndex,
+                     {BendsRole, SourceXRole, SourceXRole, TargetXRole, TargetYRole});
 }
