@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
 import Styles
-import App
 import TopicGraph
+import Canvas
 
 ApplicationWindow {
     id: app
