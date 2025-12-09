@@ -24,4 +24,4 @@ run:
 	./build/app/TopicTracer.app/Contents/MacOS/TopicTracer
 
 test:
-	./$(BUILD_DIR)/tests/unit_tests "LayoutTest" -v normal
+	./$(BUILD_DIR)/tests/unit_tests "TopicGraphTest" -v normal

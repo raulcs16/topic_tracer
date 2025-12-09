@@ -1,9 +1,13 @@
+#include "edge_store.hpp"
 #include "evidence.hpp"
 #include "heat_score.hpp"
+#include "topic_store.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Evidence test SUIT") {
-    TopicGraph tg;
+    TopicStore topics;
+    EdgeStore edges;
+    TopicGraph tg(topics, edges);
     EvidenceDB db;
     HeatScoreSystem heat(db, tg);
 
@@ -46,13 +50,13 @@ TEST_CASE("Evidence test SUIT") {
         }
         auto scores = heat.computeAllHeatScores();
         REQUIRE(scores.size() == tg.topicCount());
-        REQUIRE(scores[d1.get()] == 1);
-        REQUIRE(scores[a1.get()] == 100);
+        REQUIRE(scores[d1] == 1);
+        REQUIRE(scores[a1] == 100);
     }
     SECTION("Calculate Concept Score based off children") {
-        tg.addEdge(ca.get(), a1.get(), EdgeType::Example);
-        tg.addEdge(ca.get(), a2.get(), EdgeType::Example);
-        tg.addEdge(ca.get(), a3.get(), EdgeType::Example);
+        tg.addEdge(ca, a1, EdgeType::Example);
+        tg.addEdge(ca, a2, EdgeType::Example);
+        tg.addEdge(ca, a3, EdgeType::Example);
 
         EvidenceItem ea1_1{.filePath = "//",
                            .lineStart = 0,
@@ -78,14 +82,14 @@ TEST_CASE("Evidence test SUIT") {
         auto scores = heat.computeAllHeatScores();
 
         REQUIRE(scores.size() == tg.topicCount());
-        REQUIRE(scores[ca.get()] == 2);
+        REQUIRE(scores[ca] == 2);
     }
 
     SECTION("Calculate Concept Score based off children") {
-        tg.addEdge(cb.get(), ca.get(), EdgeType::ComposedOf);
-        tg.addEdge(ca.get(), a1.get(), EdgeType::Example);
-        tg.addEdge(ca.get(), a2.get(), EdgeType::Example);
-        tg.addEdge(ca.get(), a3.get(), EdgeType::Example);
+        tg.addEdge(cb, ca, EdgeType::ComposedOf);
+        tg.addEdge(ca, a1, EdgeType::Example);
+        tg.addEdge(ca, a2, EdgeType::Example);
+        tg.addEdge(ca, a3, EdgeType::Example);
 
         EvidenceItem ea1_1{.filePath = "//",
                            .lineStart = 0,
@@ -111,6 +115,6 @@ TEST_CASE("Evidence test SUIT") {
         auto scores = heat.computeAllHeatScores();
 
         REQUIRE(scores.size() == tg.topicCount());
-        REQUIRE(scores[cb.get()] == 1);
+        REQUIRE(scores[cb] == 1);
     }
 }

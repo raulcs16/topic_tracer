@@ -89,7 +89,7 @@ bool TopicGraphSerializer::decodeTopic(const QJsonObject &obj,
         if (error)
             *error = "failed to add topic";
     }
-    idMap[id] = topic.get();
+    idMap[id] = topic;
 
     return true;
 }

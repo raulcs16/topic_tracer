@@ -2,7 +2,8 @@
 #include "topic_graph.hpp"
 
 
-TopicGraph::TopicGraph() {
+TopicGraph::TopicGraph(ITopicStore &topicStore, IEdgeStore &edgeStore)
+    : m_topics(topicStore), m_edges(edgeStore) {
     m_validators = {
         {EdgeType::ComposedOf,
          {
@@ -44,55 +45,49 @@ TopicGraph::TopicGraph() {
 }
 
 //Topic API
-std::shared_ptr<const Topic> TopicGraph::addTopic(const std::string &name,
-                                                  TopicType topic_type) {
+const Topic *TopicGraph::addTopic(const std::string &name, TopicType topic_type) {
     if (getTopic(name) != nullptr)
-        return 0;
+        return nullptr;
     uint32_t id = nextId();
-    auto ptr = std::make_shared<Topic>(Topic{
+    auto topic = Topic{
         .id = id,
         .name = name,
         .type = topic_type,
-    });
-    m_topicMap[id] = ptr;
+    };
+    if (!m_topics.addTopic(topic))
+        return nullptr;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    return ptr;
+    return m_topics.getTopic(topic.id);
 }
 bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
-    auto it = m_topicMap.find(id);
-    if (it == m_topicMap.end())
+    auto topic = m_topics.getTopic(id);
+    if (!topic)
         return false;
-    auto exist = getTopic(new_name);
-    if (exist != nullptr) {
+    auto exist = m_topics.findTopic(new_name);
+    if (!exist) {
         return false;
     }
-    it->second.get()->name = new_name;
-    return true;
+    return m_topics.renameTopic(topic->id, new_name);
 }
 
 
 bool TopicGraph::deleteTopic(uint32_t id) {
     // Remove the topic
-    auto topicIt = m_topicMap.find(id);
-    if (topicIt == m_topicMap.end())
+    auto topic = m_topics.getTopic(id);
+    if (!topic)
         return false;
-    m_topicMap.erase(topicIt);
-
-    // Remove outgoing edges from adjacency map and edge map
     auto outIt = m_adjOutMap.find(id);
     if (outIt != m_adjOutMap.end()) {
-        for (const auto &edge : outIt->second) {
-            m_edgeMap.erase(edge->key);
-            // Also remove from inMap of target
-            auto inIt = m_adjInMap.find(edge->to);
+        for (auto to : outIt->second) {
+            m_edges.removeEdge(GraphKeys::key(topic->id, to));
+            auto inIt = m_adjInMap.find(to);
             if (inIt != m_adjInMap.end()) {
-                inIt->second.erase(std::remove_if(inIt->second.begin(),
-                                                  inIt->second.end(),
-                                                  [id](const std::shared_ptr<Edge> &e) {
-                                                      return e->from == id;
-                                                  }),
-                                   inIt->second.end());
+                inIt->second.erase(
+                    std::remove_if(inIt->second.begin(),
+                                   inIt->second.end(),
+                                   [id](uint32_t from) { return from == id; }),
+                    inIt->second.end());
             }
         }
         m_adjOutMap.erase(outIt);
@@ -101,57 +96,37 @@ bool TopicGraph::deleteTopic(uint32_t id) {
     // Remove incoming edges from adjacency map and edge map
     auto inIt = m_adjInMap.find(id);
     if (inIt != m_adjInMap.end()) {
-        for (const auto &edge : inIt->second) {
-            m_edgeMap.erase(edge->key);
+        for (auto from : inIt->second) {
+            m_edges.removeEdge(GraphKeys::key(from, id));
             // Also remove from outMap of source
-            auto outSourceIt = m_adjOutMap.find(edge->from);
+            auto outSourceIt = m_adjOutMap.find(from);
             if (outSourceIt != m_adjOutMap.end()) {
                 outSourceIt->second.erase(
-                    std::remove_if(
-                        outSourceIt->second.begin(),
-                        outSourceIt->second.end(),
-                        [id](const std::shared_ptr<Edge> &e) { return e->to == id; }),
+                    std::remove_if(outSourceIt->second.begin(),
+                                   outSourceIt->second.end(),
+                                   [id](uint32_t to) { return to == id; }),
                     outSourceIt->second.end());
             }
         }
         m_adjInMap.erase(inIt);
     }
-
-    return true;
+    return m_topics.removeTopic(id);
 }
 
-std::shared_ptr<const Topic> TopicGraph::getTopic(uint32_t id) const {
-    auto it = m_topicMap.find(id);
-    if (it == m_topicMap.end())
-        return nullptr;
-    return it->second;
+const Topic *TopicGraph::getTopic(uint32_t id) const { return m_topics.getTopic(id); }
+const Topic *TopicGraph::getTopic(const std::string &name) const {
+    return m_topics.findTopic(name);
 }
-std::shared_ptr<const Topic> TopicGraph::getTopic(const std::string &name) const {
-    for (const auto &[id, tnode] : m_topicMap) {
-        if (tnode->name == name) {
-            return tnode;
-        }
-    }
-    return nullptr;
-}
-std::vector<std::shared_ptr<const Topic>> TopicGraph::topics() const {
-    std::vector<std::shared_ptr<const Topic>> result;
-    result.reserve(m_topicMap.size());
-    for (auto &[_, topic] : m_topicMap)
-        result.push_back(topic);
-    return result;
-}
+std::vector<const Topic *> TopicGraph::topics() const { return m_topics.getAllTopics(); }
 
 /*
 Enforce Rules such as making sure EdgeType matches TopicType(s) beign connected
 */
 
-std::shared_ptr<const Edge> TopicGraph::addEdge(const Topic *a,
-                                                const Topic *b,
-                                                EdgeType type) {
+const Edge *TopicGraph::addEdge(const Topic *a, const Topic *b, EdgeType type) {
     if (!a || !b)
         return nullptr;
-    if (!m_topicMap.contains(a->id) || !m_topicMap.contains(b->id)) {
+    if (!m_topics.contains(a->id) || !m_topics.contains(b->id)) {
         return nullptr;
     }
     auto [parent, child] = normalizeJoin(a, b, type);
@@ -168,48 +143,43 @@ std::shared_ptr<const Edge> TopicGraph::addEdge(const Topic *a,
             return nullptr;
     }
 
-    auto edgePtr = std::make_shared<Edge>(
-        Edge{.key = key, .from = parent->id, .to = child->id, .type = type});
-    m_edgeMap[key] = edgePtr;
-    m_adjOutMap[parent->id].push_back(edgePtr);
-    m_adjInMap[child->id].push_back(edgePtr);
-    return edgePtr;
+    auto edge = Edge(Edge{.key = key, .from = parent->id, .to = child->id, .type = type});
+    m_edges.addEdge(edge);
+    m_adjOutMap[parent->id].push_back(child->id);
+    m_adjInMap[child->id].push_back(parent->id);
+    return m_edges.getEdge(edge.key);
 }
-std::shared_ptr<const Edge> TopicGraph::addEdge(uint32_t from,
-                                                uint32_t to,
-                                                EdgeType type) {
-
+const Edge *TopicGraph::addEdge(uint32_t from, uint32_t to, EdgeType type) {
     auto pFrom = getTopic(from);
     auto pTo = getTopic(to);
-    return addEdge(pFrom.get(), pTo.get(), type);
+    return addEdge(pFrom, pTo, type);
 }
-std::shared_ptr<const Edge> TopicGraph::addEdge(const std::string &topicA,
-                                                const std::string &topicB,
-                                                EdgeType type) {
+const Edge *TopicGraph::addEdge(const std::string &topicA,
+                                const std::string &topicB,
+                                EdgeType type) {
     auto ta = getTopic(topicA);
     auto tb = getTopic(topicB);
-    return addEdge(ta.get(), tb.get(), type);
+    return addEdge(ta, tb, type);
 }
-bool TopicGraph::hasEdge(const std::string &key) { return m_edgeMap.count(key); }
+bool TopicGraph::hasEdge(const std::string &key) { return m_edges.contains(key); }
 bool TopicGraph::removeEdge(uint32_t from, uint32_t to) {
     std::string key = makeKey(from, to);
-    auto it = m_edgeMap.find(key);
-    if (it == m_edgeMap.end())
+    auto success = m_edges.removeEdge(key);
+    if (!success)
         return false;
 
     auto &outVec = m_adjOutMap[from];
     outVec.erase(std::remove_if(outVec.begin(),
                                 outVec.end(),
-                                [&key](const auto &e) { return e->key == key; }),
+                                [&to](uint32_t key) { return key == to; }),
                  outVec.end());
 
     auto &inVec = m_adjInMap[to];
     inVec.erase(std::remove_if(inVec.begin(),
                                inVec.end(),
-                               [&key](const auto &e) { return e->key == key; }),
+                               [&from](uint32_t key) { return from == key; }),
                 inVec.end());
-    m_edgeMap.erase(it);
-    return true;
+    return success;
 }
 bool TopicGraph::removeEdge(const std::string &topicA, const std::string &topicB) {
     auto ta = getTopic(topicA);
@@ -218,48 +188,36 @@ bool TopicGraph::removeEdge(const std::string &topicA, const std::string &topicB
         return false;
     return removeEdge(ta->id, tb->id);
 }
-std::shared_ptr<const Edge> TopicGraph::getEdge(const std::string &key) const {
-    auto it = m_edgeMap.find(key);
-    return it != m_edgeMap.end() ? it->second : nullptr;
+const Edge *TopicGraph::getEdge(uint32_t from, uint32_t to) const {
+    return m_edges.getEdge(GraphKeys::key(from, to));
 }
-std::shared_ptr<const Edge> TopicGraph::getEdge(uint32_t from, uint32_t to) const {
-    return getEdge(GraphKeys::key(from, to));
+std::vector<const Edge *> TopicGraph::edges() const { return m_edges.getAllEdges(); }
+std::vector<const Edge *> TopicGraph::getOutEdges(uint32_t from) const {
+    return m_edges.getEdgesFrom(from);
 }
-std::vector<std::shared_ptr<Edge>> TopicGraph::edges() const {
-    std::vector<std::shared_ptr<Edge>> result;
-    for (auto &[_, edge] : m_edgeMap) {
-        result.push_back(edge);
-    }
-    return result;
-}
-std::vector<std::shared_ptr<Edge>> TopicGraph::getOutEdges(uint32_t from) const {
-    auto it = m_adjOutMap.find(from);
-    return it != m_adjOutMap.end() ? it->second : std::vector<std::shared_ptr<Edge>>{};
-}
-std::vector<std::shared_ptr<Edge>> TopicGraph::getInEdges(uint32_t to) const {
-    auto it = m_adjInMap.find(to);
-    return it != m_adjInMap.end() ? it->second : std::vector<std::shared_ptr<Edge>>{};
+std::vector<const Edge *> TopicGraph::getInEdges(uint32_t to) const {
+    return m_edges.getEdgesTo(to);
 }
 
-std::shared_ptr<const Topic> TopicGraph::parent(uint32_t id) {
+const Topic *TopicGraph::parent(uint32_t id) {
     auto it = m_adjInMap.find(id);
     if (it == m_adjInMap.end())
         return nullptr;
 
-    for (const auto &edge : it->second) {
+    for (uint32_t from : it->second) {
+        auto edge = m_edges.getEdge(GraphKeys::key(from, id));
+        if (!edge)
+            continue;
         if (edge->type == EdgeType::ComposedOf || edge->type == EdgeType::Example) {
             return getTopic(edge->from);
         }
     }
     return nullptr;
 }
-std::vector<std::shared_ptr<const Topic>> TopicGraph::childrenOf(uint32_t id) {
-    auto it = m_adjOutMap.find(id);
-    if (it == m_adjOutMap.end()) {
-        return {};
-    }
-    std::vector<std::shared_ptr<const Topic>> children;
-    for (const auto &e : it->second) {
+std::vector<const Topic *> TopicGraph::childrenOf(uint32_t id) {
+    auto outEdges = m_edges.getEdgesFrom(id);
+    std::vector<const Topic *> children;
+    for (const auto &e : outEdges) {
         auto topic = getTopic(e->to);
         if (topic) {
             children.push_back(topic);
@@ -277,11 +235,8 @@ std::vector<uint32_t> TopicGraph::ancestorsOf(uint32_t id) {
     return ancestors;
 }
 bool TopicGraph::hasParent(uint32_t node, EdgeType parentType) const {
-    auto it = m_adjInMap.find(node);
-    if (it == m_adjInMap.end())
-        return false;
-
-    for (auto &e : it->second) {
+    auto edges = m_edges.getEdgesTo(node);
+    for (auto &e : edges) {
         if (e->type == parentType)
             return true;
     }
@@ -300,7 +255,7 @@ bool TopicGraph::dfsReachable(uint32_t start,
         return true;
     visited.insert(start);
 
-    for (auto &edge : m_adjOutMap[start]) {
+    for (auto &edge : m_edges.getEdgesFrom(start)) {
         if (edge->type != EdgeType::ComposedOf && edge->type != EdgeType::Example)
             continue;
 
@@ -327,41 +282,10 @@ uint32_t TopicGraph::nextId() { return m_id_ref++; }
 std::string TopicGraph::makeKey(uint32_t from, uint32_t to) {
     return GraphKeys::key(from, to);
 }
-std::shared_ptr<const Topic> TopicGraph::addTopic(uint32_t id,
-                                                  const std::string &name,
-                                                  TopicType type) {
-    if (getTopic(name) != nullptr || getTopic(id) != nullptr)
-        return nullptr;
-
-    m_id_ref = id + 1;
-    auto ptr = std::make_shared<Topic>(Topic{
-        .id = id,
-        .name = name,
-        .type = type,
-    });
-
-    m_topicMap[id] = ptr;
-    m_adjOutMap[id] = {};
-    m_adjInMap[id] = {};
-    return ptr;
-}
-std::shared_ptr<const Edge> TopicGraph::addEdge(Edge edge) {
-    if (!m_topicMap.contains(edge.from) || !m_topicMap.contains(edge.to)) {
-        return nullptr;
-    }
-
-    if (hasEdge(edge.key))
-        return nullptr;
-    auto edgePtr = std::make_shared<Edge>(edge);
-    m_edgeMap[edge.key] = edgePtr;
-    m_adjOutMap[edge.from].push_back(edgePtr);
-    m_adjInMap[edge.to].push_back(edgePtr);
-    return edgePtr;
-}
 
 void TopicGraph::clear() {
-    m_topicMap.clear();
-    m_edgeMap.clear();
+    m_topics.clear();
+    m_edges.clear();
     m_adjInMap.clear();
     m_adjOutMap.clear();
     m_id_ref = 1;

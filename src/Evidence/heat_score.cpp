@@ -19,7 +19,7 @@ int HeatScoreSystem::computeHeatScore(
     int score = 0;
     if (topic->type == TopicType::Concept) {
         for (auto tc : m_topicGraph.childrenOf(topic->id)) {
-            int childScore = computeHeatScore(tc.get(), memo);
+            int childScore = computeHeatScore(tc, memo);
             score += childScore > 0 ? 1 : 0;
         }
     } else {
@@ -34,7 +34,7 @@ std::unordered_map<const Topic *, int> HeatScoreSystem::computeAllHeatScores() c
     std::unordered_map<const Topic *, int> heatScores;
     std::unordered_map<const Topic *, int> memo;
     for (auto topic : m_topicGraph.topics()) {
-        heatScores[topic.get()] = computeHeatScore(topic.get(), memo);
+        heatScores[topic] = computeHeatScore(topic, memo);
     }
 
     return heatScores;

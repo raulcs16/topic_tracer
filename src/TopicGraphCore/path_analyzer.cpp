@@ -175,7 +175,7 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
     std::unordered_map<uint32_t, double> dist;
     std::unordered_map<uint32_t, int> parents;
     for (const auto &v : graph.topics()) {
-        if (v.get()->id != start_id) {
+        if (v->id != start_id) {
             dist[v->id] = std::numeric_limits<double>::infinity();
             parents[v->id] = -1;
         }
