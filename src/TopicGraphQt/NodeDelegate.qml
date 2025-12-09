@@ -55,4 +55,17 @@ Item {
         anchors.topMargin: 4
         font.pointSize: root.hover ? 16 : 12
     }
+    Behavior on x {
+        NumberAnimation {
+            duration: 200
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    Behavior on y {
+        NumberAnimation {
+            duration: 200
+            easing.type: Easing.InOutQuad
+        }
+    }
 }
