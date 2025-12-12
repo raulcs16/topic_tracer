@@ -14,6 +14,11 @@ build:
 
 compile:
 	cmake --build $(BUILD_DIR)
+
+app:
+	cmake -S .B $(BUILD_DIR) -DTESTING=OFF
+	cmake --build $(BUILD_DIR)
+
 graph: 
 	cmake -S . -B $(BUILD_DIR) --graphviz=$(GRAPH_DOT)
 	dot -Tpng $(GRAPH_DOT) -o $(GRAPH_IMG)
@@ -23,5 +28,6 @@ show:
 run:
 	./build/app/TopicTracer.app/Contents/MacOS/TopicTracer
 
-test:
-	./$(BUILD_DIR)/tests/unit_tests "TopicGraphTest" -v normal
+coverage:
+	cmake -S . -B $(BUILD_DIR) -DCOVERAGE=ON
+	cmake --build $(BUILD_DIR) --target coverage
