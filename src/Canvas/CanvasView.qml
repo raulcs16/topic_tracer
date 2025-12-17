@@ -21,7 +21,6 @@ Item {
     Item {
         id: contentItem
         scale: root.zoom
-        transformOrigin: Item.TopLeft
 
         Rectangle {
             anchors.centerIn: parent

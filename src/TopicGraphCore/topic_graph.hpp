@@ -12,9 +12,8 @@ class TopicGraph {
 public:
     explicit TopicGraph(ITopicStore &topicStore, IEdgeStore &edgeStore);
     ~TopicGraph() = default;
-    //Topic API
-    const Topic *addTopic(const std::string &name, TopicType type = TopicType::Concept);
-    const Topic *addTopic(uint32_t id, const std::string &name, TopicType type);
+    const Topic *addTopic(const std::string &name);
+    const Topic *addTopic(uint32_t id, const std::string &name);
     bool renameTopic(uint32_t id, const std::string &new_name);
     bool deleteTopic(uint32_t id);
     //getters
@@ -45,41 +44,10 @@ public:
     size_t edgeCount() const { return m_edges.size(); }
     size_t topicCount() const { return m_topics.size(); }
 
-    const Topic *parent(uint32_t);
+    std::vector<const Topic *> parentsOf(uint32_t);
     std::vector<const Topic *> childrenOf(uint32_t id);
-    std::vector<uint32_t> ancestorsOf(uint32_t id);
-    // std::vector<uint32_t> descendantsOf(uint32_t id);
-
-    inline static bool isConcept(const Topic *t) { return t->type == TopicType::Concept; }
-    inline static bool isConcrete(const Topic *t) {
-        return t->type == TopicType::Concrete;
-    }
-    bool hasParent(uint32_t node, EdgeType parentType) const;
-    inline static bool sameType(const Topic *a, const Topic *b) {
-        return a->type == b->type;
-    }
-    inline bool sameParent(const Topic *a, const Topic *b) {
-        auto pa = parent(a->id);
-        auto pb = parent(b->id);
-        return pa != nullptr && pa == pb;
-    }
-    inline bool sameParent(uint32_t a, uint32_t b) {
-        auto pa = parent(a);
-        auto pb = parent(b);
-        return pa != nullptr && pa == pb;
-    }
-    bool makesCycle(uint32_t from, uint32_t to, EdgeType type);
-    bool dfsReachable(uint32_t start,
-                      uint32_t target,
-                      std::unordered_set<uint32_t> &visited);
-
-
-    std::pair<const Topic *, const Topic *> normalizeJoin(const Topic *a,
-                                                          const Topic *b,
-                                                          EdgeType type);
 
     void clear();
-
 
 private:
     uint32_t nextId();
@@ -90,7 +58,5 @@ private:
     IEdgeStore &m_edges;
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjOutMap;
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjInMap;
-    using Rule = std::function<bool(const Topic *, const Topic *)>;
-    std::unordered_map<EdgeType, std::vector<Rule>> m_validators;
     uint32_t m_id_ref = 1;
 };

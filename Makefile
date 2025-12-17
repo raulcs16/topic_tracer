@@ -17,7 +17,6 @@ compile:
 
 app:
 	cmake -S .B $(BUILD_DIR) -DTESTING=OFF
-	cmake --build $(BUILD_DIR)
 
 graph: 
 	cmake -S . -B $(BUILD_DIR) --graphviz=$(GRAPH_DOT)

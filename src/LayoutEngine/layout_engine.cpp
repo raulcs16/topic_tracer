@@ -9,24 +9,24 @@ LayoutEngine::LayoutEngine() {
     m_poolStrat = std::make_shared<FermatSpiralStrategy>();
     m_ogdfStrat = std::make_shared<FMMMStrategy>();
     m_pool = std::make_shared<PoolCluster>(m_poolStrat, 100);
+    m_clusters = 1;
 }
 
 void LayoutEngine::clear() {}
-GraphNode LayoutEngine::addNode(uint32_t id) {
+void LayoutEngine::addNode(uint32_t id) {
     auto gNode = m_pool->addNode(id);
-    m_componetMap[id] = m_pool;
-    return gNode;
+    m_clusterMap[id] = m_pool;
 }
 void LayoutEngine::removeNode(uint32_t id) {
-    auto it = m_componetMap.find(id);
-    if (it != m_componetMap.end()) {
+    auto it = m_clusterMap.find(id);
+    if (it != m_clusterMap.end()) {
         it->second->removeNode(id);
     }
 }
-GraphData LayoutEngine::addEdge(uint32_t from, uint32_t to) {
-    auto fromIt = m_componetMap.find(from);
-    auto toIt = m_componetMap.find(to);
-    if (fromIt == m_componetMap.end() || toIt == m_componetMap.end()) {
+void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
+    auto fromIt = m_clusterMap.find(from);
+    auto toIt = m_clusterMap.find(to);
+    if (fromIt == m_clusterMap.end() || toIt == m_clusterMap.end()) {
         throw std::invalid_argument("invalid id");
     }
     std::shared_ptr<IClusterLayout> merger;
@@ -34,45 +34,26 @@ GraphData LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         //exist in pool
         if (fromIt->second == m_pool && toIt->second == m_pool) {
             merger = makeClusterFromPool(from, to);
-        } else {
+        } else { //both not in pool but same cluster
             fromIt->second->addEdge(from, to);
             merger = fromIt->second;
         }
-    } else if (fromIt->second == m_pool) {
-        m_pool->removeNode(from);
-        toIt->second->addNode(from);
-        toIt->second->addEdge(from, to);
-        m_componetMap[from] = toIt->second;
-        merger = toIt->second;
-    } else if (toIt->second == m_pool) {
-        m_pool->removeNode(to);
-        fromIt->second->addNode(to);
-        fromIt->second->addEdge(from, to);
-        m_componetMap[to] = fromIt->second;
-        merger = toIt->second;
+        //from or to in pool
+    } else if (fromIt->second == m_pool || toIt->second == m_pool) {
+        bool fromInPool = fromIt->second == m_pool;
+        merger = extractFromPoolMergeNewCluster(from, to, fromInPool);
+        //mergeCluster
     } else {
-        auto mergeTo =
-            fromIt->second->nodes().size() < toIt->second->nodes().size() ? fromIt : toIt;
-        auto mergeFrom = mergeTo == fromIt ? toIt : fromIt;
-
-        for (auto &node : mergeFrom->second->nodes()) {
-            mergeTo->second->appendNode(node.id);
-            m_componetMap[node.id] = mergeTo->second;
-        }
-        for (auto &edge : mergeFrom->second->edges()) {
-            mergeTo->second->addEdge(edge.from, edge.to);
-        }
-        mergeTo->second->addEdge(from, to);
-        mergeTo->second->apply();
-        m_componetMap.erase(mergeFrom);
-        merger = mergeTo->second;
+        merger = mergeClusters(from, to);
     }
-    return {merger->nodes(), merger->edges()};
+    if (merger) {
+        merger->apply();
+    }
 }
 void LayoutEngine::removeEdge(const std::string &k) {
-    auto fromIt = m_componetMap.find(GraphKeys::extractFrom(k));
-    auto toIt = m_componetMap.find(GraphKeys::extractTo(k));
-    if (fromIt == m_componetMap.end() || toIt == m_componetMap.end()) {
+    auto fromIt = m_clusterMap.find(GraphKeys::extractFrom(k));
+    auto toIt = m_clusterMap.find(GraphKeys::extractTo(k));
+    if (fromIt == m_clusterMap.end() || toIt == m_clusterMap.end()) {
         return;
     }
     if (fromIt != toIt) {
@@ -82,13 +63,76 @@ void LayoutEngine::removeEdge(const std::string &k) {
 }
 std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
                                                                uint32_t to) {
-    auto newComponent = std::make_shared<OGDFCluster>(m_ogdfStrat);
+    auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
     m_pool->removeNode(from);
     m_pool->removeNode(to);
-    newComponent->appendNode(from);
-    newComponent->appendNode(to);
-    newComponent->addEdge(from, to);
-    m_componetMap[from] = newComponent;
-    m_componetMap[to] = newComponent;
-    return newComponent;
+    newCluster->appendNode(from);
+    newCluster->appendNode(to);
+    newCluster->addEdge(from, to);
+    m_clusterMap[from] = newCluster;
+    m_clusterMap[to] = newCluster;
+    m_clusters++;
+    return newCluster;
+}
+
+std::shared_ptr<OGDFCluster> LayoutEngine::mergeClusters(uint32_t from, uint32_t to) {
+    auto fromIt = m_clusterMap.find(from);
+    auto toIt = m_clusterMap.find(to);
+    if (fromIt == m_clusterMap.end() || fromIt->second == m_pool) {
+        return nullptr;
+    }
+    if (toIt == m_clusterMap.end() || toIt->second == m_pool) {
+        return nullptr;
+    }
+    auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
+    auto fromCluster = fromIt->second;
+    auto cluster = toIt->second;
+    for (auto node : fromCluster->nodes()) {
+        newCluster->addNode(node.id);
+        m_clusterMap[node.id] = newCluster;
+    }
+    for (auto node : cluster->nodes()) {
+        newCluster->addNode(node.id);
+        m_clusterMap[node.id] = newCluster;
+    }
+    for (auto edge : fromCluster->edges()) {
+        newCluster->addEdge(edge.from, edge.to);
+    }
+    for (auto edge : cluster->edges()) {
+        newCluster->addEdge(edge.from, edge.to);
+    }
+    newCluster->addEdge(from, to);
+    m_clusterMap.erase(fromIt);
+    m_clusterMap.erase(toIt);
+    m_clusters--; //only remove one to account for new one created
+    m_clusterMap[from] = newCluster;
+    m_clusterMap[to] = newCluster;
+
+    return newCluster;
+}
+std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
+    uint32_t from,
+    uint32_t to,
+    bool fromInPool) {
+
+    uint32_t pool_id = fromInPool ? from : to;
+    uint32_t cluster_id = fromInPool ? to : from;
+    auto it = m_clusterMap.find(cluster_id);
+    if (it == m_clusterMap.end() || it->second == m_pool) {
+        return nullptr;
+    }
+    m_pool->removeNode(pool_id);
+    auto cluster = it->second;
+    auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
+    for (auto node : cluster->nodes()) {
+        newCluster->addNode(node.id);
+        m_clusterMap[node.id] = newCluster;
+    }
+    for (auto edge : cluster->edges()) {
+        newCluster->addEdge(edge.from, edge.to);
+    }
+    newCluster->addNode(pool_id);
+    m_clusterMap[pool_id] = newCluster;
+    newCluster->addEdge(from, to);
+    return newCluster;
 }
