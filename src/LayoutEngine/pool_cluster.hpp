@@ -31,12 +31,12 @@ private:
         uint32_t id = 0;
     };
 
-    std::vector<GraphNode> m_nodes;               // actual positioned nodes
-    std::vector<GraphEdge> m_edges;               // actual positioned nodes
+    std::vector<GraphNode> m_nodes; // actual positioned nodes
+    std::vector<GraphEdge> m_edges; // actual positioned nodes
+    BoundingBox m_bbox;
     std::vector<Slot> m_slots;                    // occupancy map
     std::unordered_map<uint32_t, int> m_indexMap; // id → slot index
     size_t m_capacity;
 
-    BoundingBox m_bbox;
     std::shared_ptr<LayoutStrategy> m_strategy;
 };

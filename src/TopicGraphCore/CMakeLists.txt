@@ -1,17 +1,5 @@
 add_library(TopicGraphCore STATIC
     topic_graph_types.hpp
-
-    itopic_store.hpp
-    itopic_store_listener.hpp
-    iedge_store.hpp
-    iedge_store_listener.hpp
-
-    topic_store.hpp
-    topic_store.cpp
-
-    edge_store.hpp
-    edge_store.cpp
-    
     topic_graph.cpp
     topic_graph.hpp
     # edge_semantic.hpp

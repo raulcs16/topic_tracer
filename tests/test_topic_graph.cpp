@@ -1,12 +1,9 @@
-#include "edge_store.hpp"
 #include "path_analyzer.hpp"
 #include "topic_graph.hpp"
-#include "topic_store.hpp"
 #include <catch2/catch_test_macros.hpp>
 
-TopicStore topics;
-EdgeStore edges;
-TopicGraph graph(topics, edges);
+
+TopicGraph graph;
 
 TEST_CASE("Add Topics, all unique") {
 

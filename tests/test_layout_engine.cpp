@@ -1,3 +1,4 @@
+#include "fermatspiral_strategy.hpp"
 #include "layout_engine.hpp"
 #include <catch2/catch_test_macros.hpp>
 
@@ -42,4 +43,19 @@ TEST_CASE("Merging 2 cluster,reduces cluster count,by 1") {
     engine.addEdge(4, 3);
     auto after = engine.clusterCount();
     REQUIRE(after == before - 1);
+}
+
+TEST_CASE("FermatSpiralStrategy, clamped between [-1,1] on x and y") {
+    std::vector<GraphNode> nodes;
+    std::vector<GraphEdge> edges;
+    for (uint32_t i = 0; i < 100; i++) {
+        nodes.push_back(GraphNode{.id{i}, .x{0}, .y{0}});
+    }
+    FermatSpiralStrategy strategy;
+    BoundingBox bbox{.max_x{0}, .max_y{0}, .min_x{0}, .min_y{0}};
+    strategy.apply(nodes, edges, bbox);
+    REQUIRE(bbox.min_x >= -2);
+    REQUIRE(bbox.min_y >= -2);
+    REQUIRE(bbox.max_x <= 2);
+    REQUIRE(bbox.max_y <= 2);
 }

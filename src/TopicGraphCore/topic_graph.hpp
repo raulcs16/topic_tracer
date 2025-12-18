@@ -1,17 +1,26 @@
 #pragma once
 
 
-#include "iedge_store.hpp"
-#include "itopic_store.hpp"
 #include "topic_graph_types.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+struct ITopicGraphObserver {
+    virtual ~ITopicGraphObserver() = default;
+
+    virtual void onTopicAdded(const Topic &topic) {}
+    virtual void onTopicRemoved(const Topic &topic) {}
+    virtual void onTopicRenamed(const Topic &topic) {}
+    virtual void onEdgeAdded(const Edge &edge) {}
+    virtual void onEdgeRemoved(const Edge &edge) {}
+
+    virtual void onClear() {}
+};
+
 class TopicGraph {
 public:
-    explicit TopicGraph(ITopicStore &topicStore, IEdgeStore &edgeStore);
-    ~TopicGraph() = default;
+    ~TopicGraph();
     const Topic *addTopic(const std::string &name);
     const Topic *addTopic(uint32_t id, const std::string &name);
     bool renameTopic(uint32_t id, const std::string &new_name);
@@ -48,14 +57,26 @@ public:
     std::vector<const Topic *> childrenOf(uint32_t id);
 
     void clear();
+    void addObserver(ITopicGraphObserver *observer);
+    void removeObserver(ITopicGraphObserver *observer);
 
 private:
     uint32_t nextId();
     std::string makeKey(uint32_t from, uint32_t to);
 
+
 private:
-    ITopicStore &m_topics;
-    IEdgeStore &m_edges;
+    void notifyTopicAdded(const Topic &topic);
+    void notifyTopicRemoved(const Topic &topic);
+    void notifyTopicRenamed(const Topic &topic);
+    void notifyEdgeAdded(const Edge &topic);
+    void notifyEdgeRemoved(const Edge &topic);
+    void notifyClear();
+
+private:
+    std::unordered_map<uint32_t, Topic *> m_topics;
+    std::unordered_map<std::string, Edge *> m_edges;
+    std::vector<ITopicGraphObserver *> m_observers;
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjOutMap;
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjInMap;
     uint32_t m_id_ref = 1;

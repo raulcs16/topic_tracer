@@ -6,12 +6,17 @@ void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
                                  BoundingBox &bbox) {
 
     const double golden = M_PI * (3 - std::sqrt(5));
-    const double scale = 50.0;
     for (int i = 0; i < nodes.size(); i++) {
-        double r = scale * std::sqrt(i + 1);
+        double r = std::sqrt(i + 1);
         double theta = i * golden;
         double x = r * std::cos(theta);
         double y = r * std::sin(theta);
+
+        double m = std::max(std::abs(x), std::abs(y));
+        if (m > 0.0) {
+            x /= m;
+            y /= m;
+        }
         nodes[i].x = x;
         nodes[i].y = y;
         bbox.max_x = x > bbox.max_x ? x : bbox.max_x;
