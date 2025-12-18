@@ -109,7 +109,6 @@ Item {
                     let topicName = text.trim();
                     if (topicName.length > 0) {
                         root.model.addItem(topicName);
-                        root.model.currentIndex = root.model.rowCount() - 1;
                     }
                     text = "";
                     root.model.isAddingNewTopic = false;

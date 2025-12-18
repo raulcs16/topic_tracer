@@ -17,6 +17,9 @@ ApplicationWindow {
     required property int minor
     required property int patch
 
+    TopicGraphController {
+        id: topic_controller
+    }
     function parseCommand(cmd) {
         const parts = cmd.split(" ");
         const command = parts[0];
@@ -50,22 +53,17 @@ ApplicationWindow {
                     console.warn("Usage: touch <name>");
                     return;
                 }
-                let type = ENUMS.TopicType.Concept;
                 let joinConcept = null;
-                if (args[0] === "-concrete") {
-                    type = ENUMS.TopicType.Concrete;
-                    args.shift(); // Remove the flag from args
-                    if (args[args.length - 1][0] == ">") {
-                        joinConcept = args[args.length - 1].substring(1); // remove the ">" prefix
-                        args.pop();
-                    }
+                if (args[args.length - 1][0] == ">") {
+                    joinConcept = args[args.length - 1].substring(1); // remove the ">" prefix
+                    args.pop();
                 }
 
                 for (let i = 0; i < args.length; i++) {
                     const topicName = args[i];
                     if (topicName.length == 0)
                         continue;
-                    topic_controller.createTopic(topicName, type);
+                    topic_controller.createTopic(topicName);
                     if (joinConcept) {
                         topic_controller.join(topicName, joinConcept, ENUMS.EdgeType.Example);
                     }
@@ -185,9 +183,6 @@ ApplicationWindow {
         onActivated: commandInput.focus = true
     }
 
-    TopicGraphController {
-        id: topic_controller
-    }
     RowLayout {
         anchors.fill: parent
         spacing: 0

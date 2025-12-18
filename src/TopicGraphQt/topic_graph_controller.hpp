@@ -1,12 +1,9 @@
 #pragma once
 
 #include "edge_list_model.hpp"
-#include "evidence.hpp"
-#include "heat_score.hpp"
 #include "layout_engine.hpp"
 #include "node_list_model.hpp"
 #include "topic_graph.hpp"
-#include "topic_graph_repo.hpp"
 #include "topic_list_model.hpp"
 #include "ui_states.hpp"
 #include <QObject>
@@ -31,8 +28,7 @@ public:
     void calculateHeatScores();
     //QML API
 
-    Q_INVOKABLE void createTopic(const QString &name,
-                                 TopicType type = TopicType::Concept);
+    Q_INVOKABLE void createTopic(const QString &name);
 
     Q_INVOKABLE void deleteTopic(const QString &name);
     Q_INVOKABLE void join(const QString &topicA,
@@ -58,6 +54,7 @@ public:
     Q_INVOKABLE QString handleAutoComplete();
 
 public slots:
+    void onTopicRequested(const QString &topic);
     void onTopicHovered(uint32_t id);
     void onTopicUnHovered(uint32_t id);
     void onTopicSelected(uint32_t id);
@@ -78,10 +75,10 @@ private:
 private:
     TopicGraph m_graph;
     LayoutEngine m_layout;
-    EvidenceDB m_evidenceDb;
+    // EvidenceDB m_evidenceDb;
 
-    TopicGraphRepository m_repo;
-    HeatScoreSystem *m_heatScore;
+    // TopicGraphRepository m_repo;
+    // HeatScoreSystem *m_heatScore;
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;

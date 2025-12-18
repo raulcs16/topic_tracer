@@ -8,10 +8,10 @@ target_link_libraries(TopicGraphQt
     PRIVATE Qt6::Core
     PRIVATE Qt6::Quick
     PUBLIC TopicGraphCore
-    PUBLIC Evidence
+    # PUBLIC Evidence
     PUBLIC LayoutEngine
     PUBLIC OGDF
-    PUBLIC Persistence
+    # PUBLIC Persistence
 )
 
 qt_add_qml_module(TopicGraphQt

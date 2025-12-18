@@ -88,13 +88,7 @@ void TopicListModel::addItem(const QString &name) {
         qWarning() << "Cannot add a topic with an empty name.";
         return;
     }
-
-    const int newRow = m_topics.size();
-
-    beginInsertRows(QModelIndex(), newRow, newRow);
-    m_topics.push_back(TopicItem{.id = 0, .name = topicName, .pending = true});
-    endInsertRows();
-    emit requestAddTopic(m_topics.size() - 1, topicName);
+    emit requestAddTopic(topicName);
 }
 
 void TopicListModel::addConfirmedItem(uint32_t id, const QString &name) {
@@ -297,3 +291,18 @@ void TopicListModel::clear() {
     m_stateFlags.clear();
     endResetModel();
 }
+
+void TopicListModel::onTopicAdded(const Topic &topic) {
+    const int newRow = m_topics.size();
+    beginInsertRows(QModelIndex(), newRow, newRow);
+    m_topics.push_back(TopicItem{.id = topic.id,
+                                 .name = QString::fromStdString(topic.name),
+                                 .pending = false});
+    m_stateFlags.insert({topic.id, ItemState{}});
+    endInsertRows();
+}
+void TopicListModel::onTopicRemoved(const Topic &topic) {}
+void TopicListModel::onTopicRenamed(const Topic &topic) {}
+void TopicListModel::onEdgeAdded(const Edge &edge) {}
+void TopicListModel::onEdgeRemoved(const Edge &edge) {}
+void TopicListModel::onClear() { clear(); }

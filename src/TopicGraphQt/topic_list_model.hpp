@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "topic_graph.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -14,7 +15,7 @@ struct TopicItem {
     bool pending;
 };
 
-class TopicListModel : public QAbstractListModel {
+class TopicListModel : public QAbstractListModel, public ITopicGraphObserver {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Must be created by owner")
@@ -71,11 +72,18 @@ public:
     void setIsAddingNewTopic(bool value);
     void clear();
 
+    //ITopicGraphObserver
+    void onTopicAdded(const Topic &topic) override;
+    void onTopicRemoved(const Topic &topic) override;
+    void onTopicRenamed(const Topic &topic) override;
+    void onEdgeAdded(const Edge &edge) override;
+    void onEdgeRemoved(const Edge &edge) override;
+    void onClear() override;
 signals:
     //state changes
     void isAddingNewTopicChanged();
     //emit the id of the item whos state is being set
-    void requestAddTopic(int index, const QString &name);
+    void requestAddTopic(const QString &name);
 
     void topicHovered(uint32_t id);
     void topicUnHovered(uint32_t id);

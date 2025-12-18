@@ -234,10 +234,7 @@ void TopicGraph::clear() {
 }
 
 void TopicGraph::addObserver(ITopicGraphObserver *observer) {
-    auto found = std::find(m_observers.begin(), m_observers.end(), observer);
-    if (found != m_observers.end()) {
-        m_observers.push_back(observer);
-    }
+    m_observers.push_back(observer);
 }
 void TopicGraph::removeObserver(ITopicGraphObserver *observer) {
     m_observers.erase(
