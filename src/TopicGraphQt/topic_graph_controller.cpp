@@ -12,6 +12,10 @@ TopicGraphController::TopicGraphController(QObject *parent)
       m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)) {
 
     m_graph.addObserver(m_topicList);
+    m_graph.addObserver(&m_layout);
+
+    m_layout.addObserver(m_nodeList);
+
     connect(m_topicList,
             &TopicListModel::requestAddTopic,
             this,

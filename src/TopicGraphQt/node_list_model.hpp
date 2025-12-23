@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "layout_engine.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -18,7 +19,7 @@ struct NodeItem {
     double y;
 };
 
-class NodeListModel : public QAbstractListModel {
+class NodeListModel : public QAbstractListModel, public ILayoutObserver {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Use TGC.nodes instead")
@@ -52,6 +53,12 @@ public:
 
     void deleteNode(uint32_t id);
     void updateLabel(uint32_t id, const QString &name);
+
+    void onNodeAdded(const GraphNode &node) override;
+    void onNodeRemoved(uint32_t id) override;
+    void onEdgeAdded(const GraphEdge &edge) override;
+    void onEdgeRemoved(const GraphEdge &edge) override;
+    void onClear() override;
 
 public slots:
     void onGaphChanged();

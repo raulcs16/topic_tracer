@@ -16,11 +16,13 @@ void LayoutEngine::clear() {}
 void LayoutEngine::addNode(uint32_t id) {
     auto gNode = m_pool->addNode(id);
     m_clusterMap[id] = m_pool;
+    notifyNodeAdded(gNode);
 }
 void LayoutEngine::removeNode(uint32_t id) {
     auto it = m_clusterMap.find(id);
     if (it != m_clusterMap.end()) {
         it->second->removeNode(id);
+        notifyNodeRemoved(id);
     }
 }
 void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
@@ -135,4 +137,47 @@ std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
     m_clusterMap[pool_id] = newCluster;
     newCluster->addEdge(from, to);
     return newCluster;
+}
+
+void LayoutEngine::onTopicAdded(const Topic &topic) { this->addNode(topic.id); }
+void LayoutEngine::onTopicRemoved(const Topic &topic) { this->removeNode(topic.id); }
+void LayoutEngine::onTopicRenamed(const Topic &topic) {}
+void LayoutEngine::onEdgeAdded(const Edge &edge) { this->addEdge(edge.from, edge.to); }
+void LayoutEngine::onEdgeRemoved(const Edge &edge) { this->removeEdge(edge.key); }
+void LayoutEngine::onClear() { clear(); }
+
+void LayoutEngine::addObserver(ILayoutObserver *observer) {
+    m_observers.push_back(observer);
+}
+
+void LayoutEngine::removeObserver(ILayoutObserver *observer) {
+    m_observers.erase(
+        std::remove_if(m_observers.begin(),
+                       m_observers.end(),
+                       [observer](ILayoutObserver *it) { return it == observer; }));
+}
+void LayoutEngine::notifyNodeAdded(const GraphNode &node) {
+    for (const auto &obs : m_observers) {
+        obs->onNodeAdded(node);
+    }
+}
+void LayoutEngine::notifyNodeRemoved(uint32_t id) {
+    for (const auto &obs : m_observers) {
+        obs->onNodeRemoved(id);
+    }
+}
+void LayoutEngine::notifyEdgeAdded(const GraphEdge &edge) {
+    for (const auto &obs : m_observers) {
+        obs->onEdgeAdded(edge);
+    }
+}
+void LayoutEngine::notifyEdgeRemoved(const GraphEdge &edge) {
+    for (const auto &obs : m_observers) {
+        obs->onEdgeRemoved(edge);
+    }
+}
+void LayoutEngine::notifyClear() {
+    for (const auto &obs : m_observers) {
+        obs->onClear();
+    }
 }

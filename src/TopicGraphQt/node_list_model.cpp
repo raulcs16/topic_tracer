@@ -116,3 +116,28 @@ void NodeListModel::updatePos(uint32_t id, double x, double y) {
 }
 void NodeListModel::deleteNode(uint32_t id) {}
 void NodeListModel::updateLabel(uint32_t id, const QString &name) {}
+
+void NodeListModel::onNodeAdded(const GraphNode &node) {
+    const int newIndex = m_nodes.size();
+    beginInsertRows(QModelIndex(), newIndex, newIndex);
+    m_nodes.push_back(
+        NodeItem{.x = node.y, .y = node.y, .id = node.id, .label = "", .heat = 0});
+    m_stateFlags[node.id] = {};
+    endInsertRows();
+}
+void NodeListModel::onNodeRemoved(uint32_t id) {
+    int index = getIndex(id);
+    if (index >= m_nodes.size())
+        return;
+    beginRemoveRows(QModelIndex(), index, index);
+    m_nodes.erase(m_nodes.begin() + index);
+    endRemoveRows();
+}
+void NodeListModel::onEdgeAdded(const GraphEdge &edge) {}
+void NodeListModel::onEdgeRemoved(const GraphEdge &edge) {}
+void NodeListModel::onClear() {
+    beginResetModel();
+    m_nodes.clear();
+    m_stateFlags.clear();
+    endResetModel();
+}
