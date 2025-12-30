@@ -19,10 +19,10 @@ Canvas {
     property color color: highlight ? "yellow" : hover ? '#4cb4e1' : '#ffffff'
     property real opacityFactor: hidden ? 0.1 : 1.0
     // Compute translated coordinates (centered)
-    property real sX: (viewWidth / 3) + sourceX
-    property real sY: (viewHeight / 3) + sourceY
-    property real tX: (viewWidth / 3) + targetX
-    property real tY: (viewHeight / 3) + targetY
+    property real sX: sourceX
+    property real sY: sourceY
+    property real tX: targetX
+    property real tY: targetY
 
     // Compute bounding box (so the Canvas knows what to paint)
     property real minX: Math.min(sX, tX)
@@ -47,18 +47,18 @@ Canvas {
         context.beginPath();
         // Draw line.
         for (var i = 0; i < bends.length; ++i) {
-            const px = (viewWidth / 3) + bends[i].x - x;
-            const py = (viewHeight / 3) + bends[i].y - y;
+            const px = bends[i].x - x;
+            const py = bends[i].y - y;
             if (i === 0)
                 context.moveTo(px, py);
             else
                 context.lineTo(px, py);
         }
         // Draw head.
-        var fromX = bends.length > 0 ? (viewWidth / 3 + bends[bends.length - 2].x - x) : (sX - x);
-        var fromY = bends.length > 0 ? (viewHeight / 3 + bends[bends.length - 2].y - y) : (sY - y);
-        var toX = bends.length > 0 ? (viewWidth / 3 + bends[bends.length - 1].x - x) : (tX - x);
-        var toY = bends.length > 0 ? (viewHeight / 3 + bends[bends.length - 1].y - y) : (tY - y);
+        var fromX = bends.length > 0 ? (bends[bends.length - 2].x - x) : (sX - x);
+        var fromY = bends.length > 0 ? (bends[bends.length - 2].y - y) : (sY - y);
+        var toX = bends.length > 0 ? (bends[bends.length - 1].x - x) : (tX - x);
+        var toY = bends.length > 0 ? (bends[bends.length - 1].y - y) : (tY - y);
 
         // Draw arrowhead like the original style
         var angle = Math.atan2(toY - fromY, toX - fromX);

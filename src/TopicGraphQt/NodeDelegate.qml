@@ -32,8 +32,8 @@ Item {
         return Qt.rgba(r, g, b, 1.0);
     }
 
-    x: (viewWidth / 3) + posx
-    y: (viewHeight / 3) + posy
+    x: posx
+    y: posy
 
     Rectangle {
         id: node

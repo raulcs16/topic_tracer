@@ -7,22 +7,22 @@ void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
 
     const double golden = M_PI * (3 - std::sqrt(5));
     for (int i = 0; i < nodes.size(); i++) {
-        double r = std::sqrt(i + 1);
+        double r = 30 * std::sqrt(i + 1);
         double theta = i * golden;
         double x = r * std::cos(theta);
         double y = r * std::sin(theta);
 
-        double m = std::max(std::abs(x), std::abs(y));
-        if (m > 0.0) {
-            x /= m;
-            y /= m;
-        }
+        // double m = std::max(std::abs(x), std::abs(y));
+        // if (m > 0.0) {
+        //     x /= m;
+        //     y /= m;
+        // }
         nodes[i].x = x;
         nodes[i].y = y;
-        bbox.max_x = x > bbox.max_x ? x : bbox.max_x;
-        bbox.min_x = x < bbox.min_x ? x : bbox.min_x;
-        bbox.max_y = y > bbox.max_y ? y : bbox.max_y;
-        bbox.min_y = y < bbox.min_y ? y : bbox.min_y;
+        bbox.max_x = std::max(x, bbox.max_x);
+        bbox.min_x = std::min(x, bbox.min_x);
+        bbox.max_y = std::max(y, bbox.max_y);
+        bbox.min_y = std::min(y, bbox.min_y);
     }
     //for each edge find the nodes with matching from and to's
     //set source x to from.x and source y to from.y similarly for target using to

@@ -157,8 +157,35 @@ void LayoutEngine::removeObserver(ILayoutObserver *observer) {
                        [observer](ILayoutObserver *it) { return it == observer; }));
 }
 void LayoutEngine::notifyNodeAdded(const GraphNode &node) {
+    // ----- Local space -----
+    float localX = node.x;
+    float localY = node.y;
+
+    // ----- World space -----
+    // Hard-coded world offset
+    float worldOffsetX = 500.0f;
+    float worldOffsetY = 300.0f;
+
+    float worldX = localX + worldOffsetX;
+    float worldY = localY + worldOffsetY;
+
+    // ----- Screen space -----
+    // Hard-coded camera + zoom
+    float cameraX = 200.0f;
+    float cameraY = 100.0f;
+    float zoom = 1.25f;
+
+    float screenX = (worldX - cameraX) * zoom;
+    float screenY = (worldY - cameraY) * zoom;
+
+    // Copy node so we don’t mutate shared state
+    GraphNode screenNode = node;
+    screenNode.id = node.id;
+    screenNode.x = screenX;
+    screenNode.y = screenY;
+
     for (const auto &obs : m_observers) {
-        obs->onNodeAdded(node);
+        obs->onNodeAdded(screenNode);
     }
 }
 void LayoutEngine::notifyNodeRemoved(uint32_t id) {

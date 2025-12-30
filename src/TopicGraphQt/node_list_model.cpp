@@ -121,7 +121,7 @@ void NodeListModel::onNodeAdded(const GraphNode &node) {
     const int newIndex = m_nodes.size();
     beginInsertRows(QModelIndex(), newIndex, newIndex);
     m_nodes.push_back(
-        NodeItem{.x = node.y, .y = node.y, .id = node.id, .label = "", .heat = 0});
+        NodeItem{.x = node.x, .y = node.y, .id = node.id, .label = "", .heat = 0});
     m_stateFlags[node.id] = {};
     endInsertRows();
 }
