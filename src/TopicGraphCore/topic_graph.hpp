@@ -23,7 +23,9 @@ public:
     ~TopicGraph();
     const Topic *addTopic(const std::string &name);
     const Topic *addTopic(uint32_t id, const std::string &name);
+    bool renameTopic(const std::string &topic, const std::string &new_name);
     bool renameTopic(uint32_t id, const std::string &new_name);
+    bool deleteTopic(const std::string &name);
     bool deleteTopic(uint32_t id);
     //getters
     const Topic *getTopic(uint32_t id) const;

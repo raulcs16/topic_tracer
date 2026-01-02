@@ -30,3 +30,12 @@ The result is a personalized knowledge graph where users can:
 Plan learning by traversing dependencies.
 Track mastery through visual heat maps.
 Progress from concrete examples up to broad conceptual understanding.
+
+## Notes
+
+**QT Signals and Slots**: event system where slots can be binded with singlals with same function signature
+**Observer Pattern**: rather than have a controller meidate/ orchastrate interactions among varying models, each model can implement an listener interface for a particular subject. where then the subject is directly responsible for notifying listenrs of events. The listener then can handle said event.
+**Rendering Vertexes**:
+    local space->apply scale & translation to world space -> apply camera projection -> map onto screen
+**bounding box collisions**:
+    if we know what has changed, do AABB test, move until no collisions. if collision found restart test.

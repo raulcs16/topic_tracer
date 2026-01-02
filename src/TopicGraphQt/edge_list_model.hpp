@@ -53,7 +53,6 @@ public:
     void deleteEdge(const std::string &key);
 
     //layout engine observer
-
     void onNodeAdded(const GraphNode &node) override;
     void onNodeRemoved(uint32_t id) override;
     void onEdgeAdded(const GraphEdge &edge) override;

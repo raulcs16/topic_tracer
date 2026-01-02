@@ -67,11 +67,9 @@ struct Camera {
         float Bottom = centerY - halfViewHeight;
         float Top = centerY + halfViewHeight;
 
-        // 2. World to NDC (-1 to 1)
         float ndcX = (worldX - centerX) / halfViewWidth;
         float ndcY = (worldY - centerY) / halfViewHeight;
 
-        // 3. NDC to Screen (Pixels)
         sX = (ndcX + 1.0f) * (screenW / 2.0f);
         sY = (ndcY + 1.0f) * (screenH / 2.0f);
     }

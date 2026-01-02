@@ -27,7 +27,12 @@ const Topic *TopicGraph::addTopic(uint32_t id, const std::string &name) {
     notifyTopicAdded(*topic);
     return m_topics[id];
 }
-
+bool TopicGraph::renameTopic(const std::string &name, const std::string &new_name) {
+    auto topic = getTopic(name);
+    if (topic == nullptr)
+        return false;
+    return renameTopic(topic->id, new_name);
+}
 bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
     auto it = m_topics.find(id);
     if (it == m_topics.end())
@@ -41,6 +46,12 @@ bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
     return true;
 }
 
+bool TopicGraph::deleteTopic(const std::string &name) {
+    auto topic = getTopic(name);
+    if (topic == nullptr)
+        return false;
+    return deleteTopic(topic->id);
+}
 
 bool TopicGraph::deleteTopic(uint32_t id) {
     // Remove the topic
