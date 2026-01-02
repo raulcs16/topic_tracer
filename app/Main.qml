@@ -4,7 +4,6 @@ import QtQuick.Controls.Basic
 
 import Styles
 import TopicGraph
-import Canvas
 
 ApplicationWindow {
     id: app

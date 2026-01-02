@@ -5,7 +5,6 @@ add_subdirectory(LayoutEngine)
 # add_subdirectory(Persistence)
 
 IF(NOT TESTING)
-add_subdirectory(Canvas)
 add_subdirectory(Styles)
 add_subdirectory(TopicGraphQt)
 endif()

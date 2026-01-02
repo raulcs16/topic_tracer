@@ -40,6 +40,7 @@ qt_add_qml_module(TopicGraphQt
         TopicListView.qml
         TopicDelegate.qml
         GraphView.qml
+        CanvasView.qml
         EdgeSpline.qml
         NodeDelegate.qml
 

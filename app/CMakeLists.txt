@@ -27,7 +27,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     StylesLibplugin
     TopicGraphQt
     TopicGraphQtplugin
-    Canvas
 )
 
 
