@@ -7,7 +7,7 @@ void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
 
     const double golden = M_PI * (3 - std::sqrt(5));
     for (int i = 0; i < nodes.size(); i++) {
-        double r = 30 * std::sqrt(i + 1);
+        double r = std::sqrt(i + 1);
         double theta = i * golden;
         double x = r * std::cos(theta);
         double y = r * std::sin(theta);

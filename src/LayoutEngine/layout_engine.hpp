@@ -15,7 +15,7 @@ struct ILayoutObserver {
     virtual void onNodeAdded(const GraphNode &node) {}
     virtual void onNodeRemoved(uint32_t id) {}
     virtual void onEdgeAdded(const GraphEdge &edge) {}
-    virtual void onEdgeRemoved(const GraphEdge &edge) {}
+    virtual void onEdgeRemoved(const std::string &key) {}
     virtual void onClear() {}
 };
 
@@ -44,9 +44,9 @@ public:
     void onClear() override;
 
 private:
-    void notifyNodeAdded(const GraphNode &node);
+    void notifyNodeAdded(const GraphNode &node, std::shared_ptr<IClusterLayout>);
     void notifyNodeRemoved(uint32_t id);
-    void notifyEdgeAdded(const GraphEdge &edge);
+    void notifyEdgeAdded(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
     void notifyEdgeRemoved(const GraphEdge &edge);
     void notifyClear();
 
@@ -59,11 +59,8 @@ private:
     std::shared_ptr<OGDFCluster> extractFromPoolMergeNewCluster(uint32_t from,
                                                                 uint32_t to,
                                                                 bool fromInPool);
-    inline bool intersects(const BoundingBox &a, const BoundingBox &b) {
-        return !(a.max_x < b.min_y || a.min_y > b.max_y || a.max_y < b.min_y ||
-                 a.min_y > b.max_y);
-    }
-
+    bool intersects(std::shared_ptr<IClusterLayout> a, std::shared_ptr<IClusterLayout> b);
+    void resolveCollisions(std::shared_ptr<IClusterLayout> newCluster);
 
 private:
     std::shared_ptr<LayoutStrategy> m_poolStrat;
@@ -71,5 +68,6 @@ private:
     std::shared_ptr<PoolCluster> m_pool;
     std::vector<ILayoutObserver *> m_observers;
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
+    Camera m_camera;
     size_t m_clusters = 1;
 };

@@ -13,8 +13,8 @@ TopicGraphController::TopicGraphController(QObject *parent)
 
     m_graph.addObserver(m_topicList);
     m_graph.addObserver(&m_layout);
-
     m_layout.addObserver(m_nodeList);
+    m_layout.addObserver(m_edgeList);
 
     connect(m_topicList,
             &TopicListModel::requestAddTopic,
@@ -94,34 +94,7 @@ void TopicGraphController::rename(const QString &topic, const QString &new_name)
 void TopicGraphController::join(const QString &topicA,
                                 const QString &topicB,
                                 EdgeType type) {
-    // auto edge = m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), type);
-    // if (edge == nullptr)
-    //     return;
-    // GraphData data = m_layout.addEdge(edge.get()->from, edge.get()->to);
-    // if (m_nodeList) {
-    //     for (const auto &node : data.nodes)
-    //         m_nodeList->updatePos(node.id, node.x, node.y);
-    // }
-    // if (m_edgeList) {
-    //     std::vector<EdgeItem> edgeList;
-    //     for (const auto &gedge : data.edges) {
-    //         std::vector<QPointF> points;
-    //         for (const auto &ogpoint : gedge.bends) {
-    //             points.push_back({ogpoint.m_x, ogpoint.m_y});
-    //         }
-    //         edgeList.push_back(EdgeItem{
-    //             .key = gedge.key,
-    //             .bends = points,
-    //             .from = gedge.from,
-    //             .to = gedge.to,
-    //             .source_x = gedge.source_x,
-    //             .source_y = gedge.source_y,
-    //             .target_x = gedge.target_x,
-    //             .target_y = gedge.target_y,
-    //         });
-    //     }
-    //     m_edgeList->resetEdges(edgeList);
-    // }
+    auto edge = m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), type);
 }
 void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) {
     // auto ta = m_graph.getTopic(topicA.toStdString());

@@ -8,7 +8,9 @@
 LayoutEngine::LayoutEngine() {
     m_poolStrat = std::make_shared<FermatSpiralStrategy>();
     m_ogdfStrat = std::make_shared<FMMMStrategy>();
-    m_pool = std::make_shared<PoolCluster>(m_poolStrat, 100);
+    m_pool = std::make_shared<PoolCluster>(m_poolStrat, 20);
+    m_pool->transform().scale = 50;
+    m_pool->transform().x = -m_camera.screenW / 4;
     m_clusters = 1;
 }
 
@@ -16,7 +18,7 @@ void LayoutEngine::clear() {}
 void LayoutEngine::addNode(uint32_t id) {
     auto gNode = m_pool->addNode(id);
     m_clusterMap[id] = m_pool;
-    notifyNodeAdded(gNode);
+    notifyNodeAdded(gNode, m_pool);
 }
 void LayoutEngine::removeNode(uint32_t id) {
     auto it = m_clusterMap.find(id);
@@ -35,6 +37,7 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     if (fromIt->second == toIt->second) {
         //exist in pool
         if (fromIt->second == m_pool && toIt->second == m_pool) {
+            std::cout << "merger from pool\n";
             merger = makeClusterFromPool(from, to);
         } else { //both not in pool but same cluster
             fromIt->second->addEdge(from, to);
@@ -50,6 +53,15 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     }
     if (merger) {
         merger->apply();
+        if (merger != m_pool) {
+            resolveCollisions(merger);
+        }
+        for (auto const &node : merger->nodes()) {
+            notifyNodeAdded(node, merger);
+        }
+        for (auto const &edge : merger->edges()) {
+            notifyEdgeAdded(edge, merger);
+        }
     }
 }
 void LayoutEngine::removeEdge(const std::string &k) {
@@ -156,29 +168,13 @@ void LayoutEngine::removeObserver(ILayoutObserver *observer) {
                        m_observers.end(),
                        [observer](ILayoutObserver *it) { return it == observer; }));
 }
-void LayoutEngine::notifyNodeAdded(const GraphNode &node) {
-    // ----- Local space -----
-    float localX = node.x;
-    float localY = node.y;
+void LayoutEngine::notifyNodeAdded(const GraphNode &node,
+                                   std::shared_ptr<IClusterLayout> cluster) {
 
-    // ----- World space -----
-    // Hard-coded world offset
-    float worldOffsetX = 500.0f;
-    float worldOffsetY = 300.0f;
+    auto transform = cluster.get()->transform();
+    float screenX{0.0f}, screenY{0.0f};
+    m_camera.project(transform, node.x, node.y, screenX, screenY);
 
-    float worldX = localX + worldOffsetX;
-    float worldY = localY + worldOffsetY;
-
-    // ----- Screen space -----
-    // Hard-coded camera + zoom
-    float cameraX = 200.0f;
-    float cameraY = 100.0f;
-    float zoom = 1.25f;
-
-    float screenX = (worldX - cameraX) * zoom;
-    float screenY = (worldY - cameraY) * zoom;
-
-    // Copy node so we don’t mutate shared state
     GraphNode screenNode = node;
     screenNode.id = node.id;
     screenNode.x = screenX;
@@ -193,18 +189,102 @@ void LayoutEngine::notifyNodeRemoved(uint32_t id) {
         obs->onNodeRemoved(id);
     }
 }
-void LayoutEngine::notifyEdgeAdded(const GraphEdge &edge) {
+void LayoutEngine::notifyEdgeAdded(const GraphEdge &edge,
+                                   std::shared_ptr<IClusterLayout> cluster) {
+    auto transform = cluster.get()->transform();
+    float targetX{}, targetY{}, sourceX{}, sourceY{};
+    m_camera.project(transform, edge.target_x, edge.target_y, targetX, targetY);
+    m_camera.project(transform, edge.source_x, edge.source_y, sourceX, sourceY);
+
+    std::vector<ogdf::DPoint> screenbends;
+    screenbends.reserve(edge.bends.size());
+    for (const auto &point : edge.bends) {
+        float x{}, y{};
+        m_camera.project(transform, point.m_x, point.m_y, x, y);
+        screenbends.emplace_back(x, y);
+    }
+
+    GraphEdge screenEdge = edge;
+    screenEdge.source_x = sourceX;
+    screenEdge.source_y = sourceY;
+    screenEdge.target_x = targetX;
+    screenEdge.target_y = targetY;
+    screenEdge.bends = screenbends;
+
     for (const auto &obs : m_observers) {
-        obs->onEdgeAdded(edge);
+        obs->onEdgeAdded(screenEdge);
     }
 }
 void LayoutEngine::notifyEdgeRemoved(const GraphEdge &edge) {
     for (const auto &obs : m_observers) {
-        obs->onEdgeRemoved(edge);
+        obs->onEdgeRemoved(edge.key);
     }
 }
 void LayoutEngine::notifyClear() {
     for (const auto &obs : m_observers) {
         obs->onClear();
+    }
+}
+bool LayoutEngine::intersects(std::shared_ptr<IClusterLayout> a,
+                              std::shared_ptr<IClusterLayout> b) {
+    if (a == b || !a || !b)
+        return false;
+    auto bbA = a->boundingBox();
+    auto transA = a->transform();
+    auto bbB = b->boundingBox();
+    auto transB = b->transform();
+
+
+    float aMinX = bbA.min_x * transA.scale + transA.x;
+    float aMaxX = bbA.max_x * transA.scale + transA.x;
+    float aMinY = bbA.min_y * transA.scale + transA.y;
+    float aMaxY = bbA.max_y * transA.scale + transA.y;
+
+    float bMaxX = bbB.max_x * transB.scale + transB.x;
+    float bMinX = bbB.min_x * transB.scale + transB.x;
+    float bMaxY = bbB.max_y * transB.scale + transB.y;
+    float bMinY = bbB.min_y * transB.scale + transB.y;
+
+
+    return (aMinX <= bMaxX && aMaxX >= bMinX && aMinY <= bMaxY && aMaxY >= bMinY);
+}
+void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster) {
+    bool collisionFound = true;
+
+    // We keep looping until we complete a full pass without hitting anything
+    while (collisionFound) {
+        collisionFound = false;
+
+        // Collect unique clusters (since m_clusterMap has many nodes pointing to same cluster)
+        std::set<std::shared_ptr<IClusterLayout>> uniqueClusters;
+        for (auto const &[id, cluster] : m_clusterMap) {
+            if (cluster != m_pool)
+                uniqueClusters.insert(cluster);
+        }
+
+        for (auto const &existingCluster : uniqueClusters) {
+            if (newCluster == existingCluster)
+                continue;
+
+            if (intersects(newCluster, existingCluster)) {
+                auto bbNew = newCluster->boundingBox();
+                auto bbExt = existingCluster->boundingBox();
+                auto transExt = existingCluster->transform();
+
+                // Calculate the Right edge of the cluster we hit in World Space
+                float existingRightEdge = (bbExt.max_x * transExt.scale) + transExt.x;
+
+                // Add a small buffer (e.g., 50 units) so they aren't touching pixels
+                float buffer = 50.0f;
+
+                // Move newCluster's X so its Left edge starts after existingCluster's Right edge
+                // Formula: TargetX = ExistingRightEdge - (NewLocalMinX * NewScale) + Buffer
+                float newLocalMinX = bbNew.min_x * newCluster->transform().scale;
+                newCluster->transform().x = existingRightEdge - newLocalMinX + buffer;
+
+                collisionFound = true;
+                break; // Restart the 'for' loop via the 'while' loop
+            }
+        }
     }
 }

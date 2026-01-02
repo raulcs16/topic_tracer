@@ -149,3 +149,62 @@ void EdgeListModel::addItem(EdgeItem item) {
                      modelIndex,
                      {BendsRole, SourceXRole, SourceXRole, TargetXRole, TargetYRole});
 }
+
+void EdgeListModel::onNodeAdded(const GraphNode &node) {}
+void EdgeListModel::onNodeRemoved(uint32_t id) {}
+void EdgeListModel::onEdgeAdded(const GraphEdge &edge) {
+    int index = getIndex(edge.key);
+    if (index < m_edges.size())
+        return updatePos(index, edge);
+
+    index = m_edges.size();
+    beginInsertRows(QModelIndex(), index, index);
+    m_edges.push_back(extract(edge));
+    m_stateFlags[edge.key] = {};
+    endInsertRows();
+}
+void EdgeListModel::onEdgeRemoved(const std::string &key) {
+    int index = getIndex(key);
+    if (index >= m_edges.size())
+        return;
+    beginRemoveRows(QModelIndex(), index, index);
+    m_edges.erase(m_edges.begin() + index);
+    endRemoveRows();
+}
+void EdgeListModel::onClear() {
+    beginResetModel();
+    m_edges.clear();
+    m_stateFlags.clear();
+    endResetModel();
+}
+void EdgeListModel::updatePos(int index, const GraphEdge &edge) {
+    auto curr = m_edges[index];
+    if (curr.target_x == edge.target_x && curr.target_y == edge.target_y)
+        if (curr.source_x == edge.source_x && curr.source_y == edge.source_y)
+            return;
+    EdgeItem item = extract(edge);
+    m_edges[index].bends = item.bends;
+    m_edges[index].source_x = item.source_x;
+    m_edges[index].source_y = item.source_y;
+    m_edges[index].target_x = item.target_x;
+    m_edges[index].target_y = item.target_y;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex,
+                     modelIndex,
+                     {SourceXRole, SourceYRole, TargetXRole, TargetYRole, BendsRole});
+}
+EdgeItem EdgeListModel::extract(const GraphEdge &edge) {
+    std::vector<QPointF> bends;
+    bends.reserve(edge.bends.size());
+    for (const auto &point : edge.bends) {
+        bends.emplace_back(point.m_x, point.m_y);
+    }
+    return {.key = edge.key,
+            .from = edge.from,
+            .to = edge.to,
+            .source_x = edge.source_x,
+            .source_y = edge.source_y,
+            .target_x = edge.target_x,
+            .target_y = edge.target_y,
+            .bends = bends};
+}

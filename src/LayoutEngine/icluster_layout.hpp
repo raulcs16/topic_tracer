@@ -20,4 +20,6 @@ public:
     virtual void setStrategy(std::shared_ptr<LayoutStrategy> s) = 0;
     virtual std::vector<GraphNode> nodes() const = 0;
     virtual std::vector<GraphEdge> edges() const = 0;
+    virtual Transform &transform() = 0;
+    virtual const Transform &transform() const = 0;
 };

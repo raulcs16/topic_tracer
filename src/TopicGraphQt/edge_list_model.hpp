@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "layout_engine.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -19,7 +20,7 @@ struct EdgeItem {
     std::vector<QPointF> bends;
 };
 
-class EdgeListModel : public QAbstractListModel {
+class EdgeListModel : public QAbstractListModel, public ILayoutObserver {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Use Graph.edges instead")
@@ -51,12 +52,21 @@ public:
     void addItem(EdgeItem edge);
     void deleteEdge(const std::string &key);
 
+    //layout engine observer
+
+    void onNodeAdded(const GraphNode &node) override;
+    void onNodeRemoved(uint32_t id) override;
+    void onEdgeAdded(const GraphEdge &edge) override;
+    void onEdgeRemoved(const std::string &key) override;
+    void onClear() override;
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     size_t getIndex(const std::string &key);
+    void updatePos(int index, const GraphEdge &edge);
+    EdgeItem extract(const GraphEdge &edge);
 
 private:
     std::vector<EdgeItem> m_edges;

@@ -20,6 +20,8 @@ public:
     void setStrategy(std::shared_ptr<LayoutStrategy> s) override;
     std::vector<GraphNode> nodes() const override { return m_nodes; }
     std::vector<GraphEdge> edges() const override { return m_edges; }
+    Transform &transform() override { return m_transfrom; }
+    const Transform &transform() const override { return m_transfrom; }
 
 private:
     size_t getFreeSlot();
@@ -31,6 +33,7 @@ private:
         uint32_t id = 0;
     };
 
+    Transform m_transfrom;
     std::vector<GraphNode> m_nodes; // actual positioned nodes
     std::vector<GraphEdge> m_edges; // actual positioned nodes
     BoundingBox m_bbox;

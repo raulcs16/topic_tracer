@@ -105,9 +105,9 @@ void NodeListModel::addItem(NodeItem item) {
     m_nodes.push_back(item);
     endInsertRows();
 }
-void NodeListModel::updatePos(uint32_t id, double x, double y) {
-    int index = getIndex(id);
-    if (index >= m_nodes.size())
+void NodeListModel::updatePos(int index, double x, double y) {
+    auto node = m_nodes[index];
+    if (node.x == x && node.y == y)
         return;
     m_nodes[index].x = x;
     m_nodes[index].y = y;
@@ -118,8 +118,12 @@ void NodeListModel::deleteNode(uint32_t id) {}
 void NodeListModel::updateLabel(uint32_t id, const QString &name) {}
 
 void NodeListModel::onNodeAdded(const GraphNode &node) {
-    const int newIndex = m_nodes.size();
-    beginInsertRows(QModelIndex(), newIndex, newIndex);
+    int index = getIndex(node.id);
+    if (index < m_nodes.size())
+        return updatePos(index, node.x, node.y);
+
+    index = m_nodes.size();
+    beginInsertRows(QModelIndex(), index, index);
     m_nodes.push_back(
         NodeItem{.x = node.x, .y = node.y, .id = node.id, .label = "", .heat = 0});
     m_stateFlags[node.id] = {};
@@ -134,7 +138,7 @@ void NodeListModel::onNodeRemoved(uint32_t id) {
     endRemoveRows();
 }
 void NodeListModel::onEdgeAdded(const GraphEdge &edge) {}
-void NodeListModel::onEdgeRemoved(const GraphEdge &edge) {}
+void NodeListModel::onEdgeRemoved(const std::string &edge) {}
 void NodeListModel::onClear() {
     beginResetModel();
     m_nodes.clear();

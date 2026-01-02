@@ -42,7 +42,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     //Incremental API
     void addItem(NodeItem item);
-    void updatePos(uint32_t id, double x, double y);
 
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     void resetNodes(const std::vector<NodeItem> &nodes);
@@ -57,7 +56,7 @@ public:
     void onNodeAdded(const GraphNode &node) override;
     void onNodeRemoved(uint32_t id) override;
     void onEdgeAdded(const GraphEdge &edge) override;
-    void onEdgeRemoved(const GraphEdge &edge) override;
+    void onEdgeRemoved(const std::string &edge) override;
     void onClear() override;
 
 public slots:
@@ -65,6 +64,7 @@ public slots:
 
 private:
     size_t getIndex(uint32_t id);
+    void updatePos(int index, double x, double y);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
