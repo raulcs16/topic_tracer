@@ -135,19 +135,19 @@ Item {
         // consistent regardless of how far zoomed in you are.
         let adjustedStep = panStep / root.zoom;
 
-        if (event.key === Qt.Key_Up) {
+        if (event.key === Qt.Key_K) {
             panContainer.y += adjustedStep;
             event.accepted = true;
         }
-        if (event.key === Qt.Key_Down) {
+        if (event.key === Qt.Key_J) {
             panContainer.y -= adjustedStep;
             event.accepted = true;
         }
-        if (event.key === Qt.Key_Left) {
+        if (event.key === Qt.Key_H) {
             panContainer.x += adjustedStep;
             event.accepted = true;
         }
-        if (event.key === Qt.Key_Right) {
+        if (event.key === Qt.Key_L) {
             panContainer.x -= adjustedStep;
             event.accepted = true;
         }
