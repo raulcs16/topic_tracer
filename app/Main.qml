@@ -15,11 +15,14 @@ ApplicationWindow {
     required property int major
     required property int minor
     required property int patch
+    property Item focusItem: null
 
     TopicGraphController {
         id: topic_controller
     }
     function parseCommand(cmd) {
+        if (cmd.length == 0)
+            return;
         const parts = cmd.split(" ");
         const command = parts[0];
         const args = parts.slice(1);
@@ -197,6 +200,8 @@ ApplicationWindow {
                 color: Colors.primary
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                border.width: 2
+                border.color: app.focusItem == canvas ? Colors.accent : "transparent"
 
                 Text {
                     text: `v${app.major}.${app.minor}.${app.patch}`
@@ -207,9 +212,9 @@ ApplicationWindow {
                 }
 
                 CanvasView {
+                    id: canvas
                     anchors.fill: parent
                     clip: true
-                    focus: true
                     GraphView {
                         edgeModel: topic_controller.edgeListModel
                         nodeModel: topic_controller.nodeListModel
@@ -220,6 +225,13 @@ ApplicationWindow {
                         viewHeight: main_content.height
                     }
                 }
+                MouseArea {
+                    anchors.fill: app.focusItem == canvas ? null : parent
+                    onClicked: {
+                        app.focusItem = canvas;
+                        canvas.forceActiveFocus();
+                    }
+                }
             }
 
             Rectangle {
@@ -227,7 +239,8 @@ ApplicationWindow {
                 color: Colors.accent
                 Layout.fillWidth: true
                 Layout.preferredHeight: 75
-
+                border.width: 2
+                border.color: app.focusItem == commandInput ? Colors.primary : "transparent"
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 10
@@ -252,6 +265,11 @@ ApplicationWindow {
                             color: "transparent"
                         }
                         onTextChanged: topic_controller.updateBuffer(commandInput.text)
+                        onFocusChanged: {
+                            if (focus) {
+                                app.focusItem = commandInput;
+                            }
+                        }
                         Keys.onReturnPressed: {
                             const cmd = commandInput.text.trim();
                             if (cmd.length === 0)
@@ -262,6 +280,11 @@ ApplicationWindow {
                         Keys.onTabPressed: {
                             let suggestion = topic_controller.handleAutoComplete();
                             commandInput.text = suggestion;
+                        }
+                        Keys.onEscapePressed: {
+                            app.focusItem = canvas;
+                            canvas.forceActiveFocus();
+                            commandInput.focus = false;
                         }
                     }
                 }
@@ -295,14 +318,25 @@ ApplicationWindow {
                 color: Colors.secondary
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-
+                border.width: 2
+                border.color: app.focusItem == topicListView ? Colors.accent : "transparent"
                 TopicListView {
                     id: topicListView
                     model: topic_controller.topicListModel
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }
+                MouseArea {
+                    anchors.fill: app.focusItem == topicListView ? null : parent
+                    onClicked: {
+                        app.focusItem = topicListView;
+                        topicListView.forceActiveFocus();
+                    }
+                }
             }
         }
+    }
+    Component.onCompleted: {
+        app.focusItem = canvas;
     }
 }
