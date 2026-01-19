@@ -29,14 +29,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    //API USER INTERACTIONS WITH LIST
-    Q_INVOKABLE void setHovered(uint32_t id);
-    Q_INVOKABLE void unsetHovered(uint32_t id);
-
-    //single selection
-    Q_INVOKABLE void selectIndex(int index);
     //multiple selections
-    Q_INVOKABLE void toggleSelect(int index);
+    std::vector<uint32_t> getIdInRange(uint32_t start, uint32_t target);
     Q_INVOKABLE void rangeSelect(int target);
     void clearSelection();
 
@@ -51,6 +45,10 @@ public:
 
 signals:
     void isAddingNewTopicChanged();
+    void hoverRequested(uint32_t id, bool isHovered);
+    void selectRequested(uint32_t id);
+    void toggleSelectionRequest(uint32_t id);
+    void rangeSelectionRequest(uint32_t id);
 
 public slots:
     //add or update a label
@@ -65,12 +63,8 @@ private:
     int getIndex(uint32_t id);
 
 private:
+    bool m_isAddingNewTopic = false;
     QVector<uint32_t> m_ids;
     QMap<uint32_t, int> m_idToRow;
     TGStore *m_tgstore;
-    std::vector<int> m_selectedIndexes;
-
-    bool m_isAddingNewTopic = false;
-    int m_lastSelectedIndex = -1;
-    int m_rangeSelectedIndex = -1;
 };

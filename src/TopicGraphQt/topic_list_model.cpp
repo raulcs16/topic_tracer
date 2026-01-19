@@ -89,38 +89,23 @@ void TopicListModel::onFlagUpdated(uint32_t id) {
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 
-void TopicListModel::selectIndex(int index) {
-    if (index < 0 || index >= m_ids.size() || index == m_lastSelectedIndex)
-        return;
-    clearSelection();
-    m_tgstore->setSelected(m_ids[index]);
-    m_selectedIndexes.push_back(index);
-    m_lastSelectedIndex = index;
-}
-void TopicListModel::setIsAddingNewTopic(bool value) { m_isAddingNewTopic = value; }
-void TopicListModel::setHovered(uint32_t id) {
-    m_tgstore->setTopicState(id, StateFlag::Hovered, true);
-}
 
-void TopicListModel::unsetHovered(uint32_t id) {
-    m_tgstore->setTopicState(id, StateFlag::Hovered, false);
-}
-void TopicListModel::toggleSelect(int index) {
-    // if (index < 0 || index >= m_topics.size())
-    //     return;
-    // if (m_stateFlags[m_topics[index].id].has(StateFlag::Selected)) {
-    //     removeFlags(index, StateFlag::Selected);
-    //     emit topicUnSelected(m_topics[index].id);
-    //     auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), index);
-    //     if (it != m_selectedIndexes.end()) {
-    //         m_selectedIndexes.erase(it);
-    //     }
-    //     return;
-    // }
-    // addFlags(index, StateFlag::Selected);
-    // emit topicSelected(m_topics[index].id);
-    // m_selectedIndexes.push_back(index);
-    // m_lastSelectedIndex = index;
+void TopicListModel::setIsAddingNewTopic(bool value) { m_isAddingNewTopic = value; }
+
+
+std::vector<uint32_t> TopicListModel::getIdInRange(uint32_t start, uint32_t end) {
+    auto startIt = std::find(m_ids.begin(), m_ids.end(), start);
+    auto endIt = std::find(m_ids.begin(), m_ids.end(), end);
+    if (startIt == m_ids.end() || endIt == m_ids.end()) {
+        return {};
+    }
+    auto min = std::min(startIt, endIt);
+    auto max = std::max(startIt, endIt);
+    std::vector<uint32_t> ids;
+    for (; min <= max; min++) {
+        ids.push_back(*min);
+    }
+    return ids;
 }
 void TopicListModel::rangeSelect(int target) {
     // if (target < 0 || target >= m_topics.size() || target == m_lastSelectedIndex) {

@@ -264,7 +264,7 @@ ApplicationWindow {
                         background: Rectangle {
                             color: "transparent"
                         }
-                        onTextChanged: topic_controller.updateBuffer(commandInput.text)
+                        // onTextChanged: topic_controller.updateBuffer(commandInput.text)
                         onFocusChanged: {
                             if (focus) {
                                 app.focusItem = commandInput;
@@ -277,12 +277,12 @@ ApplicationWindow {
                             app.parseCommand(cmd);
                             commandInput.text = "";
                         }
-                        Keys.onTabPressed: {
-                            if (commandInput.text.length == 0)
-                                return;
-                            let suggestion = topic_controller.handleAutoComplete();
-                            commandInput.text = suggestion;
-                        }
+                        // Keys.onTabPressed: {
+                        //     if (commandInput.text.length == 0)
+                        //         return;
+                        //     let suggestion = topic_controller.handleAutoComplete();
+                        //     commandInput.text = suggestion;
+                        // }
                         Keys.onEscapePressed: {
                             app.focusItem = canvas;
                             canvas.forceActiveFocus();
@@ -329,7 +329,9 @@ ApplicationWindow {
                     anchors.topMargin: 15
                 }
                 MouseArea {
-                    anchors.fill: app.focusItem == topicListView ? null : parent
+                    enabled: app.focusItem != topicListView
+                    anchors.fill: parent
+                    propagateComposedEvents: true
                     onClicked: {
                         app.focusItem = topicListView;
                         topicListView.forceActiveFocus();

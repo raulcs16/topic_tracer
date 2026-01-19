@@ -55,6 +55,10 @@ public:
 
 public slots:
     void onTopicRequested(const QString &topic);
+    void onTopicHoverRequested(uint32_t id, bool isHovered);
+    void onTopicSelectedRequested(uint32_t id);
+    void onTopicToggleSelectionRequest(uint32_t id);
+    void onTopicRangeSelectionRequest(uint32_t id);
 
 private:
     void synchGraphView();
@@ -64,6 +68,7 @@ private:
                                 const QStringList &matches,
                                 const QStringList &parts);
     QString buildNewBuffer(const QString &replacement, const QStringList &parts);
+    void clearSelection();
 
 
 private:
@@ -80,4 +85,8 @@ private:
     QString m_lastPrefix;
     QStringList m_lastMatches;
     int m_cycleIndex = -1;
+
+    std::vector<uint32_t> m_selectedIds;
+    int m_lastSelectedId = -1;
+    int m_rangeSelectedId = -1;
 };

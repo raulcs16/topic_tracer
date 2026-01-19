@@ -38,8 +38,8 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        onEntered: root.model.setHovered(root.topicId)
-        onExited: root.model.unsetHovered(root.topicId)
+        onEntered: root.model.hoverRequested(root.topicId, true)
+        onExited: root.model.hoverRequested(root.topicId, false)
 
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: mouse => {
@@ -50,11 +50,11 @@ Item {
                 const meta = mods & Qt.MetaModifier || mods & Qt.ControlModifier;
 
                 if (meta) {
-                    root.model.toggleSelect(root.index);
+                    root.model.toggleSelectionRequest(root.topicId);
                 } else if (mods & Qt.ShiftModifier) {
-                    root.model.rangeSelect(root.index);
+                    root.model.rangeSelectionRequest(root.topicId);
                 } else {
-                    root.model.selectIndex(root.index);
+                    root.model.selectRequested(root.topicId);
                 }
             }
         }

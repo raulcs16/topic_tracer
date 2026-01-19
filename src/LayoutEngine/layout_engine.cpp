@@ -37,7 +37,6 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     if (fromIt->second == toIt->second) {
         //exist in pool
         if (fromIt->second == m_pool && toIt->second == m_pool) {
-            std::cout << "merger from pool\n";
             merger = makeClusterFromPool(from, to);
         } else { //both not in pool but same cluster
             fromIt->second->addEdge(from, to);

@@ -36,36 +36,24 @@ TopicGraphController::TopicGraphController(QObject *parent)
 
     connect(m_tgstore, &TGStore::flagUpdated, m_nodeList, &NodeListModel::onFlagsUpdated);
 
-    // connect(m_topicList,
-    //         &TopicListModel::requestAddTopic,
-    //         this,
-    //         &TopicGraphController::createTopic);
-    // connect(m_topicList,
-    //         &TopicListModel::topicHovered,
-    //         this,
-    //         &TopicGraphController::onTopicHovered);
-    // connect(m_topicList,
-    //         &TopicListModel::topicUnHovered,
-    //         this,
-    //         &TopicGraphController::onTopicUnHovered);
+    connect(m_topicList,
+            &TopicListModel::hoverRequested,
+            this,
+            &TopicGraphController::onTopicHoverRequested);
 
-    // connect(m_topicList,
-    //         &TopicListModel::topicSelected,
-    //         this,
-    //         &TopicGraphController::onTopicSelected);
+    connect(m_topicList,
+            &TopicListModel::selectRequested,
+            this,
+            &TopicGraphController::onTopicSelectedRequested);
 
-    // connect(m_topicList,
-    //         &TopicListModel::topicUnSelected,
-    //         this,
-    //         &TopicGraphController::onTopicUnSelected);
-    // connect(m_topicList,
-    //         &TopicListModel::topicDeleted,
-    //         this,
-    //         &TopicGraphController::onTopicDeleted);
-    // connect(m_topicList,
-    //         &TopicListModel::topicRenamed,
-    //         this,
-    //         &TopicGraphController::onTopicRenamed);
+    connect(m_topicList,
+            &TopicListModel::toggleSelectionRequest,
+            this,
+            &TopicGraphController::onTopicToggleSelectionRequest);
+    connect(m_topicList,
+            &TopicListModel::rangeSelectionRequest,
+            this,
+            &TopicGraphController::onTopicRangeSelectionRequest);
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
@@ -73,6 +61,54 @@ void TopicGraphController::createTopic(const QString &name) {
     if (m_graph) {
         m_graph->addTopic(name.toStdString());
     }
+}
+void TopicGraphController::onTopicHoverRequested(uint32_t id, bool isHovered) {
+    if (m_tgstore)
+        m_tgstore->setTopicState(id, StateFlag::Hovered, isHovered);
+}
+void TopicGraphController::clearSelection() {
+    if (!m_tgstore)
+        return;
+    for (auto i : m_selectedIds) {
+        m_tgstore->setTopicState(i, StateFlag::Selected, false);
+    }
+    m_selectedIds.clear();
+    m_lastSelectedId = -1;
+    m_rangeSelectedId = -1;
+}
+//left click
+void TopicGraphController::onTopicSelectedRequested(uint32_t id) {
+    if (!m_tgstore)
+        return;
+    clearSelection();
+    m_tgstore->setTopicState(id, StateFlag::Selected, true);
+    m_selectedIds.push_back(id);
+    m_lastSelectedId = id;
+}
+//cmd click
+void TopicGraphController::onTopicToggleSelectionRequest(uint32_t id) {
+    auto it = std::find(m_selectedIds.begin(), m_selectedIds.end(), id);
+    if (it == m_selectedIds.end()) {
+        m_tgstore->setTopicState(id, StateFlag::Selected, true);
+        m_selectedIds.push_back(id);
+        m_lastSelectedId = id;
+    } else {
+        m_tgstore->setTopicState(id, StateFlag::Selected, false);
+        m_selectedIds.erase(it);
+    }
+}
+void TopicGraphController::onTopicRangeSelectionRequest(uint32_t id) {
+    if (!m_tgstore || !m_topicList)
+        return;
+    if (m_lastSelectedId < 0)
+        return;
+    auto ids = m_topicList->getIdInRange(m_lastSelectedId, id);
+    clearSelection();
+    for (const auto id : ids) {
+        m_tgstore->setTopicState(id, StateFlag::Selected, true);
+        m_selectedIds.push_back(id);
+    }
+    m_lastSelectedId = id;
 }
 void TopicGraphController::onTopicRequested(const QString &name) {
     if (m_graph)

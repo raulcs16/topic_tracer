@@ -32,15 +32,15 @@ Item {
         background: MenuBackground {}
         MenuItemCard {
             text: qsTr("Rename...")
-            onTriggered: {
-                root.model.addFlags(delegateMenu.clickedIndex, ENUMS.StateFlag.EditMode);
-            }
+            onTriggered:
+            // root.model.addFlags(delegateMenu.clickedIndex, ENUMS.StateFlag.EditMode);
+            {}
         }
         MenuItemCard {
             text: qsTr("Delete")
-            onTriggered: {
-                root.model.removeItem(delegateMenu.clickedIndex);
-            }
+            onTriggered:
+            // root.model.removeItem(delegateMenu.clickedIndex);
+            {}
         }
     }
 
@@ -107,9 +107,9 @@ Item {
 
                 Keys.onReturnPressed: {
                     let topicName = text.trim();
-                    if (topicName.length > 0) {
-                        root.model.addItem(topicName);
-                    }
+                    if (topicName.length > 0)
+                    // root.model.addItem(topicName);
+                    {}
                     text = "";
                     root.model.isAddingNewTopic = false;
                     topicView.focus = true;
