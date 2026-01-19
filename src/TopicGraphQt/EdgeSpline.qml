@@ -1,8 +1,6 @@
 import QtQuick
 
 Canvas {
-    property real viewWidth: 0
-    property real viewHeight: 0
     property int headSize: 10
 
     required property double sourceX

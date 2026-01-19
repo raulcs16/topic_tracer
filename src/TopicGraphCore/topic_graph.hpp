@@ -10,10 +10,10 @@ struct ITopicGraphObserver {
     virtual ~ITopicGraphObserver() = default;
 
     virtual void onTopicAdded(const Topic &topic) {}
-    virtual void onTopicRemoved(const Topic &topic) {}
+    virtual void onTopicRemoved(uint32_t id) {}
     virtual void onTopicRenamed(const Topic &topic) {}
     virtual void onEdgeAdded(const Edge &edge) {}
-    virtual void onEdgeRemoved(const Edge &edge) {}
+    virtual void onEdgeRemoved(const std::string &key) {}
 
     virtual void onClear() {}
 };

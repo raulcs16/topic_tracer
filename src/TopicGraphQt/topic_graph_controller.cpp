@@ -8,67 +8,94 @@
 #include <QTimer>
 
 TopicGraphController::TopicGraphController(QObject *parent)
-    : QObject{parent}, m_graph{}, m_layout{}, m_topicList{new TopicListModel{this}},
-      m_nodeList(new NodeListModel(this)), m_edgeList(new EdgeListModel(this)) {
+    : QObject{parent}, m_graph{new TopicGraph()}, m_layout{new LayoutEngine()},
+      m_tgstore{new TGStore()}, m_topicList{new TopicListModel(m_tgstore, this)},
+      m_nodeList{new NodeListModel(m_tgstore, this)},
+      m_edgeList(new EdgeListModel(this)) {
 
-    m_graph.addObserver(m_topicList);
-    m_graph.addObserver(&m_layout);
-    m_layout.addObserver(m_nodeList);
-    m_layout.addObserver(m_edgeList);
+    if (!m_graph || !m_layout || !m_tgstore || !m_topicList || !m_nodeList || !m_edgeList)
+        return;
+    m_graph->addObserver(m_tgstore);
+    m_graph->addObserver(m_layout);
+    // // m_graph.addObserver(m_topicList);
+    m_layout->addObserver(m_nodeList);
+    m_layout->addObserver(m_edgeList);
 
-    connect(m_topicList,
-            &TopicListModel::requestAddTopic,
-            this,
-            &TopicGraphController::createTopic);
-    connect(m_topicList,
-            &TopicListModel::topicHovered,
-            this,
-            &TopicGraphController::onTopicHovered);
-    connect(m_topicList,
-            &TopicListModel::topicUnHovered,
-            this,
-            &TopicGraphController::onTopicUnHovered);
+    connect(m_tgstore,
+            &TGStore::labelUpdated,
+            m_nodeList,
+            &NodeListModel::onLabelUpdated);
+    connect(m_tgstore,
+            &TGStore::labelUpdated,
+            m_topicList,
+            &TopicListModel::onLabelUpdated);
+    connect(m_tgstore,
+            &TGStore::flagUpdated,
+            m_topicList,
+            &TopicListModel::onFlagUpdated);
 
-    connect(m_topicList,
-            &TopicListModel::topicSelected,
-            this,
-            &TopicGraphController::onTopicSelected);
+    connect(m_tgstore, &TGStore::flagUpdated, m_nodeList, &NodeListModel::onFlagsUpdated);
 
-    connect(m_topicList,
-            &TopicListModel::topicUnSelected,
-            this,
-            &TopicGraphController::onTopicUnSelected);
-    connect(m_topicList,
-            &TopicListModel::topicDeleted,
-            this,
-            &TopicGraphController::onTopicDeleted);
-    connect(m_topicList,
-            &TopicListModel::topicRenamed,
-            this,
-            &TopicGraphController::onTopicRenamed);
+    // connect(m_topicList,
+    //         &TopicListModel::requestAddTopic,
+    //         this,
+    //         &TopicGraphController::createTopic);
+    // connect(m_topicList,
+    //         &TopicListModel::topicHovered,
+    //         this,
+    //         &TopicGraphController::onTopicHovered);
+    // connect(m_topicList,
+    //         &TopicListModel::topicUnHovered,
+    //         this,
+    //         &TopicGraphController::onTopicUnHovered);
+
+    // connect(m_topicList,
+    //         &TopicListModel::topicSelected,
+    //         this,
+    //         &TopicGraphController::onTopicSelected);
+
+    // connect(m_topicList,
+    //         &TopicListModel::topicUnSelected,
+    //         this,
+    //         &TopicGraphController::onTopicUnSelected);
+    // connect(m_topicList,
+    //         &TopicListModel::topicDeleted,
+    //         this,
+    //         &TopicGraphController::onTopicDeleted);
+    // connect(m_topicList,
+    //         &TopicListModel::topicRenamed,
+    //         this,
+    //         &TopicGraphController::onTopicRenamed);
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 
 void TopicGraphController::createTopic(const QString &name) {
-    m_graph.addTopic(name.toStdString());
+    if (m_graph) {
+        m_graph->addTopic(name.toStdString());
+    }
 }
 void TopicGraphController::onTopicRequested(const QString &name) {
-    m_graph.addTopic(name.toStdString());
+    if (m_graph)
+        m_graph->addTopic(name.toStdString());
 }
 void TopicGraphController::deleteTopic(const QString &topic) {
-    m_graph.deleteTopic(topic.toStdString());
+    if (m_graph)
+        m_graph->deleteTopic(topic.toStdString());
 }
 void TopicGraphController::rename(const QString &topic, const QString &new_name) {
-    m_graph.renameTopic(topic.toStdString(), new_name.toStdString());
+    if (m_graph)
+        m_graph->renameTopic(topic.toStdString(), new_name.toStdString());
 }
 
 void TopicGraphController::join(const QString &topicA,
                                 const QString &topicB,
                                 EdgeType type) {
-    m_graph.addEdge(topicA.toStdString(), topicB.toStdString(), type);
+    if (m_graph)
+        m_graph->addEdge(topicA.toStdString(), topicB.toStdString(), type);
 }
 void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) {
-    m_graph.removeEdge(topicA.toStdString(), topicB.toStdString());
+    if (m_graph)
+        m_graph->removeEdge(topicA.toStdString(), topicB.toStdString());
 }
 
 void TopicGraphController::synchGraphView() {}
@@ -108,28 +135,6 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     //         flag = StateFlag::Hidden;
     //     m_edgeList->setFlagsOnId(edge.get()->key, flag);
     // }
-}
-
-void TopicGraphController::onTopicHovered(uint32_t id) {
-    m_nodeList->setFlagsOnId(id, StateFlag::Hovered);
-    auto outEdges = m_graph.getOutEdges(id);
-    for (const auto &e : outEdges) {
-        m_edgeList->setFlagsOnId(e->key, StateFlag::Hovered);
-    }
-}
-
-void TopicGraphController::onTopicUnHovered(uint32_t id) {
-    m_nodeList->unSetFlagsOnId(id, StateFlag::Hovered);
-    auto outEdges = m_graph.getOutEdges(id);
-    for (const auto &e : outEdges) {
-        m_edgeList->unSetFlagsOnId(e->key, StateFlag::Hovered);
-    }
-}
-void TopicGraphController::onTopicSelected(uint32_t id) {
-    m_nodeList->setFlagsOnId(id, StateFlag::Selected);
-}
-void TopicGraphController::onTopicUnSelected(uint32_t id) {
-    m_nodeList->unSetFlagsOnId(id, StateFlag::Selected);
 }
 
 void TopicGraphController::calculateHeatScores() {
@@ -201,8 +206,8 @@ void TopicGraphController::load(QString fileName) {
     // }
 }
 void TopicGraphController::clearAll() {
-    m_graph.clear();
-    m_layout.clear();
+    m_graph->clear();
+    m_layout->clear();
     m_topicList->clear();
     synchGraphView();
 }
@@ -254,7 +259,7 @@ QString TopicGraphController::autoCompleteTopics(const QStringList &parts,
                                                  const QString &prefix) {
     QStringList matches;
 
-    for (const auto &t : m_graph.topics()) {
+    for (const auto &t : m_graph->topics()) {
         QString name = QString::fromStdString(t->name);
         if (name.startsWith(prefix))
             matches << name;
@@ -302,28 +307,4 @@ QString TopicGraphController::buildNewBuffer(const QString &replacement,
     QString newBuffer = newParts.join(" ");
     m_currentBuffer = newBuffer;
     return newBuffer;
-}
-void TopicGraphController::onTopicDeleted(uint32_t id) {
-    auto in = m_graph.getOutEdges(id);
-    auto out = m_graph.getInEdges(id);
-    m_graph.deleteTopic(id);
-    if (m_nodeList) {
-        m_nodeList->deleteNode(id);
-    }
-    if (m_edgeList) {
-        for (const auto &e : in) {
-            m_edgeList->deleteEdge(e->key);
-        }
-        for (const auto &e : out) {
-            m_edgeList->deleteEdge(e->key);
-        }
-    }
-}
-void TopicGraphController::onTopicRenamed(uint32_t id, const QString &label) {
-    bool success = m_graph.renameTopic(id, label.toStdString());
-    if (!success)
-        return;
-    if (m_nodeList) {
-        m_nodeList->updateLabel(id, label);
-    }
 }

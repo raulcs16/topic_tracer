@@ -11,9 +11,9 @@ Item {
     required property TopicListModel model
 
     required property int index
+
     required property int topicId
     required property string topicName
-    required property bool pending
     required property int flags
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
@@ -38,8 +38,8 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        onEntered: root.model.setHovered(root.index)
-        onExited: root.model.unsetHovered(root.index)
+        onEntered: root.model.setHovered(root.topicId)
+        onExited: root.model.unsetHovered(root.topicId)
 
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: mouse => {
@@ -93,7 +93,7 @@ Item {
         text: root.topicName
         font.pointSize: 16
         font.weight: Font.DemiBold
-        color: root.pending ? Colors.primary : Colors.text_secondary
+        color: Colors.text_secondary
         Layout.fillWidth: true
         elide: Text.ElideRight
         anchors {
@@ -120,11 +120,12 @@ Item {
         Keys.onReturnPressed: {
             const newName = text.trim();
             if (newName.length > 0)
-                root.model.editItem(root.index, newName);
-            root.model.removeFlags(root.index, ENUMS.StateFlag.EditMode);
+            //                root.model.editItem(root.index, newName);
+            {}
+            //           root.model.removeFlags(root.index, ENUMS.StateFlag.EditMode);
         }
         Keys.onEscapePressed: {
-            root.model.removeFlags(root.index, ENUMS.StateFlag.EditMode);
+            //root.model.removeFlags(root.index, ENUMS.StateFlag.EditMode);
             text = root.topicName; // revert
         }
     }

@@ -260,7 +260,7 @@ void TopicGraph::notifyTopicAdded(const Topic &topic) {
 }
 void TopicGraph::notifyTopicRemoved(const Topic &topic) {
     for (const auto obs : m_observers) {
-        obs->onTopicRemoved(topic);
+        obs->onTopicRemoved(topic.id);
     }
 }
 void TopicGraph::notifyTopicRenamed(const Topic &topic) {
@@ -275,7 +275,7 @@ void TopicGraph::notifyEdgeAdded(const Edge &edge) {
 }
 void TopicGraph::notifyEdgeRemoved(const Edge &edge) {
     for (const auto obs : m_observers) {
-        obs->onEdgeRemoved(edge);
+        obs->onEdgeRemoved(edge.key);
     }
 }
 void TopicGraph::notifyClear() {

@@ -152,10 +152,10 @@ std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
 }
 
 void LayoutEngine::onTopicAdded(const Topic &topic) { this->addNode(topic.id); }
-void LayoutEngine::onTopicRemoved(const Topic &topic) { this->removeNode(topic.id); }
+void LayoutEngine::onTopicRemoved(uint32_t id) { this->removeNode(id); }
 void LayoutEngine::onTopicRenamed(const Topic &topic) {}
 void LayoutEngine::onEdgeAdded(const Edge &edge) { this->addEdge(edge.from, edge.to); }
-void LayoutEngine::onEdgeRemoved(const Edge &edge) { this->removeEdge(edge.key); }
+void LayoutEngine::onEdgeRemoved(const std::string &key) { this->removeEdge(key); }
 void LayoutEngine::onClear() { clear(); }
 
 void LayoutEngine::addObserver(ILayoutObserver *observer) {

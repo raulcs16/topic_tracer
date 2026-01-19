@@ -2,6 +2,7 @@
 
 
 #include "layout_engine.hpp"
+#include "topic_graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -13,7 +14,6 @@
 
 struct NodeItem {
     uint32_t id;
-    QString label;
     int heat = 0;
     double x;
     double y;
@@ -34,24 +34,18 @@ public:
         HeatRole,
     };
 
-    explicit NodeListModel(QObject *parent = nullptr);
-
+    explicit NodeListModel(TGStore *store, QObject *parent = nullptr);
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     //Incremental API
-    void addItem(NodeItem item);
 
-    // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    void resetNodes(const std::vector<NodeItem> &nodes);
+    //API USER INTERACTIONS WITH LIST
+    Q_INVOKABLE void setHovered(uint32_t id);
+    Q_INVOKABLE void unsetHovered(uint32_t id);
 
-    void setFlagsOnId(uint32_t id, StateFlag flags);
-    void unSetFlagsOnId(uint32_t id, StateFlag flags);
     void updateHeatScore(uint32_t id, int score);
-
-    void deleteNode(uint32_t id);
-    void updateLabel(uint32_t id, const QString &name);
 
     void onNodeAdded(const GraphNode &node) override;
     void onNodeRemoved(uint32_t id) override;
@@ -60,10 +54,11 @@ public:
     void onClear() override;
 
 public slots:
-    void onGaphChanged();
+    void onLabelUpdated(uint32_t id);
+    void onFlagsUpdated(uint32_t id);
 
 private:
-    size_t getIndex(uint32_t id);
+    int getIndex(uint32_t id);
     void updatePos(int index, double x, double y);
 
 protected:
@@ -71,5 +66,6 @@ protected:
 
 private:
     std::vector<NodeItem> m_nodes;
-    std::unordered_map<uint32_t, ItemState> m_stateFlags;
+    QMap<uint32_t, int> m_idToRow;
+    TGStore *m_tgstore;
 };
