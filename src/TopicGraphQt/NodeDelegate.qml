@@ -5,11 +5,11 @@ import TopicGraph
 
 Item {
     id: root
-    property real viewWidth: 0
-    property real viewHeight: 0
+
+    required property NodeListModel model
 
     required property int index
-    required property int id
+    required property int topicId
     required property string label
     required property double posx
     required property double posy
@@ -31,21 +31,27 @@ Item {
         let b = 0.2 * (1 - t);
         return Qt.rgba(r, g, b, 1.0);
     }
-
-    x: posx
-    y: posy
-
+    width: 20
+    height: 20
+    x: posx - width / 2
+    y: posy - height / 2
     Rectangle {
         id: node
-        width: 20
-        height: 20
-        x: -width / 2
-        y: -height / 2
+        anchors.fill: parent
         color: root.heatColor(root.heatScore)
         opacity: root.hidden ? 0.1 : 1
         radius: 100
         border.width: 2
         border.color: root.highlight ? "yellow" : root.hover ? '#9806f3' : "#af9476"
+    }
+    MouseArea {
+        z: 100
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        propagateComposedEvents: true
+        onEntered: root.model.setHovered(root.topicId)
+        onExited: root.model.unsetHovered(root.topicId)
     }
     Text {
         text: root.label

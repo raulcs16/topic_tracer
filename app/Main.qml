@@ -278,6 +278,8 @@ ApplicationWindow {
                             commandInput.text = "";
                         }
                         Keys.onTabPressed: {
+                            if (commandInput.text.length == 0)
+                                return;
                             let suggestion = topic_controller.handleAutoComplete();
                             commandInput.text = suggestion;
                         }

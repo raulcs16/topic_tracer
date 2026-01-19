@@ -17,17 +17,13 @@ Item {
 
     Repeater {
         model: root.edgeModel
-        delegate: EdgeSpline {
-            viewWidth: root.viewWidth
-            viewHeight: root.viewHeight
-        }
+        delegate: EdgeSpline {}
     }
 
     Repeater {
         model: root.nodeModel
         delegate: NodeDelegate {
-            viewWidth: root.viewWidth
-            viewHeight: root.viewHeight
+            model: root.nodeModel
         }
     }
 }

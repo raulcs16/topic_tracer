@@ -1,11 +1,12 @@
 #include "graph_keys.hpp"
 #include "node_list_model.hpp"
 
-NodeListModel::NodeListModel(QObject *parent) : QAbstractListModel{parent} {}
+NodeListModel::NodeListModel(TGStore *store, QObject *parent)
+    : QAbstractListModel{parent}, m_tgstore(store) {}
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[IdRole] = "id";
+    roles[IdRole] = "topicId";
     roles[LabelRole] = "label";
     roles[XRole] = "posx";
     roles[YRole] = "posy";
@@ -34,77 +35,44 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
 
     switch (role) {
     case IdRole: return QVariant::fromValue(nodeInfo.id);
-    case LabelRole: return nodeInfo.label;
+    case LabelRole: {
+        if (m_tgstore) {
+            return m_tgstore->label(nodeInfo.id);
+        }
+        return QVariant();
+    }
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     case FlagsRole: {
-        auto it = m_stateFlags.find(nodeInfo.id);
-        if (it == m_stateFlags.end())
-            return QVariant();
-        return static_cast<int>(it->second.flags);
+        if (m_tgstore) {
+            return static_cast<int>(m_tgstore->flags(nodeInfo.id));
+        }
+        return 0;
     }
     case HeatRole: return nodeInfo.heat;
     default: return QVariant();
     }
 }
 
-size_t NodeListModel::getIndex(uint32_t id) {
-    size_t i = 0;
-    while (i < rowCount()) {
-        if (m_nodes[i].id == id)
-            break;
-        i++;
+int NodeListModel::getIndex(uint32_t id) {
+    auto it = m_idToRow.find(id);
+    if (it == m_idToRow.end()) {
+        return -1;
     }
-    return i;
+    return it.value();
 }
 
-void NodeListModel::resetNodes(const std::vector<NodeItem> &nodes) {
-    beginResetModel();
-    m_nodes = nodes;
-    m_stateFlags.clear();
 
-    for (const auto &n : m_nodes) {
-        m_stateFlags.insert({n.id, {}});
-    }
-    endResetModel();
-}
-void NodeListModel::onGaphChanged() {
-    beginResetModel();
-    m_nodes.clear();
-    endResetModel();
-}
-
-void NodeListModel::setFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = getIndex(id);
-    if (index >= m_nodes.size())
-        return;
-    m_stateFlags[id].add(flags);
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
-}
-void NodeListModel::unSetFlagsOnId(uint32_t id, StateFlag flags) {
-    int index = getIndex(id);
-    if (index >= m_nodes.size())
-        return;
-    m_stateFlags[id].remove(flags);
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
-}
 void NodeListModel::updateHeatScore(uint32_t id, int score) {
     int index = getIndex(id);
-    if (index >= m_nodes.size())
+    if (index < 0)
         return;
     m_nodes[index].heat = score;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {HeatRole});
 }
 
-void NodeListModel::addItem(NodeItem item) {
-    const int newIndex = m_nodes.size();
-    beginInsertRows(QModelIndex(), newIndex, newIndex);
-    m_nodes.push_back(item);
-    endInsertRows();
-}
+
 void NodeListModel::updatePos(int index, double x, double y) {
     auto node = m_nodes[index];
     if (node.x == x && node.y == y)
@@ -114,27 +82,29 @@ void NodeListModel::updatePos(int index, double x, double y) {
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {XRole, YRole});
 }
-void NodeListModel::deleteNode(uint32_t id) {}
-void NodeListModel::updateLabel(uint32_t id, const QString &name) {}
+
 
 void NodeListModel::onNodeAdded(const GraphNode &node) {
     int index = getIndex(node.id);
-    if (index < m_nodes.size())
+    if (index >= 0)
         return updatePos(index, node.x, node.y);
 
     index = m_nodes.size();
     beginInsertRows(QModelIndex(), index, index);
-    m_nodes.push_back(
-        NodeItem{.x = node.x, .y = node.y, .id = node.id, .label = "", .heat = 0});
-    m_stateFlags[node.id] = {};
+    m_nodes.push_back(NodeItem{.x = node.x, .y = node.y, .id = node.id, .heat = 0});
+    m_idToRow.insert(node.id, index);
     endInsertRows();
 }
 void NodeListModel::onNodeRemoved(uint32_t id) {
     int index = getIndex(id);
-    if (index >= m_nodes.size())
+    if (index < 0)
         return;
     beginRemoveRows(QModelIndex(), index, index);
     m_nodes.erase(m_nodes.begin() + index);
+    auto it = m_idToRow.find(id);
+    if (it != m_idToRow.end()) {
+        m_idToRow.erase(it);
+    }
     endRemoveRows();
 }
 void NodeListModel::onEdgeAdded(const GraphEdge &edge) {}
@@ -142,6 +112,32 @@ void NodeListModel::onEdgeRemoved(const std::string &edge) {}
 void NodeListModel::onClear() {
     beginResetModel();
     m_nodes.clear();
-    m_stateFlags.clear();
+    m_idToRow.clear();
     endResetModel();
+}
+
+void NodeListModel::onLabelUpdated(uint32_t id) {
+    int row = getIndex(id);
+    if (row < 0) {
+        return; // Node doesn't exist in our list yet
+    }
+    const QModelIndex modelIndex = this->index(row);
+    emit dataChanged(modelIndex, modelIndex, {LabelRole});
+}
+void NodeListModel::onFlagsUpdated(uint32_t id) {
+    int row = getIndex(id);
+    if (row < 0) {
+        return;
+    }
+    const QModelIndex modelIndex = this->index(row);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+
+void NodeListModel::setHovered(uint32_t id) {
+    qDebug() << "setHovered:" << id;
+    m_tgstore->setTopicState(id, StateFlag::Hovered, true);
+}
+void NodeListModel::unsetHovered(uint32_t id) {
+    qDebug() << "setUnHovered:" << id;
+    m_tgstore->setTopicState(id, StateFlag::Hovered, false);
 }

@@ -37,10 +37,10 @@ public:
     void removeObserver(ILayoutObserver *observer);
 
     void onTopicAdded(const Topic &topic) override;
-    void onTopicRemoved(const Topic &topic) override;
+    void onTopicRemoved(uint32_t id) override;
     void onTopicRenamed(const Topic &topic) override;
     void onEdgeAdded(const Edge &edge) override;
-    void onEdgeRemoved(const Edge &edge) override;
+    void onEdgeRemoved(const std::string &key) override;
     void onClear() override;
 
 private:

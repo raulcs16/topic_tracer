@@ -55,12 +55,6 @@ public:
 
 public slots:
     void onTopicRequested(const QString &topic);
-    void onTopicHovered(uint32_t id);
-    void onTopicUnHovered(uint32_t id);
-    void onTopicSelected(uint32_t id);
-    void onTopicUnSelected(uint32_t id);
-    void onTopicDeleted(uint32_t id);
-    void onTopicRenamed(uint32_t id, const QString &name);
 
 private:
     void synchGraphView();
@@ -73,10 +67,10 @@ private:
 
 
 private:
-    TopicGraph m_graph;
-    LayoutEngine m_layout;
+    TopicGraph *m_graph;
+    LayoutEngine *m_layout;
+    TGStore *m_tgstore;
     // EvidenceDB m_evidenceDb;
-
     // TopicGraphRepository m_repo;
     // HeatScoreSystem *m_heatScore;
     TopicListModel *m_topicList;

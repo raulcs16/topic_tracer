@@ -2,13 +2,13 @@
 #include "topic_list_model.hpp"
 
 
-TopicListModel::TopicListModel(QObject *parent) : QAbstractListModel{parent} {}
+TopicListModel::TopicListModel(TGStore *store, QObject *parent)
+    : QAbstractListModel{parent}, m_tgstore(store) {}
 
 QHash<int, QByteArray> TopicListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "topicId";
-    roles[NameRole] = "topicName";
-    roles[PendingRole] = "pending";
+    roles[LabelRole] = "topicName";
     roles[FlagsRole] = "flags";
     return roles;
 }
@@ -16,29 +16,30 @@ int TopicListModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid()) {
         return 0;
     }
-    return m_topics.size();
+    return m_ids.size();
 }
 QVariant TopicListModel::data(const QModelIndex &index, int role) const {
-    if (!checkIndex(index, CheckIndexOption::IndexIsValid)) {
+    if (!checkIndex(index, CheckIndexOption::IndexIsValid))
         return QVariant();
-    }
-    if (!index.isValid()) {
+    if (!index.isValid())
         return QVariant();
-    }
 
     int row = index.row();
-
-    auto topic = m_topics[row];
+    auto id = m_ids[row];
 
     switch (role) {
-    case NameRole: return topic.name;
-    case IdRole: return topic.id;
-    case PendingRole: return topic.pending;
+    case IdRole: return id;
+    case LabelRole: {
+        if (m_tgstore) {
+            return m_tgstore->label(id);
+        }
+        return QVariant();
+    }
     case FlagsRole: {
-        auto it = m_stateFlags.find(topic.id);
-        if (it == m_stateFlags.end())
-            return QVariant();
-        return static_cast<int>(it->second.flags);
+        if (m_tgstore) {
+            return static_cast<int>(m_tgstore->flags(id));
+        }
+        return 0;
     }
     default: return QVariant();
     }
@@ -58,251 +59,124 @@ Qt::ItemFlags TopicListModel::flags(const QModelIndex &index) const {
     }
     return baseFlags;
 }
-bool TopicListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-    if (!index.isValid() || index.row() >= m_topics.size()) {
-        return false;
+int TopicListModel::getIndex(uint32_t id) {
+    auto it = m_idToRow.find(id);
+    if (it == m_idToRow.end()) {
+        return -1;
     }
-
-    TopicItem &item = m_topics[index.row()];
-    bool changed = false;
-
-    if (role == NameRole) {
-        QString newName = value.toString().trimmed();
-        if (item.name != newName) {
-            item.name = newName;
-            changed = true;
-        }
-    }
-
-    if (changed) {
-        emit dataChanged(index, index, {role});
-        return true;
-    }
-    return false;
+    return it.value();
 }
 
-
-void TopicListModel::addItem(const QString &name) {
-    QString topicName = name.trimmed();
-    if (topicName.isEmpty()) {
-        qWarning() << "Cannot add a topic with an empty name.";
+void TopicListModel::onLabelUpdated(uint32_t id) {
+    int index = getIndex(id);
+    if (index >= 0) {
+        const QModelIndex modelIndex = this->index(index);
+        emit dataChanged(modelIndex, modelIndex, {LabelRole});
         return;
     }
-    emit requestAddTopic(topicName);
-}
-
-void TopicListModel::addConfirmedItem(uint32_t id, const QString &name) {
-    const int newRow = m_topics.size();
-
+    const int newRow = m_ids.size();
     beginInsertRows(QModelIndex(), newRow, newRow);
-    m_topics.push_back(TopicItem{.id = id, .name = name, .pending = false});
-    m_stateFlags.insert({id, ItemState{}});
+    m_ids.push_back(id);
     endInsertRows();
+    m_idToRow.insert(id, newRow);
 }
-
-bool TopicListModel::removeItem(int index) {
-    if (index < 0 || index >= m_topics.size()) {
-        return false;
-    }
-
-    uint32_t id = m_topics[index].id;
-    beginRemoveRows(QModelIndex(), index, index);
-    m_topics.removeAt(index);
-    endRemoveRows();
-    emit topicDeleted(id);
-    return true;
-}
-void TopicListModel::deleteTopic(uint32_t id) {
-    size_t index = getIndex(id);
-    if (index >= m_topics.size()) {
+void TopicListModel::onFlagUpdated(uint32_t id) {
+    int index = getIndex(id);
+    if (index < 0) {
         return;
     }
-    beginRemoveRows(QModelIndex(), index, index);
-    m_topics.removeAt(index);
-    endRemoveRows();
-    emit topicDeleted(id);
-}
-//TODO: set to pending, add wait for response
-void TopicListModel::renameTopic(uint32_t id, const QString &newName) {
-    size_t index = getIndex(id);
-    if (index >= m_topics.size()) {
-        return;
-    }
-    QModelIndex modelIndex = this->index(index);
-    QString name = newName.trimmed();
-    setData(modelIndex, name, NameRole);
-    emit topicRenamed(id, name);
-}
-size_t TopicListModel::getIndex(uint32_t id) {
-    size_t index = 0;
-    while (index < m_topics.size()) {
-        if (m_topics[index].id == id)
-            break;
-        index++;
-    }
-    return index;
-}
-bool TopicListModel::editItem(int index, const QString &newName) {
-    if (index < 0 || index >= m_topics.size() || newName.trimmed().isEmpty()) {
-        return false;
-    }
-    QModelIndex modelIndex = this->index(index);
-    setData(modelIndex, newName.trimmed(), NameRole);
-    return true;
-}
-
-
-void TopicListModel::setIsAddingNewTopic(bool value) {
-    if (value != m_isAddingNewTopic) {
-        m_isAddingNewTopic = value;
-        emit isAddingNewTopicChanged();
-    }
-}
-
-
-void TopicListModel::confirmTopic(int index, uint32_t new_id) {
-    if (index < 0 || index >= m_topics.size())
-        return;
-
-    TopicItem &item = m_topics[index];
-    item.id = new_id;
-    item.pending = false;
-    m_stateFlags.insert({new_id, ItemState{}});
-
-    // Notify any views or bindings that these fields changed
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {IdRole, PendingRole});
-}
-
-
-void TopicListModel::addFlags(int index, StateFlag flags) {
-    if (index < 0 || index >= m_topics.size()) {
-        return;
-    }
-    uint32_t id = m_topics[index].id;
-    m_stateFlags[id].add(flags);
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
-}
-void TopicListModel::removeFlags(int index, StateFlag flags) {
-    if (index < 0 || index >= m_topics.size()) {
-        return;
-    }
-    uint32_t id = m_topics[index].id;
-    m_stateFlags[id].remove(flags);
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
 
 void TopicListModel::selectIndex(int index) {
-    if (index < 0 || index >= m_topics.size() || index == m_lastSelectedIndex)
+    if (index < 0 || index >= m_ids.size() || index == m_lastSelectedIndex)
         return;
     clearSelection();
-
-    addFlags(index, StateFlag::Selected);
-    emit topicSelected(m_topics[index].id);
+    m_tgstore->setSelected(m_ids[index]);
     m_selectedIndexes.push_back(index);
     m_lastSelectedIndex = index;
+}
+void TopicListModel::setIsAddingNewTopic(bool value) { m_isAddingNewTopic = value; }
+void TopicListModel::setHovered(uint32_t id) {
+    m_tgstore->setTopicState(id, StateFlag::Hovered, true);
+}
+
+void TopicListModel::unsetHovered(uint32_t id) {
+    m_tgstore->setTopicState(id, StateFlag::Hovered, false);
 }
 void TopicListModel::toggleSelect(int index) {
-    if (index < 0 || index >= m_topics.size())
-        return;
-    if (m_stateFlags[m_topics[index].id].has(StateFlag::Selected)) {
-        removeFlags(index, StateFlag::Selected);
-        emit topicUnSelected(m_topics[index].id);
-        auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), index);
-        if (it != m_selectedIndexes.end()) {
-            m_selectedIndexes.erase(it);
-        }
-        return;
-    }
-    addFlags(index, StateFlag::Selected);
-    emit topicSelected(m_topics[index].id);
-    m_selectedIndexes.push_back(index);
-    m_lastSelectedIndex = index;
+    // if (index < 0 || index >= m_topics.size())
+    //     return;
+    // if (m_stateFlags[m_topics[index].id].has(StateFlag::Selected)) {
+    //     removeFlags(index, StateFlag::Selected);
+    //     emit topicUnSelected(m_topics[index].id);
+    //     auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), index);
+    //     if (it != m_selectedIndexes.end()) {
+    //         m_selectedIndexes.erase(it);
+    //     }
+    //     return;
+    // }
+    // addFlags(index, StateFlag::Selected);
+    // emit topicSelected(m_topics[index].id);
+    // m_selectedIndexes.push_back(index);
+    // m_lastSelectedIndex = index;
 }
 void TopicListModel::rangeSelect(int target) {
-    if (target < 0 || target >= m_topics.size() || target == m_lastSelectedIndex) {
-        return;
-    }
+    // if (target < 0 || target >= m_topics.size() || target == m_lastSelectedIndex) {
+    //     return;
+    // }
 
-    //remove previous range
-    if (m_rangeSelectedIndex != -1) {
-        int min = qMin(m_lastSelectedIndex, m_rangeSelectedIndex);
-        int max = qMax(m_lastSelectedIndex, m_rangeSelectedIndex);
-        std::vector<int> toRemove;
-        toRemove.reserve(max - min + 1);
-        for (int i : m_selectedIndexes) {
-            if (i >= min && i <= max && i != m_lastSelectedIndex) {
-                toRemove.push_back(i);
-            }
-        }
-        for (int i : toRemove) {
-            removeFlags(i, StateFlag::Selected);
-            emit topicUnSelected(m_topics[i].id);
-            auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), i);
-            if (it != m_selectedIndexes.end()) {
-                m_selectedIndexes.erase(it);
-            }
-        }
-    }
+    // //remove previous range
+    // if (m_rangeSelectedIndex != -1) {
+    //     int min = qMin(m_lastSelectedIndex, m_rangeSelectedIndex);
+    //     int max = qMax(m_lastSelectedIndex, m_rangeSelectedIndex);
+    //     std::vector<int> toRemove;
+    //     toRemove.reserve(max - min + 1);
+    //     for (int i : m_selectedIndexes) {
+    //         if (i >= min && i <= max && i != m_lastSelectedIndex) {
+    //             toRemove.push_back(i);
+    //         }
+    //     }
+    //     for (int i : toRemove) {
+    //         removeFlags(i, StateFlag::Selected);
+    //         emit topicUnSelected(m_topics[i].id);
+    //         auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), i);
+    //         if (it != m_selectedIndexes.end()) {
+    //             m_selectedIndexes.erase(it);
+    //         }
+    //     }
+    // }
 
-    //add range
-    int min = qMin(m_lastSelectedIndex, target);
-    int max = qMax(m_lastSelectedIndex, target);
-    for (; min <= max; min++) {
-        if (min == m_lastSelectedIndex)
-            continue;
-        emit topicSelected(m_topics[min].id);
-        addFlags(min, StateFlag::Selected);
-        m_selectedIndexes.push_back(min);
-    }
-    m_rangeSelectedIndex = target;
+    // //add range
+    // int min = qMin(m_lastSelectedIndex, target);
+    // int max = qMax(m_lastSelectedIndex, target);
+    // for (; min <= max; min++) {
+    //     if (min == m_lastSelectedIndex)
+    //         continue;
+    //     emit topicSelected(m_topics[min].id);
+    //     addFlags(min, StateFlag::Selected);
+    //     m_selectedIndexes.push_back(min);
+    // }
+    // m_rangeSelectedIndex = target;
 }
 void TopicListModel::clearSelection() {
-    for (auto i : m_selectedIndexes) {
-        removeFlags(i, StateFlag::Selected);
-        emit topicUnSelected(m_topics[i].id);
-    }
-    m_selectedIndexes.clear();
-    m_lastSelectedIndex = -1;
-    m_rangeSelectedIndex = -1;
+    // for (auto i : m_selectedIndexes) {
+    //     removeFlags(i, StateFlag::Selected);
+    //     emit topicUnSelected(m_topics[i].id);
+    // }
+    // m_selectedIndexes.clear();
+    // m_lastSelectedIndex = -1;
+    // m_rangeSelectedIndex = -1;
 }
 
-void TopicListModel::setHovered(int index) {
-    if (index < 0 || index >= m_topics.size())
-        return;
-    addFlags(index, StateFlag::Hovered);
-    emit topicHovered(m_topics[index].id);
-}
 
-void TopicListModel::unsetHovered(int index) {
-    if (index < 0 || index >= m_topics.size())
-        return;
-    removeFlags(index, StateFlag::Hovered);
-    emit topicUnHovered(m_topics[index].id);
-}
 void TopicListModel::clear() {
-    if (m_topics.isEmpty())
+    if (m_ids.isEmpty())
         return;
 
     beginResetModel();
-    m_topics.clear();
-    m_stateFlags.clear();
+    m_ids.clear();
+    m_idToRow.clear();
     endResetModel();
 }
-
-void TopicListModel::onTopicAdded(const Topic &topic) {
-    const int newRow = m_topics.size();
-    beginInsertRows(QModelIndex(), newRow, newRow);
-    m_topics.push_back(TopicItem{.id = topic.id,
-                                 .name = QString::fromStdString(topic.name),
-                                 .pending = false});
-    m_stateFlags.insert({topic.id, ItemState{}});
-    endInsertRows();
-}
-void TopicListModel::onTopicRemoved(const Topic &topic) {}
-void TopicListModel::onTopicRenamed(const Topic &topic) {}
-void TopicListModel::onEdgeAdded(const Edge &edge) {}
-void TopicListModel::onEdgeRemoved(const Edge &edge) {}
-void TopicListModel::onClear() { clear(); }

@@ -21,6 +21,9 @@ qt_add_qml_module(TopicGraphQt
         topic_graph_controller.hpp
         topic_graph_controller.cpp
 
+        topic_graph_store.hpp
+        topic_graph_store.cpp
+
         topic_list_model.hpp
         topic_list_model.cpp
 
@@ -32,6 +35,8 @@ qt_add_qml_module(TopicGraphQt
         
         ui_states.hpp
         ui_states.cpp
+
+
 
         enums.hpp
         enums.cpp
