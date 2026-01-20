@@ -95,9 +95,12 @@ Enforce Rules such as making sure EdgeType matches TopicType(s) beign connected
 */
 const Edge *TopicGraph::addEdge(Edge edge) {
     auto found = m_edges.find(edge.key);
-    if (found == m_edges.end())
+    if (found != m_edges.end())
         return nullptr;
     m_edges[edge.key] = std::move(&edge);
+    m_adjInMap[edge.to].push_back(edge.from);
+    m_adjOutMap[edge.from].push_back(edge.to);
+    notifyEdgeAdded(edge);
     return m_edges[edge.key];
 }
 const Edge *TopicGraph::addEdge(const Topic *a, const Topic *b, EdgeType type) {

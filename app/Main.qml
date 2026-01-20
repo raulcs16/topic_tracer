@@ -32,14 +32,17 @@ ApplicationWindow {
             topic_controller.clearAll();
             break;
         case "save":
-            if (args.length < 1) {
-                console.warn("Usage: save <file>");
-                return;
-            }
-            if (args[0].length == 0)
+            {
+                if (args.length < 1) {
+                    console.warn("Usage: save <file>");
+                    return;
+                }
+                if (args[0].length == 0) {
+                    break;
+                }
+                topic_controller.save(args[0]);
                 break;
-            topic_controller.save(args[0]);
-            break;
+            }
         case "load":
             if (args.length < 1) {
                 console.warn("Usage: load <file>");
@@ -145,35 +148,6 @@ ApplicationWindow {
                 let topic = args[0];
                 let newName = args[1];
                 topic_controller.rename(topic, newName);
-                break;
-            }
-        case "layout":
-            {
-                if (args.length < 1)
-                    return;
-                let layout = args[0];
-                switch (layout) {
-                case "default":
-                    topic_controller.defaultLayout();
-                    break;
-                case "directed":
-                    topic_controller.directedLayout();
-                    break;
-                case "circular":
-                    topic_controller.circularLayout();
-                    break;
-                case "tree":
-                    topic_controller.treeLayout();
-                    break;
-                case "planar":
-                    topic_controller.planarLayout();
-                    break;
-                case "multi":
-                    topic_controller.multiLayout();
-                    break;
-                default:
-                    break;
-                }
                 break;
             }
         default:

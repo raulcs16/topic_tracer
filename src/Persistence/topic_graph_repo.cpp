@@ -1,4 +1,5 @@
 #include "topic_graph_repo.hpp"
+#include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -25,8 +26,7 @@ bool TopicGraphSerializer::fromJson(const QJsonDocument &doc,
                                     TopicGraph &graph,
                                     QString *error) {
     if (!doc.isObject()) {
-        if (error)
-            *error = "json root not an object";
+        qDebug() << "json root not an object";
         return false;
     }
     QJsonObject root = doc.object();
@@ -56,7 +56,6 @@ QJsonObject TopicGraphSerializer::encodeTopic(const Topic &t) {
     QJsonObject topic;
     topic["id"] = static_cast<int>(t.id);
     topic["name"] = QString::fromStdString(t.name);
-    topic["type"] = static_cast<int>(t.type);
     return topic;
 }
 
@@ -74,20 +73,16 @@ bool TopicGraphSerializer::decodeTopic(const QJsonObject &obj,
                                        TopicGraph &graph,
                                        QHash<int, const Topic *> &idMap,
                                        QString *error) {
-    if (!obj.contains("id") || !obj.contains("name") || !obj.contains("type")) {
-        if (error)
-            *error = "topic missing required fields";
+    if (!obj.contains("id") || !obj.contains("name")) {
+        qDebug() << "topic missing required fields";
         return false;
     }
 
     uint32_t id = obj["id"].toInt();
     std::string name = obj["name"].toString().toStdString();
-    TopicType type = static_cast<TopicType>(obj["type"].toInt());
-
-    const auto topic = graph.addTopic(id, name, type);
+    const auto topic = graph.addTopic(id, name);
     if (!topic) {
-        if (error)
-            *error = "failed to add topic";
+        qDebug() << "failed to add topic";
     }
     idMap[id] = topic;
 
@@ -99,8 +94,7 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
                                       QString *error) {
     if (!obj.contains("key") || !obj.contains("from") || !obj.contains("to") ||
         !obj.contains("type")) {
-        if (error)
-            *error = "Edge missing required fields";
+        qDebug() << "Edge missing required fields";
         return false;
     }
 
@@ -110,40 +104,43 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
     EdgeType type = static_cast<EdgeType>(obj["type"].toInt());
 
     if (!idMap.contains(fromId) || !idMap.contains(toId)) {
-        if (error)
-            *error = "Edge references invalid topic ID";
+        qDebug() << "Edge references invalid topic ID";
         return false;
     }
 
     if (!graph.addEdge(Edge{.key = key, .from = fromId, .to = toId, .type = type})) {
-        if (error)
-            *error = "Failed to create edge: " + QString::fromStdString(key);
+        qDebug() << "Failed to create edge: " + QString::fromStdString(key);
         return false;
     }
 
     return true;
 }
-TopicGraphRepository::TopicGraphRepository(QString basePath) : m_basePath(basePath) {}
+TopicGraphRepository::TopicGraphRepository(QString basePath) : m_basePath(basePath) {
+    QDir dir(m_basePath);
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+}
 bool TopicGraphRepository::save(const TopicGraph &graph,
                                 QString fileName,
                                 QString *error) {
 
-    QFile file(m_basePath + "/" + fileName);
+    QFile file(m_basePath + "/" + fileName + ".json");
     if (!file.open(QIODevice::WriteOnly)) {
-        if (error)
-            *error = "Cannot open file for writing";
+        qDebug() << "open file error";
         return false;
     }
 
     QJsonDocument doc = TopicGraphSerializer::toJson(graph);
     file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
     return true;
 }
 bool TopicGraphRepository::load(TopicGraph &graph, QString file_name, QString *error) {
-    QFile file(m_basePath + "/" + file_name);
+
+    QFile file(m_basePath + "/" + file_name + ".json");
     if (!file.open(QIODevice::ReadOnly)) {
-        if (error)
-            *error = "Cannot open file for reading";
+        qDebug() << "Cannot open file for reading";
         return false;
     }
 
@@ -151,10 +148,9 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name, QString *e
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseErr);
 
     if (parseErr.error != QJsonParseError::NoError) {
-        if (error)
-            *error = "JSON parse error: " + parseErr.errorString();
+        qDebug() << "JSON PArseError";
         return false;
     }
-
+    file.close();
     return TopicGraphSerializer::fromJson(doc, graph, error);
 }

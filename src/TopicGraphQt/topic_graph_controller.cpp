@@ -8,16 +8,18 @@
 #include <QTimer>
 
 TopicGraphController::TopicGraphController(QObject *parent)
-    : QObject{parent}, m_graph{new TopicGraph()}, m_layout{new LayoutEngine()},
+    : QObject{parent}, m_graph{new TopicGraph()},
+      m_repo{new TopicGraphRepository("./data")}, m_layout{new LayoutEngine()},
       m_tgstore{new TGStore()}, m_topicList{new TopicListModel(m_tgstore, this)},
       m_nodeList{new NodeListModel(m_tgstore, this)},
       m_edgeList(new EdgeListModel(this)) {
 
-    if (!m_graph || !m_layout || !m_tgstore || !m_topicList || !m_nodeList || !m_edgeList)
+    if (!m_graph || !m_repo || !m_layout || !m_tgstore || !m_topicList || !m_nodeList ||
+        !m_edgeList)
         return;
     m_graph->addObserver(m_tgstore);
     m_graph->addObserver(m_layout);
-    // // m_graph.addObserver(m_topicList);
+
     m_layout->addObserver(m_nodeList);
     m_layout->addObserver(m_edgeList);
 
@@ -65,7 +67,16 @@ TopicGraphController::TopicGraphController(QObject *parent)
             this,
             &TopicGraphController::onTopicToggleSelectionRequest);
 }
-TopicGraphController::~TopicGraphController() { delete m_topicList; }
+TopicGraphController::~TopicGraphController() {
+    clearAll();
+    delete m_nodeList;
+    delete m_edgeList;
+    delete m_topicList;
+    delete m_repo;
+    delete m_tgstore;
+    delete m_graph;
+    delete m_layout;
+}
 
 void TopicGraphController::createTopic(const QString &name) {
     if (m_graph) {
@@ -144,13 +155,7 @@ void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) 
         m_graph->removeEdge(topicA.toStdString(), topicB.toStdString());
 }
 
-void TopicGraphController::synchGraphView() {}
-void TopicGraphController::directedLayout() {}
-void TopicGraphController::treeLayout() {}
-void TopicGraphController::circularLayout() {}
-void TopicGraphController::planarLayout() {}
-void TopicGraphController::defaultLayout() {}
-void TopicGraphController::multiLayout() {}
+
 void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     // auto ta = m_graph.getTopic(topicA.toStdString());
     // auto tb = m_graph.getTopic(topicB.toStdString());
@@ -192,71 +197,26 @@ void TopicGraphController::calculateHeatScores() {
     // }
 }
 void TopicGraphController::save(QString fileName) {
-    // QString *error = nullptr;
-    // m_repo.save(m_graph, fileName, error);
-    // if (error) {
-    //     qDebug() << error;
-    // }
+    if (!m_repo)
+        return;
+    QString *error = nullptr;
+    bool saved = m_repo->save(*m_graph, fileName, error);
+    if (error != nullptr) {
+        qDebug() << error;
+    }
 }
 void TopicGraphController::load(QString fileName) {
-    // clearAll();
-    // QString *error = nullptr;
-
-    // TopicGraph temp;
-    // bool load = m_repo.load(temp, fileName, error);
-    // if (error != nullptr) {
-    //     qDebug() << error;
-    // }
-    // for (auto topic : temp.topics()) {
-
-    //     m_graph.addTopic(topic->id, topic->name, topic->type);
-
-    //     QString name = QString::fromStdString(topic->name);
-    //     if (m_topicList) {
-    //         m_topicList->addConfirmedItem(topic->id, name);
-    //     }
-
-    //     auto gNode = m_layout.addNode(topic->id);
-    //     if (m_nodeList) {
-    //         m_nodeList->addItem(NodeItem{.label = name,
-    //                                      .x = gNode.x,
-    //                                      .y = gNode.y,
-    //                                      .id = topic->id,
-    //                                      .heat = 0});
-    //     }
-    // }
-    // for (const auto &e : temp.edges()) {
-    //     auto gData = m_layout.addEdge(e->from, e->to);
-    //     if (m_nodeList) {
-    //         for (const auto &node : gData.nodes)
-    //             m_nodeList->updatePos(node.id, node.x, node.y);
-    //     }
-    //     if (m_edgeList) {
-    //         for (const auto &gedge : gData.edges) {
-    //             std::vector<QPointF> points;
-    //             for (const auto &ogpoint : gedge.bends) {
-    //                 points.push_back({ogpoint.m_x, ogpoint.m_y});
-    //             }
-    //             m_edgeList->addItem(EdgeItem{
-    //                 .key = gedge.key,
-    //                 .bends = points,
-    //                 .from = gedge.from,
-    //                 .to = gedge.to,
-    //                 .source_x = gedge.source_x,
-    //                 .source_y = gedge.source_y,
-    //                 .target_x = gedge.target_x,
-    //                 .target_y = gedge.target_y,
-    //             });
-    //         }
-    //     }
-    // }
+    if (!m_repo || !m_graph)
+        return;
+    clearAll();
+    QString *error = nullptr;
+    bool load = m_repo->load(*m_graph, fileName, error);
+    if (error != nullptr) {
+        qDebug() << error;
+    }
+    qDebug() << load;
 }
-void TopicGraphController::clearAll() {
-    m_graph->clear();
-    m_layout->clear();
-    m_topicList->clear();
-    synchGraphView();
-}
+void TopicGraphController::clearAll() { m_graph->clear(); }
 void TopicGraphController::updateBuffer(const QString &buffer) {
     m_currentBuffer = buffer;
 }

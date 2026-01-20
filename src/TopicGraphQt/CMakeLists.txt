@@ -11,7 +11,7 @@ target_link_libraries(TopicGraphQt
     # PUBLIC Evidence
     PUBLIC LayoutEngine
     PUBLIC OGDF
-    # PUBLIC Persistence
+    PUBLIC Persistence
 )
 
 qt_add_qml_module(TopicGraphQt

@@ -4,6 +4,7 @@
 #include "layout_engine.hpp"
 #include "node_list_model.hpp"
 #include "topic_graph.hpp"
+#include "topic_graph_repo.hpp"
 #include "topic_list_model.hpp"
 #include "ui_states.hpp"
 #include <QObject>
@@ -38,13 +39,6 @@ public:
     Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
     Q_INVOKABLE void path(const QString &topicA, const QString &topicB);
 
-    Q_INVOKABLE void defaultLayout();
-    Q_INVOKABLE void directedLayout();
-    Q_INVOKABLE void treeLayout();
-    Q_INVOKABLE void circularLayout();
-    Q_INVOKABLE void planarLayout();
-    Q_INVOKABLE void multiLayout();
-
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString fileName);
     Q_INVOKABLE void clearAll();
@@ -61,7 +55,6 @@ public slots:
     void onTopicRangeSelectionRequest(uint32_t id);
 
 private:
-    void synchGraphView();
     QString autoCompleteCommand(const QString &buffer, const QStringList &parts);
     QString autoCompleteTopics(const QStringList &parts, const QString &prefix);
     QString processAutocomplete(const QString &prefix,
@@ -75,17 +68,18 @@ private:
     TopicGraph *m_graph;
     LayoutEngine *m_layout;
     TGStore *m_tgstore;
-    // EvidenceDB m_evidenceDb;
-    // TopicGraphRepository m_repo;
-    // HeatScoreSystem *m_heatScore;
+    TopicGraphRepository *m_repo;
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;
+
+
+    // EvidenceDB m_evidenceDb;
+    // HeatScoreSystem *m_heatScore;
     QString m_currentBuffer;
     QString m_lastPrefix;
     QStringList m_lastMatches;
     int m_cycleIndex = -1;
-
     std::vector<uint32_t> m_selectedIds;
     int m_lastSelectedId = -1;
     int m_rangeSelectedId = -1;
