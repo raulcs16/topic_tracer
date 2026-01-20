@@ -54,6 +54,16 @@ TopicGraphController::TopicGraphController(QObject *parent)
             &TopicListModel::rangeSelectionRequest,
             this,
             &TopicGraphController::onTopicRangeSelectionRequest);
+
+    connect(m_nodeList,
+            &NodeListModel::selectRequested,
+            this,
+            &TopicGraphController::onTopicSelectedRequested);
+
+    connect(m_nodeList,
+            &NodeListModel::toggleSelectionRequest,
+            this,
+            &TopicGraphController::onTopicToggleSelectionRequest);
 }
 TopicGraphController::~TopicGraphController() { delete m_topicList; }
 

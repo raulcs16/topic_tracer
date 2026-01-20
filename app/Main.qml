@@ -226,7 +226,9 @@ ApplicationWindow {
                     }
                 }
                 MouseArea {
-                    anchors.fill: app.focusItem == canvas ? null : parent
+                    enabled: app.focusItem != canvas
+                    anchors.fill: parent
+                    propagateComposedEvents: true
                     onClicked: {
                         app.focusItem = canvas;
                         canvas.forceActiveFocus();

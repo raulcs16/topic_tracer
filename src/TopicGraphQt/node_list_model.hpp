@@ -41,10 +41,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     //Incremental API
 
-    //API USER INTERACTIONS WITH LIST
-    Q_INVOKABLE void setHovered(uint32_t id);
-    Q_INVOKABLE void unsetHovered(uint32_t id);
-
     void updateHeatScore(uint32_t id, int score);
 
     void onNodeAdded(const GraphNode &node) override;
@@ -52,6 +48,11 @@ public:
     void onEdgeAdded(const GraphEdge &edge) override;
     void onEdgeRemoved(const std::string &edge) override;
     void onClear() override;
+
+signals:
+    void hoverRequested(uint32_t id, bool isHovered);
+    void selectRequested(uint32_t id);
+    void toggleSelectionRequest(uint32_t id);
 
 public slots:
     void onLabelUpdated(uint32_t id);

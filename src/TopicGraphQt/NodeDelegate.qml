@@ -31,6 +31,19 @@ Item {
         let b = 0.2 * (1 - t);
         return Qt.rgba(r, g, b, 1.0);
     }
+    function borderColor() {
+        let color = "#af9476";
+        if (root.highlight) {
+            color = "yellow";
+        }
+        if (root.hover) {
+            color = '#f37100';
+        }
+        if (root.selected) {
+            color = '#1a06f3';
+        }
+        return color;
+    }
     width: 20
     height: 20
     x: posx - width / 2
@@ -41,17 +54,30 @@ Item {
         color: root.heatColor(root.heatScore)
         opacity: root.hidden ? 0.1 : 1
         radius: 100
-        border.width: 2
-        border.color: root.highlight ? "yellow" : root.hover ? '#9806f3' : "#af9476"
+        border.width: root.selected ? 3 : 2
+        border.color: root.borderColor()
     }
     MouseArea {
         z: 100
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        propagateComposedEvents: true
-        onEntered: root.model.setHovered(root.topicId)
-        onExited: root.model.unsetHovered(root.topicId)
+        onEntered: root.model.hoverRequested(root.topicId, true)
+        onExited: root.model.hoverRequested(root.topicId, false)
+        onClicked: mouse => {
+            if (mouse.button == Qt.RightButton)
+            //root.contextMenuRequested(root.index, Qt.point(mouse.x, mouse.y));
+            {} else {
+                const mods = mouse.modifiers;
+                const meta = mods & Qt.MetaModifier || mods & Qt.ControlModifier;
+
+                if (meta) {
+                    root.model.toggleSelectionRequest(root.topicId);
+                } else {
+                    root.model.selectRequested(root.topicId);
+                }
+            }
+        }
     }
     Text {
         text: root.label
@@ -59,7 +85,7 @@ Item {
         anchors.top: node.bottom
         anchors.horizontalCenter: node.horizontalCenter
         anchors.topMargin: 4
-        font.pointSize: root.hover ? 16 : 12
+        font.pointSize: root.hover | root.selected ? 16 : 12
     }
     Behavior on x {
         NumberAnimation {

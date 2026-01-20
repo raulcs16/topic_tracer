@@ -132,12 +132,3 @@ void NodeListModel::onFlagsUpdated(uint32_t id) {
     const QModelIndex modelIndex = this->index(row);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }
-
-void NodeListModel::setHovered(uint32_t id) {
-    qDebug() << "setHovered:" << id;
-    m_tgstore->setTopicState(id, StateFlag::Hovered, true);
-}
-void NodeListModel::unsetHovered(uint32_t id) {
-    qDebug() << "setUnHovered:" << id;
-    m_tgstore->setTopicState(id, StateFlag::Hovered, false);
-}
