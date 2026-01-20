@@ -19,7 +19,6 @@ TopicGraphController::TopicGraphController(QObject *parent)
         return;
     m_graph->addObserver(m_tgstore);
     m_graph->addObserver(m_layout);
-
     m_layout->addObserver(m_nodeList);
     m_layout->addObserver(m_edgeList);
 
@@ -157,35 +156,36 @@ void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) 
 
 
 void TopicGraphController::path(const QString &topicA, const QString &topicB) {
-    // auto ta = m_graph.getTopic(topicA.toStdString());
-    // auto tb = m_graph.getTopic(topicB.toStdString());
-    // if (ta == nullptr || tb == nullptr) {
-    //     return;
-    // }
-    // auto parents = TG::PathAnalyzer::dijsktras(m_graph, ta->id, tb->id);
-    // auto topicIds = TG::PathAnalyzer::topicPath(parents, tb->id);
+    if (!m_graph)
+        return;
+    auto ta = m_graph->getTopic(topicA.toStdString());
+    auto tb = m_graph->getTopic(topicB.toStdString());
+    if (ta == nullptr || tb == nullptr) {
+        return;
+    }
+    auto parents = TG::PathAnalyzer::dijsktras(*m_graph, ta->id, tb->id);
+    auto topicIds = TG::PathAnalyzer::topicPath(parents, tb->id);
 
-    // std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
-    // for (const auto &topic : m_graph.topics()) {
-    //     StateFlag flag = StateFlag::None;
-    //     if (topicSet.contains(topic.get()->id))
-    //         flag = StateFlag::InPath;
-    //     else
-    //         flag = StateFlag::Hidden;
-    //     m_nodeList->setFlagsOnId(topic.get()->id, flag);
-    // }
+    std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
+    for (const auto &topic : m_graph->topics()) {
+        StateFlag flag = StateFlag::None;
+        if (topicSet.contains(topic->id))
+            flag = StateFlag::InPath;
+        else
+            flag = StateFlag::Hidden;
+        m_tgstore->setTopicState(topic->id, flag, true);
+    }
 
 
-    // auto edgeKeys = TG::PathAnalyzer::edgePath(topicIds);
-    // std::unordered_set<std::string> edgeSet(edgeKeys.begin(), edgeKeys.end());
-    // for (const auto &edge : m_graph.edges()) {
-    //     StateFlag flag = StateFlag::None;
-    //     if (edgeSet.contains(edge.get()->key))
-    //         flag = StateFlag::InPath;
-    //     else
-    //         flag = StateFlag::Hidden;
-    //     m_edgeList->setFlagsOnId(edge.get()->key, flag);
-    // }
+    auto edgeKeys = TG::PathAnalyzer::edgePath(topicIds);
+    std::unordered_set<std::string> edgeSet(edgeKeys.begin(), edgeKeys.end());
+    for (const auto &edge : m_graph->edges()) {
+        StateFlag flag = StateFlag::None;
+        if (edgeSet.contains(edge->key))
+            flag = StateFlag::InPath;
+        else
+            flag = StateFlag::Hidden;
+    }
 }
 
 void TopicGraphController::calculateHeatScores() {
@@ -214,7 +214,6 @@ void TopicGraphController::load(QString fileName) {
     if (error != nullptr) {
         qDebug() << error;
     }
-    qDebug() << load;
 }
 void TopicGraphController::clearAll() { m_graph->clear(); }
 void TopicGraphController::updateBuffer(const QString &buffer) {

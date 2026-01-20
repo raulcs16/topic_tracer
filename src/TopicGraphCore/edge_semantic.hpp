@@ -11,8 +11,7 @@ enum class EdgeSemantic {
 
 static inline EdgeSemantic of(EdgeType type) {
     switch (type) {
-    case EdgeType::ComposedOf:
-    case EdgeType::Example: return EdgeSemantic::Hierarchical;
+    case EdgeType::ComposedOf: return EdgeSemantic::Hierarchical;
     case EdgeType::DependsOn:
     case EdgeType::AlternativeTo: return EdgeSemantic::Lateral;
     case EdgeType::RelatedTo: return EdgeSemantic::CrossLink;

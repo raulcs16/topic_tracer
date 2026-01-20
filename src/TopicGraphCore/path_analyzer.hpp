@@ -5,13 +5,12 @@
 
 namespace TG::PathAnalyzer {
 
-
+using ParentMap = std::unordered_map<uint32_t, int32_t>;
 struct BFSResult {
     std::vector<uint32_t> order;
     std::unordered_map<uint32_t, uint32_t> parent;
     std::unordered_map<uint32_t, int> dist;
 };
-BFSResult bfs(const TopicGraph &g, uint32_t start);
 
 struct DFSResult {
     std::vector<uint32_t> order;
@@ -19,6 +18,9 @@ struct DFSResult {
     std::unordered_map<uint32_t, int> entry;
     std::unordered_map<uint32_t, int> exit;
 };
+
+BFSResult bfs(const TopicGraph &g, uint32_t start);
+
 DFSResult dfs(const TopicGraph &g, uint32_t start);
 
 std::vector<uint32_t> topologicalSort(const TopicGraph &G);

@@ -14,7 +14,11 @@ void TGStore::onTopicRemoved(uint32_t id) {
 void TGStore::onTopicRenamed(const Topic &topic) {}
 void TGStore::onEdgeAdded(const Edge &edge) {}
 void TGStore::onEdgeRemoved(const std::string &key) {}
-void TGStore::onClear() {}
+void TGStore::onClear() {
+    m_labels.clear();
+    m_topicFlags.clear();
+    m_edgeFlags.clear();
+}
 
 QString TGStore::label(uint32_t id) {
     auto it = m_labels.find(id);

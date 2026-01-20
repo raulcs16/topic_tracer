@@ -8,8 +8,8 @@
 
 using nodeDist = std::pair<uint32_t, double>;
 
-namespace TG::PathAnalyzer {
 
+namespace TG::PathAnalyzer {
 BFSResult bfs(const TopicGraph &g, uint32_t start) {
     BFSResult result;
     std::queue<uint32_t> q;
@@ -194,8 +194,8 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
         }
         for (const auto &e : graph.getOutEdges(v)) {
             uint32_t u = e->to;
-            if (dist[u] > dist[v] + edgeWeight(e->type)) {
-                dist[u] = edgeWeight(e->type) + dist[v];
+            if (dist[u] > dist[v] + static_cast<int>(e->type)) {
+                dist[u] = static_cast<int>(e->type) + dist[v];
                 parents[u] = v;
                 pq.emplace(u, dist[u]);
             }
@@ -203,5 +203,4 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
     }
     return parents;
 }
-
 } // namespace TG::PathAnalyzer
