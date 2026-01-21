@@ -69,10 +69,11 @@ void LayoutEngine::removeEdge(const std::string &k) {
     if (fromIt == m_clusterMap.end() || toIt == m_clusterMap.end()) {
         return;
     }
-    if (fromIt != toIt) {
+    if (fromIt->second != toIt->second) {
         return;
     }
     fromIt->second->removeEdge(fromIt->first, toIt->first);
+    notifyEdgeRemoved(k);
 }
 std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
                                                                uint32_t to) {
@@ -214,9 +215,9 @@ void LayoutEngine::notifyEdgeAdded(const GraphEdge &edge,
         obs->onEdgeAdded(screenEdge);
     }
 }
-void LayoutEngine::notifyEdgeRemoved(const GraphEdge &edge) {
+void LayoutEngine::notifyEdgeRemoved(const std::string &key) {
     for (const auto &obs : m_observers) {
-        obs->onEdgeRemoved(edge.key);
+        obs->onEdgeRemoved(key);
     }
 }
 void LayoutEngine::notifyClear() {

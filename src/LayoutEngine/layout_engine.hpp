@@ -47,7 +47,7 @@ private:
     void notifyNodeAdded(const GraphNode &node, std::shared_ptr<IClusterLayout>);
     void notifyNodeRemoved(uint32_t id);
     void notifyEdgeAdded(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
-    void notifyEdgeRemoved(const GraphEdge &edge);
+    void notifyEdgeRemoved(const std::string &key);
     void notifyClear();
 
 private:

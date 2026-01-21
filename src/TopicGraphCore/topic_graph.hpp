@@ -71,8 +71,8 @@ private:
     void notifyTopicAdded(const Topic &topic);
     void notifyTopicRemoved(const Topic &topic);
     void notifyTopicRenamed(const Topic &topic);
-    void notifyEdgeAdded(const Edge &topic);
-    void notifyEdgeRemoved(const Edge &topic);
+    void notifyEdgeAdded(const Edge &edge);
+    void notifyEdgeRemoved(const std::string &key);
     void notifyClear();
 
 private:

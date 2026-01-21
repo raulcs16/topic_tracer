@@ -168,12 +168,11 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
 
     std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
     for (const auto &topic : m_graph->topics()) {
-        StateFlag flag = StateFlag::None;
-        if (topicSet.contains(topic->id))
-            flag = StateFlag::InPath;
-        else
-            flag = StateFlag::Hidden;
-        m_tgstore->setTopicState(topic->id, flag, true);
+        if (topicSet.contains(topic->id)) {
+            m_tgstore->setTopicState(topic->id, StateFlag::InPath, true);
+        } else {
+            m_tgstore->setTopicState(topic->id, StateFlag::InPath, false);
+        }
     }
 
 

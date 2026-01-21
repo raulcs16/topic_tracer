@@ -1,5 +1,6 @@
 #include "graph_keys.hpp"
 #include "topic_graph.hpp"
+#include <iostream>
 
 
 //Topic API
@@ -136,24 +137,19 @@ const Edge *TopicGraph::addEdge(const std::string &topicA,
 bool TopicGraph::hasEdge(const std::string &key) { return m_edges.contains(key); }
 bool TopicGraph::removeEdge(uint32_t from, uint32_t to) {
     std::string key = makeKey(from, to);
+
     auto it = m_edges.find(key);
     if (it == m_edges.end())
         return true;
-    auto edge = it->second;
+
+    auto &in = m_adjInMap[to];
+    in.erase(std::remove(in.begin(), in.end(), from), in.end());
+
+    auto &out = m_adjOutMap[from];
+    out.erase(std::remove(out.begin(), out.end(), to), out.end());
 
     m_edges.erase(it);
-    auto &vec = m_adjInMap[to];
-    vec.erase(
-        std::remove_if(vec.begin(), vec.end(), [&](auto value) { return value == from; }),
-        vec.end());
-
-    vec = m_adjOutMap[from];
-
-    vec.erase(std::remove_if(m_adjOutMap[from].begin(),
-                             m_adjOutMap[from].end(),
-                             [&](auto value) { return value == to; }));
-
-    notifyEdgeRemoved(*edge);
+    notifyEdgeRemoved(key);
     return true;
 }
 bool TopicGraph::removeEdge(const std::string &topicA, const std::string &topicB) {
@@ -276,9 +272,9 @@ void TopicGraph::notifyEdgeAdded(const Edge &edge) {
         obs->onEdgeAdded(edge);
     }
 }
-void TopicGraph::notifyEdgeRemoved(const Edge &edge) {
+void TopicGraph::notifyEdgeRemoved(const std::string &key) {
     for (const auto obs : m_observers) {
-        obs->onEdgeRemoved(edge.key);
+        obs->onEdgeRemoved(key);
     }
 }
 void TopicGraph::notifyClear() {

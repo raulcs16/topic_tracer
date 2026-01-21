@@ -167,6 +167,7 @@ std::vector<std::string> edgePath(std::vector<uint32_t> topicPath) {
 std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
                                             uint32_t start_id,
                                             uint32_t goal_id) {
+
     auto cmp = [](const nodeDist &a, const nodeDist &b) { return a.second > b.second; };
     std::priority_queue<nodeDist, std::vector<nodeDist>, decltype(cmp)> pq(cmp);
 
