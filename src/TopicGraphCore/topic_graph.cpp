@@ -9,7 +9,7 @@ const Topic *TopicGraph::addTopic(const std::string &name) {
     if (getTopic(name) != nullptr)
         return nullptr;
     uint32_t id = nextId();
-    std::cout << "tg:addTopic:" << name << ",id:" << id << std::endl;
+    // std::cout << "tg:addTopic:" << name << ",id:" << id << std::endl;
     auto topic = new Topic{.id = id, .name = name};
     m_topics[id] = topic;
     m_adjOutMap[id] = {};

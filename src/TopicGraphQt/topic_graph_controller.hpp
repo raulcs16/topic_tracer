@@ -38,6 +38,7 @@ public:
     Q_INVOKABLE void noJoin(const QString &topicA, const QString &topicB);
     Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
     Q_INVOKABLE void path(const QString &topicA, const QString &topicB);
+    Q_INVOKABLE void noPath();
 
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString fileName);

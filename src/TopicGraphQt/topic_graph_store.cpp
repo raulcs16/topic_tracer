@@ -50,8 +50,10 @@ void TGStore::setTopicState(uint32_t id, StateFlag flag, bool state) {
     if (state) {
         it->second.add(flag);
     } else {
-        it->second.remove(flag);
+        if (it->second.has(flag))
+            it->second.remove(flag);
     }
+    // qDebug() << "TGStore::setTopicState" << id << "_" << (int)flag << "_" << state;
     emit flagUpdated(id);
 }
 void TGStore::setSelected(uint32_t id) {

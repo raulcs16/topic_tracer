@@ -120,14 +120,18 @@ ApplicationWindow {
             }
         case "no":
             {
-                if (args.length < 3) {
+                if (args.length < 1) {
                     return;
                 }
-                if (args[0] != "join")
-                    return;
-                let topicA = args[1];
-                let topicB = args[2];
-                topic_controller.noJoin(topicA, topicB);
+                if (args[0] == "join") {
+                    if (args.length < 3)
+                        return;
+                    let topicA = args[1];
+                    let topicB = args[2];
+                    topic_controller.noJoin(topicA, topicB);
+                } else if (args[0] == "path") {
+                    topic_controller.noPath();
+                }
                 break;
             }
         case "path":

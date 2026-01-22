@@ -170,8 +170,10 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     for (const auto &topic : m_graph->topics()) {
         if (topicSet.contains(topic->id)) {
             m_tgstore->setTopicState(topic->id, StateFlag::InPath, true);
+            m_tgstore->setTopicState(topic->id, StateFlag::Hidden, false);
         } else {
             m_tgstore->setTopicState(topic->id, StateFlag::InPath, false);
+            m_tgstore->setTopicState(topic->id, StateFlag::Hidden, true);
         }
     }
 
@@ -186,7 +188,18 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
             flag = StateFlag::Hidden;
     }
 }
-
+void TopicGraphController::noPath() {
+    if (!m_graph || !m_tgstore)
+        return;
+    for (const auto topics : m_graph->topics()) {
+        m_tgstore->setTopicState(topics->id, StateFlag::Hidden, false);
+        m_tgstore->setTopicState(topics->id, StateFlag::InPath, false);
+    }
+    // for (const auto edges : m_graph->topics()) {
+    //     m_tgstore->setTopicState(topics->id, StateFlag::Hidden, false);
+    //     m_tgstore->setTopicState(topics->id, StateFlag::InPath, false);
+    // }
+}
 void TopicGraphController::calculateHeatScores() {
     // auto map = m_heatScore->computeAllHeatScores();
     // for (const auto [topic, score] : map) {

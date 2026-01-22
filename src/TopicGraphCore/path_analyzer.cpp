@@ -164,6 +164,7 @@ std::vector<std::string> edgePath(std::vector<uint32_t> topicPath) {
     }
     return edgeKeys;
 }
+
 std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
                                             uint32_t start_id,
                                             uint32_t goal_id) {

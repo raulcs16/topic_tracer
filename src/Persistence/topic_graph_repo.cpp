@@ -48,10 +48,10 @@ bool TopicGraphSerializer::fromJson(const QJsonDocument &doc,
             succes = false;
         }
     }
-    qDebug() << "TGR::load::graph state::\n";
-    for (const auto topics : graph.topics()) {
-        qDebug() << topics->id << ":" << topics->name;
-    }
+    // qDebug() << "TGR::load::graph state::\n";
+    // for (const auto topics : graph.topics()) {
+    //     qDebug() << topics->id << ":" << topics->name;
+    // }
 
     return succes;
 }
