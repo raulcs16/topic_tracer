@@ -34,22 +34,26 @@ bool TopicGraphSerializer::fromJson(const QJsonDocument &doc,
     Q_UNUSED(version);
 
     QHash<int, const Topic *> idMap;
+    bool succes = true;
     QJsonArray topics = root["topics"].toArray();
     for (auto it : topics) {
         QJsonObject obj = it.toObject();
         if (!decodeTopic(obj, graph, idMap, error))
-            return false;
+            succes = false;
     }
     QJsonArray edges = root["edges"].toArray();
     for (auto it : edges) {
         QJsonObject obj = it.toObject();
         if (!decodeEdge(obj, graph, idMap, error)) {
-            return false;
+            succes = false;
         }
     }
+    qDebug() << "TGR::load::graph state::\n";
+    for (const auto topics : graph.topics()) {
+        qDebug() << topics->id << ":" << topics->name;
+    }
 
-
-    return true;
+    return succes;
 }
 
 QJsonObject TopicGraphSerializer::encodeTopic(const Topic &t) {
@@ -94,22 +98,26 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
                                       QString *error) {
     if (!obj.contains("key") || !obj.contains("from") || !obj.contains("to") ||
         !obj.contains("type")) {
-        qDebug() << "Edge missing required fields";
+        qDebug() << "TGS::decodeEdge::Edge missing required fields";
         return false;
     }
 
     std::string key = obj["key"].toString().toStdString();
+    if (key.length() == 0)
+        return false;
     uint32_t fromId = obj["from"].toInt();
     uint32_t toId = obj["to"].toInt();
     EdgeType type = static_cast<EdgeType>(obj["type"].toInt());
 
     if (!idMap.contains(fromId) || !idMap.contains(toId)) {
-        qDebug() << "Edge references invalid topic ID";
+        qDebug() << "TGR::decodeEdge::Edge references invalid topic ID"
+                 << "from=" << fromId << "," << "to=" << toId;
         return false;
     }
 
     if (!graph.addEdge(Edge{.key = key, .from = fromId, .to = toId, .type = type})) {
-        qDebug() << "Failed to create edge: " + QString::fromStdString(key);
+        qDebug() << "TGR::decodeEdge::Failed to create edge: " +
+                        QString::fromStdString(key);
         return false;
     }
 
@@ -127,7 +135,7 @@ bool TopicGraphRepository::save(const TopicGraph &graph,
 
     QFile file(m_basePath + "/" + fileName + ".json");
     if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << "open file error";
+        qDebug() << "TGR::save::open file error";
         return false;
     }
 
@@ -140,7 +148,7 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name, QString *e
 
     QFile file(m_basePath + "/" + file_name + ".json");
     if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Cannot open file for reading";
+        qDebug() << "TGR::load::Cannot open file for reading";
         return false;
     }
 
@@ -148,7 +156,7 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name, QString *e
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseErr);
 
     if (parseErr.error != QJsonParseError::NoError) {
-        qDebug() << "JSON PArseError";
+        qDebug() << "TGR::load::JSON PArseError";
         return false;
     }
     file.close();

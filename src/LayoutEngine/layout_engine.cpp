@@ -14,9 +14,14 @@ LayoutEngine::LayoutEngine() {
     m_clusters = 1;
 }
 
-void LayoutEngine::clear() {}
+void LayoutEngine::clear() {
+    m_clusterMap.clear();
+    m_pool->clear();
+    notifyClear();
+}
 void LayoutEngine::addNode(uint32_t id) {
     auto gNode = m_pool->addNode(id);
+    gNode.id = id;
     m_clusterMap[id] = m_pool;
     notifyNodeAdded(gNode, m_pool);
 }
@@ -31,6 +36,10 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     auto fromIt = m_clusterMap.find(from);
     auto toIt = m_clusterMap.find(to);
     if (fromIt == m_clusterMap.end() || toIt == m_clusterMap.end()) {
+        std::cout << "clusterMapNodes:\n";
+        for (const auto [node, _] : m_clusterMap) {
+            std::cout << "\t" << node << "\n";
+        }
         throw std::invalid_argument("invalid id");
     }
     std::shared_ptr<IClusterLayout> merger;
@@ -56,7 +65,7 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
             resolveCollisions(merger);
         }
         for (auto const &node : merger->nodes()) {
-            notifyNodeAdded(node, merger);
+            notifyNodeUpdated(node, merger);
         }
         for (auto const &edge : merger->edges()) {
             notifyEdgeAdded(edge, merger);
@@ -179,9 +188,23 @@ void LayoutEngine::notifyNodeAdded(const GraphNode &node,
     screenNode.id = node.id;
     screenNode.x = screenX;
     screenNode.y = screenY;
-
     for (const auto &obs : m_observers) {
         obs->onNodeAdded(screenNode);
+    }
+}
+void LayoutEngine::notifyNodeUpdated(const GraphNode &node,
+                                     std::shared_ptr<IClusterLayout> cluster) {
+
+    auto transform = cluster.get()->transform();
+    float screenX{0.0f}, screenY{0.0f};
+    m_camera.project(transform, node.x, node.y, screenX, screenY);
+
+    GraphNode screenNode = node;
+    screenNode.id = node.id;
+    screenNode.x = screenX;
+    screenNode.y = screenY;
+    for (const auto &obs : m_observers) {
+        obs->onNodeUpdated(screenNode);
     }
 }
 void LayoutEngine::notifyNodeRemoved(uint32_t id) {

@@ -58,20 +58,20 @@ ApplicationWindow {
                     console.warn("Usage: touch <name>");
                     return;
                 }
-                let joinConcept = null;
-                if (args[args.length - 1][0] == ">") {
-                    joinConcept = args[args.length - 1].substring(1); // remove the ">" prefix
-                    args.pop();
-                }
+                // let joinConcept = null;
+                // if (args[args.length - 1][0] == ">") {
+                //     joinConcept = args[args.length - 1].substring(1); // remove the ">" prefix
+                //     args.pop();
+                // }
 
                 for (let i = 0; i < args.length; i++) {
                     const topicName = args[i];
                     if (topicName.length == 0)
                         continue;
                     topic_controller.createTopic(topicName);
-                    if (joinConcept) {
-                        topic_controller.join(topicName, joinConcept, ENUMS.EdgeType.Example);
-                    }
+                    // if (joinConcept) {
+                    //     topic_controller.join(topicName, joinConcept, ENUMS.EdgeType.Example);
+                    // }
                 }
 
                 break;

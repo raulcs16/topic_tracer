@@ -44,6 +44,7 @@ public:
     void updateHeatScore(uint32_t id, int score);
 
     void onNodeAdded(const GraphNode &node) override;
+    void onNodeUpdated(const GraphNode &node) override;
     void onNodeRemoved(uint32_t id) override;
     void onEdgeAdded(const GraphEdge &edge) override;
     void onEdgeRemoved(const std::string &edge) override;

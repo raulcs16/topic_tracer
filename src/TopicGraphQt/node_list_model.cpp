@@ -83,12 +83,16 @@ void NodeListModel::updatePos(int index, double x, double y) {
     emit dataChanged(modelIndex, modelIndex, {XRole, YRole});
 }
 
-
+void NodeListModel::onNodeUpdated(const GraphNode &node) {
+    int index = getIndex(node.id);
+    if (index < 0)
+        return;
+    return updatePos(index, node.x, node.y);
+}
 void NodeListModel::onNodeAdded(const GraphNode &node) {
     int index = getIndex(node.id);
     if (index >= 0)
-        return updatePos(index, node.x, node.y);
-
+        return;
     index = m_nodes.size();
     beginInsertRows(QModelIndex(), index, index);
     m_nodes.push_back(NodeItem{.x = node.x, .y = node.y, .id = node.id, .heat = 0});

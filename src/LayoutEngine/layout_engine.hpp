@@ -13,6 +13,7 @@
 struct ILayoutObserver {
     virtual ~ILayoutObserver() = default;
     virtual void onNodeAdded(const GraphNode &node) {}
+    virtual void onNodeUpdated(const GraphNode &node) {}
     virtual void onNodeRemoved(uint32_t id) {}
     virtual void onEdgeAdded(const GraphEdge &edge) {}
     virtual void onEdgeRemoved(const std::string &key) {}
@@ -45,6 +46,7 @@ public:
 
 private:
     void notifyNodeAdded(const GraphNode &node, std::shared_ptr<IClusterLayout>);
+    void notifyNodeUpdated(const GraphNode &node, std::shared_ptr<IClusterLayout>);
     void notifyNodeRemoved(uint32_t id);
     void notifyEdgeAdded(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
     void notifyEdgeRemoved(const std::string &key);
@@ -66,8 +68,8 @@ private:
     std::shared_ptr<LayoutStrategy> m_poolStrat;
     std::shared_ptr<OGDFStrategy> m_ogdfStrat;
     std::shared_ptr<PoolCluster> m_pool;
-    std::vector<ILayoutObserver *> m_observers;
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
+    std::vector<ILayoutObserver *> m_observers;
     Camera m_camera;
     size_t m_clusters = 1;
 };

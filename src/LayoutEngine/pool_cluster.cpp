@@ -26,14 +26,28 @@ GraphNode &PoolCluster::addNode(uint32_t id) {
 void PoolCluster::appendNode(uint32_t id) { addNode(id); }
 
 
-//WARNING: currently returns last slot position if none available
 size_t PoolCluster::getFreeSlot() {
     size_t i = 0;
     for (; i < m_slots.size(); i++) {
         if (!m_slots[i].used)
             return i;
     }
-    return i--;
+    //allocate bigger pool:
+    size_t old_cap = m_capacity;
+    m_capacity *= 4;
+    std::vector<GraphEdge> edges;
+    std::vector<GraphNode> nodes;
+    for (size_t i = 0; i < m_capacity; i++) {
+        nodes.emplace_back(0, 0, 0);
+        if (i >= old_cap) {
+            m_slots.push_back({false, 0});
+        }
+    }
+    m_strategy->apply(nodes, edges, m_bbox);
+    for (size_t i = old_cap; i < m_capacity; i++) {
+        m_nodes.push_back(nodes[i]);
+    }
+    return m_capacity;
 }
 void PoolCluster::removeNode(uint32_t id) {
     auto it = m_indexMap.find(id);

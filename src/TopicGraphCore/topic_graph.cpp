@@ -9,6 +9,7 @@ const Topic *TopicGraph::addTopic(const std::string &name) {
     if (getTopic(name) != nullptr)
         return nullptr;
     uint32_t id = nextId();
+    std::cout << "tg:addTopic:" << name << ",id:" << id << std::endl;
     auto topic = new Topic{.id = id, .name = name};
     m_topics[id] = topic;
     m_adjOutMap[id] = {};
@@ -17,7 +18,7 @@ const Topic *TopicGraph::addTopic(const std::string &name) {
     return m_topics[id];
 }
 const Topic *TopicGraph::addTopic(uint32_t id, const std::string &name) {
-    m_id_ref = id;
+    m_id_ref = std::max(m_id_ref, id);
     if (getTopic(name) != nullptr) {
         return nullptr;
     }
@@ -230,7 +231,7 @@ std::vector<const Topic *> TopicGraph::childrenOf(uint32_t id) {
     }
     return children;
 }
-uint32_t TopicGraph::nextId() { return m_id_ref++; }
+uint32_t TopicGraph::nextId() { return ++m_id_ref; }
 std::string TopicGraph::makeKey(uint32_t from, uint32_t to) {
     return GraphKeys::key(from, to);
 }
