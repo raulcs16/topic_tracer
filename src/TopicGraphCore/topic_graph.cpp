@@ -4,7 +4,10 @@
 
 
 //Topic API
-TopicGraph::~TopicGraph() { clear(); }
+TopicGraph::~TopicGraph() {
+    clear();
+    m_observers.clear();
+}
 const Topic *TopicGraph::addTopic(const std::string &name) {
     if (getTopic(name) != nullptr)
         return nullptr;
@@ -242,6 +245,7 @@ void TopicGraph::clear() {
     m_adjInMap.clear();
     m_adjOutMap.clear();
     m_id_ref = 1;
+    notifyClear();
 }
 
 void TopicGraph::addObserver(ITopicGraphObserver *observer) {

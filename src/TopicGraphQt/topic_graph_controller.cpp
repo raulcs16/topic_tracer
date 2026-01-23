@@ -68,9 +68,9 @@ TopicGraphController::TopicGraphController(QObject *parent)
 }
 TopicGraphController::~TopicGraphController() {
     clearAll();
-    delete m_nodeList;
-    delete m_edgeList;
-    delete m_topicList;
+
+    m_graph->removeObserver(m_tgstore);
+    m_graph->removeObserver(m_layout);
     delete m_repo;
     delete m_tgstore;
     delete m_graph;
@@ -211,21 +211,13 @@ void TopicGraphController::calculateHeatScores() {
 void TopicGraphController::save(QString fileName) {
     if (!m_repo)
         return;
-    QString *error = nullptr;
-    bool saved = m_repo->save(*m_graph, fileName, error);
-    if (error != nullptr) {
-        qDebug() << error;
-    }
+    bool saved = m_repo->save(*m_graph, fileName);
 }
 void TopicGraphController::load(QString fileName) {
     if (!m_repo || !m_graph)
         return;
-    clearAll();
-    QString *error = nullptr;
-    bool load = m_repo->load(*m_graph, fileName, error);
-    if (error != nullptr) {
-        qDebug() << error;
-    }
+    m_graph->clear();
+    bool load = m_repo->load(*m_graph, fileName);
 }
 void TopicGraphController::clearAll() { m_graph->clear(); }
 void TopicGraphController::updateBuffer(const QString &buffer) {

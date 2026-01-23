@@ -13,6 +13,10 @@ LayoutEngine::LayoutEngine() {
     m_pool->transform().x = -m_camera.screenW / 4;
     m_clusters = 1;
 }
+LayoutEngine::~LayoutEngine() {
+    clear();
+    m_observers.clear();
+}
 
 void LayoutEngine::clear() {
     m_clusterMap.clear();

@@ -22,9 +22,7 @@ QJsonDocument TopicGraphSerializer::toJson(const TopicGraph &graph) {
     return QJsonDocument(root);
 }
 
-bool TopicGraphSerializer::fromJson(const QJsonDocument &doc,
-                                    TopicGraph &graph,
-                                    QString *error) {
+bool TopicGraphSerializer::fromJson(const QJsonDocument &doc, TopicGraph &graph) {
     if (!doc.isObject()) {
         qDebug() << "json root not an object";
         return false;
@@ -38,13 +36,13 @@ bool TopicGraphSerializer::fromJson(const QJsonDocument &doc,
     QJsonArray topics = root["topics"].toArray();
     for (auto it : topics) {
         QJsonObject obj = it.toObject();
-        if (!decodeTopic(obj, graph, idMap, error))
+        if (!decodeTopic(obj, graph, idMap))
             succes = false;
     }
     QJsonArray edges = root["edges"].toArray();
     for (auto it : edges) {
         QJsonObject obj = it.toObject();
-        if (!decodeEdge(obj, graph, idMap, error)) {
+        if (!decodeEdge(obj, graph, idMap)) {
             succes = false;
         }
     }
@@ -75,8 +73,7 @@ QJsonObject TopicGraphSerializer::encodeEdge(const Edge &e) {
 
 bool TopicGraphSerializer::decodeTopic(const QJsonObject &obj,
                                        TopicGraph &graph,
-                                       QHash<int, const Topic *> &idMap,
-                                       QString *error) {
+                                       QHash<int, const Topic *> &idMap) {
     if (!obj.contains("id") || !obj.contains("name")) {
         qDebug() << "topic missing required fields";
         return false;
@@ -94,8 +91,7 @@ bool TopicGraphSerializer::decodeTopic(const QJsonObject &obj,
 }
 bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
                                       TopicGraph &graph,
-                                      const QHash<int, const Topic *> &idMap,
-                                      QString *error) {
+                                      const QHash<int, const Topic *> &idMap) {
     if (!obj.contains("key") || !obj.contains("from") || !obj.contains("to") ||
         !obj.contains("type")) {
         qDebug() << "TGS::decodeEdge::Edge missing required fields";
@@ -129,9 +125,7 @@ TopicGraphRepository::TopicGraphRepository(QString basePath) : m_basePath(basePa
         dir.mkpath(".");
     }
 }
-bool TopicGraphRepository::save(const TopicGraph &graph,
-                                QString fileName,
-                                QString *error) {
+bool TopicGraphRepository::save(const TopicGraph &graph, QString fileName) {
 
     QFile file(m_basePath + "/" + fileName + ".json");
     if (!file.open(QIODevice::WriteOnly)) {
@@ -144,7 +138,7 @@ bool TopicGraphRepository::save(const TopicGraph &graph,
     file.close();
     return true;
 }
-bool TopicGraphRepository::load(TopicGraph &graph, QString file_name, QString *error) {
+bool TopicGraphRepository::load(TopicGraph &graph, QString file_name) {
 
     QFile file(m_basePath + "/" + file_name + ".json");
     if (!file.open(QIODevice::ReadOnly)) {
@@ -160,5 +154,5 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name, QString *e
         return false;
     }
     file.close();
-    return TopicGraphSerializer::fromJson(doc, graph, error);
+    return TopicGraphSerializer::fromJson(doc, graph);
 }

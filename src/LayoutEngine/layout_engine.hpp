@@ -24,6 +24,7 @@ class LayoutEngine : public ITopicGraphObserver {
 
 public:
     explicit LayoutEngine();
+    ~LayoutEngine();
     //incremental ops
     void addNode(uint32_t id);
     void removeNode(uint32_t id);

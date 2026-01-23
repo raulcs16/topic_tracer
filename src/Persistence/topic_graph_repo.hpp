@@ -8,9 +8,7 @@
 class TopicGraphSerializer {
 public:
     static QJsonDocument toJson(const TopicGraph &graph);
-    static bool fromJson(const QJsonDocument &doc,
-                         TopicGraph &graph,
-                         QString *error = nullptr);
+    static bool fromJson(const QJsonDocument &doc, TopicGraph &graph);
 
 private:
     static QJsonObject encodeTopic(const Topic &t);
@@ -18,19 +16,17 @@ private:
 
     static bool decodeTopic(const QJsonObject &obj,
                             TopicGraph &graph,
-                            QHash<int, const Topic *> &idMap,
-                            QString *error);
+                            QHash<int, const Topic *> &idMap);
     static bool decodeEdge(const QJsonObject &obj,
                            TopicGraph &graph,
-                           const QHash<int, const Topic *> &idMap,
-                           QString *error);
+                           const QHash<int, const Topic *> &idMap);
 };
 
 class TopicGraphRepository {
 public:
     TopicGraphRepository(QString basePath);
-    bool save(const TopicGraph &graph, QString file_name, QString *error = nullptr);
-    bool load(TopicGraph &graph, QString file_name, QString *error = nullptr);
+    bool save(const TopicGraph &graph, QString file_name);
+    bool load(TopicGraph &graph, QString file_name);
 
 private:
     QString m_basePath;
