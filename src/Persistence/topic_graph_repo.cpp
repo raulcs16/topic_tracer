@@ -46,10 +46,6 @@ bool TopicGraphSerializer::fromJson(const QJsonDocument &doc, TopicGraph &graph)
             succes = false;
         }
     }
-    // qDebug() << "TGR::load::graph state::\n";
-    // for (const auto topics : graph.topics()) {
-    //     qDebug() << topics->id << ":" << topics->name;
-    // }
 
     return succes;
 }
@@ -79,7 +75,7 @@ bool TopicGraphSerializer::decodeTopic(const QJsonObject &obj,
         return false;
     }
 
-    uint32_t id = obj["id"].toInt();
+    uint32_t id = static_cast<uint32_t>(obj["id"].toInt());
     std::string name = obj["name"].toString().toStdString();
     const auto topic = graph.addTopic(id, name);
     if (!topic) {
@@ -101,8 +97,8 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
     std::string key = obj["key"].toString().toStdString();
     if (key.length() == 0)
         return false;
-    uint32_t fromId = obj["from"].toInt();
-    uint32_t toId = obj["to"].toInt();
+    uint32_t fromId = static_cast<uint32_t>(obj["from"].toInt());
+    uint32_t toId = static_cast<uint32_t>(obj["to"].toInt());
     EdgeType type = static_cast<EdgeType>(obj["type"].toInt());
 
     if (!idMap.contains(fromId) || !idMap.contains(toId)) {

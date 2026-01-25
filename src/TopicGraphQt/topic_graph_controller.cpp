@@ -163,8 +163,13 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     if (ta == nullptr || tb == nullptr) {
         return;
     }
+    qDebug() << "TGC::path";
     auto parents = TG::PathAnalyzer::dijsktras(*m_graph, ta->id, tb->id);
+    qDebug() << "Parents map size:" << parents.size();
     auto topicIds = TG::PathAnalyzer::topicPath(parents, tb->id);
+    qDebug() << "Path reconstructed size:" << topicIds.size();
+    for (int id : topicIds)
+        qDebug() << "ID in path:" << id;
 
     std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
     for (const auto &topic : m_graph->topics()) {
@@ -218,6 +223,11 @@ void TopicGraphController::load(QString fileName) {
         return;
     m_graph->clear();
     bool load = m_repo->load(*m_graph, fileName);
+    qDebug() << "TGC::load::";
+    for (const auto &topic : m_graph->topics()) {
+        auto edges = m_graph->getOutEdges(topic->id);
+        qDebug() << "Topic" << topic->id << "has" << edges.size() << "out-edges";
+    }
 }
 void TopicGraphController::clearAll() { m_graph->clear(); }
 void TopicGraphController::updateBuffer(const QString &buffer) {
