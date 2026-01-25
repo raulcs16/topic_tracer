@@ -21,8 +21,9 @@ struct ITopicGraphObserver {
 class TopicGraph {
 public:
     ~TopicGraph();
-    const Topic *addTopic(const std::string &name);
-    const Topic *addTopic(uint32_t id, const std::string &name);
+    bool addTopic(const std::string &name);
+    bool addTopic(uint32_t id, const std::string &name);
+
     bool renameTopic(const std::string &topic, const std::string &new_name);
     bool renameTopic(uint32_t id, const std::string &new_name);
     bool deleteTopic(const std::string &name);
@@ -33,12 +34,10 @@ public:
     std::vector<const Topic *> topics() const;
 
     //Edge API
-    const Edge *addEdge(uint32_t from, uint32_t to, EdgeType type);
-    const Edge *addEdge(const std::string &topicA,
-                        const std::string &topicB,
-                        EdgeType type);
-    const Edge *addEdge(Edge edge);
-    const Edge *addEdge(const Topic *a, const Topic *b, EdgeType type);
+    bool addEdge(uint32_t from, uint32_t to, EdgeType type);
+    bool addEdge(const std::string &topicA, const std::string &topicB, EdgeType type);
+    bool addEdge(Edge edge);
+    bool addEdge(const Topic *a, const Topic *b, EdgeType type);
 
     bool removeEdge(uint32_t from, uint32_t to);
     bool removeEdge(const std::string &topicA, const std::string &topicB);
@@ -76,8 +75,8 @@ private:
     void notifyClear();
 
 private:
-    std::unordered_map<uint32_t, Topic *> m_topics;
-    std::unordered_map<std::string, Edge *> m_edges;
+    std::unordered_map<uint32_t, Topic> m_topics;
+    std::unordered_map<std::string, Edge> m_edges;
     std::vector<ITopicGraphObserver *> m_observers;
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjOutMap;
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjInMap;
