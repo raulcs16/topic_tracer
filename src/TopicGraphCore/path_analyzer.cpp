@@ -2,6 +2,7 @@
 #include "graph_keys.hpp"
 #include "path_analyzer.hpp"
 #include "topic_graph.hpp"
+#include <iostream>
 #include <queue>
 #include <vector>
 
@@ -139,6 +140,9 @@ double edgeWeight(EdgeType type) { return static_cast<int>(type) * 1.0; }
 std::vector<uint32_t> topicPath(std::unordered_map<uint32_t, int> parents,
                                 uint32_t dest) {
     if (parents.find(dest) == parents.end() || parents[dest] == -1) {
+        for (const auto [p, v] : parents) {
+            std::cout << p << ":" << v << std::endl;
+        }
         return {};
     }
     uint32_t current = dest;
@@ -170,34 +174,35 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
                                             uint32_t goal_id) {
 
     auto cmp = [](const nodeDist &a, const nodeDist &b) { return a.second > b.second; };
-    std::priority_queue<nodeDist, std::vector<nodeDist>, decltype(cmp)> pq(cmp);
 
+    std::priority_queue<nodeDist, std::vector<nodeDist>, decltype(cmp)> pq(cmp);
     pq.emplace(start_id, 0);
 
     std::unordered_map<uint32_t, double> dist;
     std::unordered_map<uint32_t, int> parents;
     for (const auto &v : graph.topics()) {
-        if (v->id != start_id) {
-            dist[v->id] = std::numeric_limits<double>::infinity();
-            parents[v->id] = -1;
-        }
+        dist[v->id] = std::numeric_limits<double>::infinity();
+        parents[v->id] = -1;
     }
     dist[start_id] = 0;
-    parents[start_id] = -1;
-    pq.push({start_id, 0.0});
+    std::cout << "dijstra's goal=" << goal_id << std::endl;
     while (!pq.empty()) {
         uint32_t v = pq.top().first;
         double d = pq.top().second;
         pq.pop();
-        if (d > dist[v])
-            continue;
+        std::cout << "pq:v=" << v << ",d=" << d << std::endl;
         if (v == goal_id) {
+            std::cout << "goal found!\n";
             return parents;
         }
         for (const auto &e : graph.getOutEdges(v)) {
             uint32_t u = e->to;
-            if (dist[u] > dist[v] + static_cast<int>(e->type)) {
-                dist[u] = static_cast<int>(e->type) + dist[v];
+            double w = static_cast<int>(e->type) * 1.0;
+            std::cout << "visiting edge:" << e->key << std::endl;
+            std::cout << "dist[" << u << "]=" << dist[u] << "dist[" << v
+                      << "]=" << dist[v] << ",w=" << w << std::endl;
+            if (dist[u] > dist[v] + w) {
+                dist[u] = w + dist[v];
                 parents[u] = v;
                 pq.emplace(u, dist[u]);
             }

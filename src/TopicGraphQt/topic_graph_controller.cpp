@@ -223,11 +223,11 @@ void TopicGraphController::load(QString fileName) {
         return;
     m_graph->clear();
     bool load = m_repo->load(*m_graph, fileName);
-    qDebug() << "TGC::load::";
-    for (const auto &topic : m_graph->topics()) {
-        auto edges = m_graph->getOutEdges(topic->id);
-        qDebug() << "Topic" << topic->id << "has" << edges.size() << "out-edges";
-    }
+    // qDebug() << "TGC::load::";
+    // for (const auto &topic : m_graph->topics()) {
+    //     auto edges = m_graph->getOutEdges(topic->id);
+    //     qDebug() << "Topic" << topic->id << "has" << edges.size() << "out-edges";
+    // }
 }
 void TopicGraphController::clearAll() { m_graph->clear(); }
 void TopicGraphController::updateBuffer(const QString &buffer) {
