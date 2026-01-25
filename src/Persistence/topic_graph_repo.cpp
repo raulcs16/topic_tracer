@@ -77,9 +77,13 @@ bool TopicGraphSerializer::decodeTopic(const QJsonObject &obj,
 
     uint32_t id = static_cast<uint32_t>(obj["id"].toInt());
     std::string name = obj["name"].toString().toStdString();
-    const auto topic = graph.addTopic(id, name);
-    if (!topic) {
+    bool success = graph.addTopic(id, name);
+    if (!success) {
         qDebug() << "failed to add topic";
+    }
+    auto topic = graph.getTopic(id);
+    if (!topic) {
+        qDebug() << "failed to fetch topic";
     }
     idMap[id] = topic;
 
@@ -100,6 +104,7 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
     uint32_t fromId = static_cast<uint32_t>(obj["from"].toInt());
     uint32_t toId = static_cast<uint32_t>(obj["to"].toInt());
     EdgeType type = static_cast<EdgeType>(obj["type"].toInt());
+    qDebug() << "TGR::decodeEdge::edge=" << key << "type=" << static_cast<int>(type);
 
     if (!idMap.contains(fromId) || !idMap.contains(toId)) {
         qDebug() << "TGR::decodeEdge::Edge references invalid topic ID"

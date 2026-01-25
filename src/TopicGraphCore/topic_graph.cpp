@@ -8,29 +8,29 @@ TopicGraph::~TopicGraph() {
     clear();
     m_observers.clear();
 }
-const Topic *TopicGraph::addTopic(const std::string &name) {
+bool TopicGraph::addTopic(const std::string &name) {
     if (getTopic(name) != nullptr)
-        return nullptr;
+        return false;
     uint32_t id = nextId();
     // std::cout << "tg:addTopic:" << name << ",id:" << id << std::endl;
-    auto topic = new Topic{.id = id, .name = name};
+    auto topic = Topic{.id = id, .name = name};
     m_topics[id] = topic;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    notifyTopicAdded(*topic);
-    return m_topics[id];
+    notifyTopicAdded(topic);
+    return true;
 }
-const Topic *TopicGraph::addTopic(uint32_t id, const std::string &name) {
+bool TopicGraph::addTopic(uint32_t id, const std::string &name) {
     m_id_ref = std::max(m_id_ref, id);
     if (getTopic(name) != nullptr) {
-        return nullptr;
+        return false;
     }
-    auto topic = new Topic{.id = id, .name = name};
+    auto topic = Topic{.id = id, .name = name};
     m_topics[id] = topic;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    notifyTopicAdded(*topic);
-    return m_topics[id];
+    notifyTopicAdded(topic);
+    return true;
 }
 bool TopicGraph::renameTopic(const std::string &name, const std::string &new_name) {
     auto topic = getTopic(name);
@@ -46,8 +46,8 @@ bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
     if (exist != nullptr) {
         return false;
     }
-    it->second->name = new_name;
-    notifyTopicRenamed(*it->second);
+    it->second.name = new_name;
+    notifyTopicRenamed(it->second);
     return true;
 }
 
@@ -77,20 +77,20 @@ bool TopicGraph::deleteTopic(uint32_t id) {
 
 const Topic *TopicGraph::getTopic(uint32_t id) const {
     auto it = m_topics.find(id);
-    return it == m_topics.end() ? nullptr : it->second;
+    return it == m_topics.end() ? nullptr : &it->second;
 }
 const Topic *TopicGraph::getTopic(const std::string &name) const {
     auto found = std::find_if(m_topics.begin(), m_topics.end(), [name](auto &pair) {
-        return pair.second->name == name;
+        return pair.second.name == name;
     });
-    return found == m_topics.end() ? nullptr : found->second;
+    return found == m_topics.end() ? nullptr : &found->second;
 }
 std::vector<const Topic *> TopicGraph::topics() const {
     std::vector<const Topic *> result;
     result.reserve(m_topics.size());
 
     for (const auto &[id, topic] : m_topics) {
-        result.push_back(topic);
+        result.push_back(&topic);
     }
     return result;
 }
@@ -98,42 +98,45 @@ std::vector<const Topic *> TopicGraph::topics() const {
 /*
 Enforce Rules such as making sure EdgeType matches TopicType(s) beign connected
 */
-const Edge *TopicGraph::addEdge(Edge edge) {
-    auto found = m_edges.find(edge.key);
-    if (found != m_edges.end())
-        return nullptr;
-    m_edges[edge.key] = std::move(&edge);
-    m_adjInMap[edge.to].push_back(edge.from);
-    m_adjOutMap[edge.from].push_back(edge.to);
-    notifyEdgeAdded(edge);
-    return m_edges[edge.key];
+bool TopicGraph::addEdge(Edge edge) {
+    auto [it, inserted] = m_edges.try_emplace(edge.key, std::move(edge));
+    if (!inserted) {
+        return false;
+    }
+    const Edge &storedEdge = it->second;
+
+    m_adjInMap[storedEdge.to].push_back(storedEdge.from);
+    m_adjOutMap[storedEdge.from].push_back(storedEdge.to);
+
+    notifyEdgeAdded(storedEdge);
+    return true;
 }
-const Edge *TopicGraph::addEdge(const Topic *a, const Topic *b, EdgeType type) {
+
+bool TopicGraph::addEdge(const Topic *a, const Topic *b, EdgeType type) {
     if (!a || !b)
-        return nullptr;
+        return false;
     if (!m_topics.contains(a->id) || !m_topics.contains(b->id)) {
-        return nullptr;
+        return false;
     }
     std::string key = makeKey(a->id, b->id);
 
     if (hasEdge(key))
-        return nullptr;
-
-    auto edge = new Edge(Edge{.key = key, .from = a->id, .to = b->id, .type = type});
+        return false;
+    auto edge = Edge(Edge{.key = key, .from = a->id, .to = b->id, .type = type});
     m_edges[key] = edge;
     m_adjOutMap[a->id].push_back(b->id);
     m_adjInMap[b->id].push_back(a->id);
-    notifyEdgeAdded(*edge);
-    return edge;
+    notifyEdgeAdded(edge);
+    return true;
 }
-const Edge *TopicGraph::addEdge(uint32_t from, uint32_t to, EdgeType type) {
+bool TopicGraph::addEdge(uint32_t from, uint32_t to, EdgeType type) {
     auto pFrom = getTopic(from);
     auto pTo = getTopic(to);
     return addEdge(pFrom, pTo, type);
 }
-const Edge *TopicGraph::addEdge(const std::string &topicA,
-                                const std::string &topicB,
-                                EdgeType type) {
+bool TopicGraph::addEdge(const std::string &topicA,
+                         const std::string &topicB,
+                         EdgeType type) {
     auto ta = getTopic(topicA);
     auto tb = getTopic(topicB);
     return addEdge(ta, tb, type);
@@ -165,18 +168,18 @@ bool TopicGraph::removeEdge(const std::string &topicA, const std::string &topicB
 }
 const Edge *TopicGraph::getEdge(uint32_t from, uint32_t to) const {
     auto it = m_edges.find(GraphKeys::key(from, to));
-    return it == m_edges.end() ? nullptr : it->second;
+    return it == m_edges.end() ? nullptr : &it->second;
 }
 const Edge *TopicGraph::getEdge(const std::string &key) const {
     auto it = m_edges.find(key);
-    return it == m_edges.end() ? nullptr : it->second;
+    return it == m_edges.end() ? nullptr : &it->second;
 }
 std::vector<const Edge *> TopicGraph::edges() const {
     std::vector<const Edge *> result;
     result.reserve(m_edges.size());
 
     for (const auto &[_, edge] : m_edges) {
-        result.push_back(edge);
+        result.push_back(&edge);
     }
     return result;
 }
@@ -216,7 +219,7 @@ std::vector<const Topic *> TopicGraph::parentsOf(uint32_t id) {
         auto t = m_topics.find((*i));
         if (t == m_topics.end())
             continue;
-        parents.push_back(t->second);
+        parents.push_back(&t->second);
     }
     return parents;
 }
