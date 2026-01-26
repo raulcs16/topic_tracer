@@ -8,10 +8,10 @@ struct Topic {
 };
 
 enum class EdgeType {
-    ComposedOf,    // Concept → Concept
-    DependsOn,     // Concrete → Concrete (same cluster)
-    AlternativeTo, // Concrete → Concrete (same cluster)
-    RelatedTo      // Concept ↔ Concept OR Concrete ↔ Concrete (cross-cluster)
+    ComposedOf,
+    DependsOn,
+    AlternativeTo,
+    RelatedTo
 };
 
 struct Edge {

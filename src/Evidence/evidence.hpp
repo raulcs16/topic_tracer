@@ -31,6 +31,5 @@ public:
 
 private:
     std::unordered_map<std::string, std::vector<EvidenceItem *>> m_topicIndex;
-
     std::unordered_map<std::string, Project> m_projects;
 };

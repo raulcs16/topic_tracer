@@ -12,7 +12,8 @@ TopicGraphController::TopicGraphController(QObject *parent)
       m_repo{new TopicGraphRepository("./data")}, m_layout{new LayoutEngine()},
       m_tgstore{new TGStore()}, m_topicList{new TopicListModel(m_tgstore, this)},
       m_nodeList{new NodeListModel(m_tgstore, this)},
-      m_edgeList(new EdgeListModel(m_tgstore, this)) {
+      m_edgeList(new EdgeListModel(m_tgstore, this)), m_evidenceDb{new EvidenceDB()},
+      m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)) {
 
     if (!m_graph || !m_repo || !m_layout || !m_tgstore || !m_topicList || !m_nodeList ||
         !m_edgeList)
@@ -84,6 +85,8 @@ TopicGraphController::~TopicGraphController() {
     delete m_tgstore;
     delete m_graph;
     delete m_layout;
+    delete m_evidenceDb;
+    delete m_heatScore;
 }
 
 void TopicGraphController::createTopic(const QString &name) {
@@ -212,12 +215,12 @@ void TopicGraphController::noPath() {
     }
 }
 void TopicGraphController::calculateHeatScores() {
-    // auto map = m_heatScore->computeAllHeatScores();
-    // for (const auto [topic, score] : map) {
-    //     if (!score)
-    //         continue;
-    //     m_nodeList->updateHeatScore(topic->id, score);
-    // }
+    auto map = m_heatScore->computeAllHeatScores();
+    for (const auto [topic, score] : map) {
+        if (!score)
+            continue;
+        m_nodeList->updateHeatScore(topic->id, score);
+    }
 }
 void TopicGraphController::save(QString fileName) {
     if (!m_repo)
@@ -229,6 +232,7 @@ void TopicGraphController::load(QString fileName) {
         return;
     m_graph->clear();
     bool load = m_repo->load(*m_graph, fileName);
+    calculateHeatScores();
     // qDebug() << "TGC::load::";
     // for (const auto &topic : m_graph->topics()) {
     //     auto edges = m_graph->getOutEdges(topic->id);

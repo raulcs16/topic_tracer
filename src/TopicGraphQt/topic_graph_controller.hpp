@@ -1,6 +1,8 @@
 #pragma once
 
 #include "edge_list_model.hpp"
+#include "evidence.hpp"
+#include "heat_score.hpp"
 #include "layout_engine.hpp"
 #include "node_list_model.hpp"
 #include "topic_graph.hpp"
@@ -75,8 +77,8 @@ private:
     EdgeListModel *m_edgeList;
 
 
-    // EvidenceDB m_evidenceDb;
-    // HeatScoreSystem *m_heatScore;
+    EvidenceDB *m_evidenceDb;
+    HeatScoreSystem *m_heatScore;
     QString m_currentBuffer;
     QString m_lastPrefix;
     QStringList m_lastMatches;

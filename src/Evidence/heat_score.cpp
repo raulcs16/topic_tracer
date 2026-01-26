@@ -1,41 +1,35 @@
 #include "heat_score.hpp"
 
-
 HeatScoreSystem::HeatScoreSystem(EvidenceDB &evidenceDb, TopicGraph &tg)
     : m_evidenceDb(evidenceDb), m_topicGraph(tg) {}
 
 
-int HeatScoreSystem::computeHeatScore(
-    const Topic *topic,
-    std::unordered_map<const Topic *, int> &memo) const {
+std::unordered_map<const Topic *, float> HeatScoreSystem::computeAllHeatScores() const {
+    std::unordered_map<const Topic *, float> scores;
 
-    if (!topic)
-        return 0;
-
-    if (memo.count(topic)) {
-        return memo[topic];
-    }
-
-    int score = 0;
-    if (topic->type == TopicType::Concept) {
-        for (auto tc : m_topicGraph.childrenOf(topic->id)) {
-            int childScore = computeHeatScore(tc, memo);
-            score += childScore > 0 ? 1 : 0;
-        }
-    } else {
-        const auto &evidence = m_evidenceDb.getEvidenceForTopic(topic->name);
-        score += static_cast<int>(evidence.size());
-    }
-    memo[topic] = score;
-    return score;
-}
-
-std::unordered_map<const Topic *, int> HeatScoreSystem::computeAllHeatScores() const {
-    std::unordered_map<const Topic *, int> heatScores;
-    std::unordered_map<const Topic *, int> memo;
     for (auto topic : m_topicGraph.topics()) {
-        heatScores[topic] = computeHeatScore(topic, memo);
+        const auto &evidence = m_evidenceDb.getEvidenceForTopic(topic->name);
+
+        if (!evidence.empty()) {
+            float directHeat = static_cast<float>(evidence.size());
+            std::set<uint32_t> visited;
+            propagateUp(topic, directHeat, scores, visited);
+        }
     }
 
-    return heatScores;
+    return scores;
+}
+void HeatScoreSystem::propagateUp(const Topic *currentNode,
+                                  float amount,
+                                  std::unordered_map<const Topic *, float> &scores,
+                                  std::set<uint32_t> &visited) const {
+
+    if (!currentNode || amount < 0.01f || visited.count(currentNode->id)) {
+        return;
+    }
+    visited.insert(currentNode->id);
+    scores[currentNode] += amount;
+    for (auto parent : m_topicGraph.parentsOf(currentNode->id)) {
+        propagateUp(parent, amount * m_decayFactor, scores, visited);
+    }
 }

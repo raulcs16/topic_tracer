@@ -39,3 +39,4 @@ Progress from concrete examples up to broad conceptual understanding.
     local space->apply scale & translation to world space -> apply camera projection -> map onto screen
 **bounding box collisions**:
     if we know what has changed, do AABB test, move until no collisions. if collision found restart test.
+**Store Pattern**: centralize shared state, the store then signals out changs of the state and all models interested in those changes, synchronize with the state using signals and slots
