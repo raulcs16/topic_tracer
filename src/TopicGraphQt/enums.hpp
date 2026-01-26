@@ -10,7 +10,6 @@ class ENUMS : public QObject {
 public:
     enum class EdgeType {
         ComposedOf,
-        Example,
         DependsOn,
         AlternativeTo,
         RelatedTo

@@ -87,10 +87,6 @@ ApplicationWindow {
                     type = ENUMS.EdgeType.ComposedOf;
                     args.shift(); // Remove the flag from args
                 }
-                if (args[0] === "-Example") {
-                    type = ENUMS.EdgeType.Example;
-                    args.shift(); // Remove the flag from args
-                }
                 if (args[0] === "-DependsOn") {
                     type = ENUMS.EdgeType.DependsOn;
                     args.shift(); // Remove the flag from args
