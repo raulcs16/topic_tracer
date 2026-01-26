@@ -23,12 +23,13 @@ public:
     StateFlags flags(const std::string &key);
 
     void setTopicState(uint32_t id, StateFlag flag, bool state);
+    void setEdgeState(const std::string &key, StateFlag flag, bool state);
 
-    void setSelected(uint32_t id);
 
 signals:
     void labelUpdated(uint32_t id);
-    void flagUpdated(uint32_t id);
+    void topicFlagUpdated(uint32_t id);
+    void edgeFlagUpdated(const std::string &key);
     // void flagUpdated(const std::string &key);
 
 private:

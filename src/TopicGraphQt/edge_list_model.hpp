@@ -2,6 +2,7 @@
 
 
 #include "layout_engine.hpp"
+#include "topic_graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -37,18 +38,13 @@ public:
         FlagsRole,
     };
 
-    explicit EdgeListModel(QObject *parent = nullptr);
+    explicit EdgeListModel(TGStore *store, QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-
-    void resetEdges(const std::vector<EdgeItem> &edges);
-    void setFlagsOnId(const std::string &key, StateFlag flags);
-    void unSetFlagsOnId(const std::string &key, StateFlag flags);
-    //adds or updates edge item
     void addItem(EdgeItem edge);
     void deleteEdge(const std::string &key);
 
@@ -62,6 +58,9 @@ public:
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
+public slots:
+    void onFlagUpdated(const std::string &key);
+
 private:
     size_t getIndex(const std::string &key);
     void updatePos(int index, const GraphEdge &edge);
@@ -69,5 +68,5 @@ private:
 
 private:
     std::vector<EdgeItem> m_edges;
-    std::unordered_map<std::string, ItemState> m_stateFlags;
+    TGStore *m_tgstore;
 };

@@ -1,7 +1,8 @@
 #include "edge_list_model.hpp"
 #include "graph_keys.hpp"
 
-EdgeListModel::EdgeListModel(QObject *parent) : QAbstractListModel{parent} {}
+EdgeListModel::EdgeListModel(TGStore *store, QObject *parent)
+    : QAbstractListModel{parent}, m_tgstore(store) {}
 
 QHash<int, QByteArray> EdgeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -49,21 +50,15 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
         return points;
     }
     case FlagsRole: {
-        auto it = m_stateFlags.find(edge.key);
-        if (it == m_stateFlags.end())
-            return QVariant();
-        return static_cast<int>(it->second.flags);
+        if (m_tgstore) {
+            return static_cast<int>(m_tgstore->flags(edge.key));
+        }
+        return 0;
     }
     default: return QVariant();
     }
 }
-void EdgeListModel::resetEdges(const std::vector<EdgeItem> &edges) {
-    beginResetModel();
-    m_edges.clear();
-    m_stateFlags.clear();
-    m_edges = edges;
-    endResetModel();
-}
+
 size_t EdgeListModel::getIndex(const std::string &key) {
     size_t index = 0;
     while (index < m_edges.size()) {
@@ -98,32 +93,11 @@ size_t EdgeListModel::getIndex(const std::string &key) {
 //     return true;
 // }
 
-void EdgeListModel::setFlagsOnId(const std::string &key, StateFlag flags) {
-    int index = 0;
-    while (index < m_edges.size()) {
-        if (m_edges[index].key == key)
-            break;
-        index++;
-    }
-    if (index == m_edges.size())
-        return;
-    m_stateFlags[key].add(flags);
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
-}
-void EdgeListModel::unSetFlagsOnId(const std::string &key, StateFlag flags) {
-    size_t index = getIndex(key);
-    if (index >= m_edges.size())
-        return;
-    m_stateFlags[key].remove(flags);
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
-}
+
 void EdgeListModel::deleteEdge(const std::string &key) {
     size_t index = getIndex(key);
     if (index >= m_edges.size())
         return;
-    m_stateFlags.erase(key);
     beginRemoveRows(QModelIndex(), index, index);
     m_edges.erase(m_edges.begin() + index);
     endRemoveRows();
@@ -136,7 +110,6 @@ void EdgeListModel::addItem(EdgeItem item) {
         const int newIndex = m_edges.size();
         beginInsertRows(QModelIndex(), newIndex, newIndex);
         m_edges.push_back(item);
-        m_stateFlags[item.key] = {};
         endInsertRows();
     }
     m_edges[index].bends = item.bends;
@@ -160,7 +133,6 @@ void EdgeListModel::onEdgeAdded(const GraphEdge &edge) {
     index = m_edges.size();
     beginInsertRows(QModelIndex(), index, index);
     m_edges.push_back(extract(edge));
-    m_stateFlags[edge.key] = {};
     endInsertRows();
 }
 void EdgeListModel::onEdgeRemoved(const std::string &key) {
@@ -176,7 +148,6 @@ void EdgeListModel::onEdgeRemoved(const std::string &key) {
 void EdgeListModel::onClear() {
     beginResetModel();
     m_edges.clear();
-    m_stateFlags.clear();
     endResetModel();
 }
 void EdgeListModel::updatePos(int index, const GraphEdge &edge) {
@@ -209,4 +180,12 @@ EdgeItem EdgeListModel::extract(const GraphEdge &edge) {
             .target_x = edge.target_x,
             .target_y = edge.target_y,
             .bends = bends};
+}
+
+void EdgeListModel::onFlagUpdated(const std::string &key) {
+    int index = getIndex(key);
+    if (index >= m_edges.size())
+        return;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {FlagsRole});
 }

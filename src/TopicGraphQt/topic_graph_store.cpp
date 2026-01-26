@@ -10,10 +10,21 @@ void TGStore::onTopicRemoved(uint32_t id) {
     if (it == m_labels.end())
         return;
     m_labels.erase(it);
+    auto tt = m_topicFlags.find(id);
+    if (tt == m_topicFlags.end())
+        return;
+    m_topicFlags.erase(tt);
 }
 void TGStore::onTopicRenamed(const Topic &topic) {}
-void TGStore::onEdgeAdded(const Edge &edge) {}
-void TGStore::onEdgeRemoved(const std::string &key) {}
+void TGStore::onEdgeAdded(const Edge &edge) {
+    m_edgeFlags.emplace(edge.key, StateFlag::None);
+}
+void TGStore::onEdgeRemoved(const std::string &key) {
+    auto it = m_edgeFlags.find(key);
+    if (it == m_edgeFlags.end())
+        return;
+    m_edgeFlags.erase(it);
+}
 void TGStore::onClear() {
     m_labels.clear();
     m_topicFlags.clear();
@@ -53,14 +64,18 @@ void TGStore::setTopicState(uint32_t id, StateFlag flag, bool state) {
         if (it->second.has(flag))
             it->second.remove(flag);
     }
-    // qDebug() << "TGStore::setTopicState" << id << "_" << (int)flag << "_" << state;
-    emit flagUpdated(id);
+    emit topicFlagUpdated(id);
 }
-void TGStore::setSelected(uint32_t id) {
-    auto it = m_topicFlags.find(id);
-    if (it == m_topicFlags.end()) {
+void TGStore::setEdgeState(const std::string &key, StateFlag flag, bool state) {
+    auto it = m_edgeFlags.find(key);
+    if (it == m_edgeFlags.end()) {
         return;
     }
-    return it->second.add(StateFlag::Selected);
-    emit flagUpdated(id);
+    if (state) {
+        it->second.add(flag);
+    } else {
+        if (it->second.has(flag))
+            it->second.remove(flag);
+    }
+    emit edgeFlagUpdated(key);
 }

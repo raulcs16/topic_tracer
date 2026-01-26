@@ -12,7 +12,7 @@ TopicGraphController::TopicGraphController(QObject *parent)
       m_repo{new TopicGraphRepository("./data")}, m_layout{new LayoutEngine()},
       m_tgstore{new TGStore()}, m_topicList{new TopicListModel(m_tgstore, this)},
       m_nodeList{new NodeListModel(m_tgstore, this)},
-      m_edgeList(new EdgeListModel(this)) {
+      m_edgeList(new EdgeListModel(m_tgstore, this)) {
 
     if (!m_graph || !m_repo || !m_layout || !m_tgstore || !m_topicList || !m_nodeList ||
         !m_edgeList)
@@ -21,7 +21,7 @@ TopicGraphController::TopicGraphController(QObject *parent)
     m_graph->addObserver(m_layout);
     m_layout->addObserver(m_nodeList);
     m_layout->addObserver(m_edgeList);
-
+    //----TG Store Singals BEGIN----
     connect(m_tgstore,
             &TGStore::labelUpdated,
             m_nodeList,
@@ -31,12 +31,19 @@ TopicGraphController::TopicGraphController(QObject *parent)
             m_topicList,
             &TopicListModel::onLabelUpdated);
     connect(m_tgstore,
-            &TGStore::flagUpdated,
+            &TGStore::topicFlagUpdated,
             m_topicList,
             &TopicListModel::onFlagUpdated);
-
-    connect(m_tgstore, &TGStore::flagUpdated, m_nodeList, &NodeListModel::onFlagsUpdated);
-
+    connect(m_tgstore,
+            &TGStore::topicFlagUpdated,
+            m_nodeList,
+            &NodeListModel::onFlagsUpdated);
+    connect(m_tgstore,
+            &TGStore::edgeFlagUpdated,
+            m_edgeList,
+            &EdgeListModel::onFlagUpdated);
+    //----TG Store Singals END----
+    //----TopicListModel Singals Begin----
     connect(m_topicList,
             &TopicListModel::hoverRequested,
             this,
@@ -56,6 +63,8 @@ TopicGraphController::TopicGraphController(QObject *parent)
             this,
             &TopicGraphController::onTopicRangeSelectionRequest);
 
+    //----TopicListModel Singals End----
+    //----NodeListModel Singals Begin----
     connect(m_nodeList,
             &NodeListModel::selectRequested,
             this,
@@ -163,13 +172,8 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     if (ta == nullptr || tb == nullptr) {
         return;
     }
-    qDebug() << "TGC::path";
     auto parents = TG::PathAnalyzer::dijsktras(*m_graph, ta->id, tb->id);
-    qDebug() << "Parents map size:" << parents.size();
     auto topicIds = TG::PathAnalyzer::topicPath(parents, tb->id);
-    qDebug() << "Path reconstructed size:" << topicIds.size();
-    for (int id : topicIds)
-        qDebug() << "ID in path:" << id;
 
     std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
     for (const auto &topic : m_graph->topics()) {
@@ -186,11 +190,13 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     auto edgeKeys = TG::PathAnalyzer::edgePath(topicIds);
     std::unordered_set<std::string> edgeSet(edgeKeys.begin(), edgeKeys.end());
     for (const auto &edge : m_graph->edges()) {
-        StateFlag flag = StateFlag::None;
-        if (edgeSet.contains(edge->key))
-            flag = StateFlag::InPath;
-        else
-            flag = StateFlag::Hidden;
+        if (edgeSet.contains(edge->key)) {
+            m_tgstore->setEdgeState(edge->key, StateFlag::InPath, true);
+            m_tgstore->setEdgeState(edge->key, StateFlag::Hidden, false);
+        } else {
+            m_tgstore->setEdgeState(edge->key, StateFlag::InPath, false);
+            m_tgstore->setEdgeState(edge->key, StateFlag::Hidden, true);
+        }
     }
 }
 void TopicGraphController::noPath() {
@@ -200,10 +206,10 @@ void TopicGraphController::noPath() {
         m_tgstore->setTopicState(topics->id, StateFlag::Hidden, false);
         m_tgstore->setTopicState(topics->id, StateFlag::InPath, false);
     }
-    // for (const auto edges : m_graph->topics()) {
-    //     m_tgstore->setTopicState(topics->id, StateFlag::Hidden, false);
-    //     m_tgstore->setTopicState(topics->id, StateFlag::InPath, false);
-    // }
+    for (const auto edges : m_graph->edges()) {
+        m_tgstore->setEdgeState(edges->key, StateFlag::Hidden, false);
+        m_tgstore->setEdgeState(edges->key, StateFlag::InPath, false);
+    }
 }
 void TopicGraphController::calculateHeatScores() {
     // auto map = m_heatScore->computeAllHeatScores();
