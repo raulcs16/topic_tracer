@@ -185,22 +185,16 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
         parents[v->id] = -1;
     }
     dist[start_id] = 0;
-    std::cout << "dijstra's goal=" << goal_id << std::endl;
     while (!pq.empty()) {
         uint32_t v = pq.top().first;
         double d = pq.top().second;
         pq.pop();
-        std::cout << "pq:v=" << v << ",d=" << d << std::endl;
         if (v == goal_id) {
-            std::cout << "goal found!\n";
             return parents;
         }
         for (const auto &e : graph.getOutEdges(v)) {
             uint32_t u = e->to;
             double w = static_cast<int>(e->type) * 1.0;
-            std::cout << "visiting edge:" << e->key << std::endl;
-            std::cout << "dist[" << u << "]=" << dist[u] << "dist[" << v
-                      << "]=" << dist[v] << ",w=" << w << std::endl;
             if (dist[u] > dist[v] + w) {
                 dist[u] = w + dist[v];
                 parents[u] = v;

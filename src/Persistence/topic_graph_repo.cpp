@@ -94,7 +94,7 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
                                       const QHash<int, const Topic *> &idMap) {
     if (!obj.contains("key") || !obj.contains("from") || !obj.contains("to") ||
         !obj.contains("type")) {
-        qDebug() << "TGS::decodeEdge::Edge missing required fields";
+        // qDebug() << "TGS::decodeEdge::Edge missing required fields";
         return false;
     }
 
@@ -104,17 +104,17 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
     uint32_t fromId = static_cast<uint32_t>(obj["from"].toInt());
     uint32_t toId = static_cast<uint32_t>(obj["to"].toInt());
     EdgeType type = static_cast<EdgeType>(obj["type"].toInt());
-    qDebug() << "TGR::decodeEdge::edge=" << key << "type=" << static_cast<int>(type);
+    // qDebug() << "TGR::decodeEdge::edge=" << key << "type=" << static_cast<int>(type);
 
     if (!idMap.contains(fromId) || !idMap.contains(toId)) {
-        qDebug() << "TGR::decodeEdge::Edge references invalid topic ID"
-                 << "from=" << fromId << "," << "to=" << toId;
+        // qDebug() << "TGR::decodeEdge::Edge references invalid topic ID"
+        // << "from=" << fromId << "," << "to=" << toId;
         return false;
     }
 
     if (!graph.addEdge(Edge{.key = key, .from = fromId, .to = toId, .type = type})) {
-        qDebug() << "TGR::decodeEdge::Failed to create edge: " +
-                        QString::fromStdString(key);
+        // qDebug() << "TGR::decodeEdge::Failed to create edge: " +
+        QString::fromStdString(key);
         return false;
     }
 
@@ -130,7 +130,7 @@ bool TopicGraphRepository::save(const TopicGraph &graph, QString fileName) {
 
     QFile file(m_basePath + "/" + fileName + ".json");
     if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << "TGR::save::open file error";
+        // qDebug() << "TGR::save::open file error";
         return false;
     }
 
@@ -143,7 +143,7 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name) {
 
     QFile file(m_basePath + "/" + file_name + ".json");
     if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "TGR::load::Cannot open file for reading";
+        // qDebug() << "TGR::load::Cannot open file for reading";
         return false;
     }
 
@@ -151,7 +151,7 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name) {
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseErr);
 
     if (parseErr.error != QJsonParseError::NoError) {
-        qDebug() << "TGR::load::JSON PArseError";
+        // qDebug() << "TGR::load::JSON PArseError";
         return false;
     }
     file.close();
