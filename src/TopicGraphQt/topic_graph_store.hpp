@@ -30,6 +30,7 @@ signals:
     void labelUpdated(uint32_t id);
     void topicFlagUpdated(uint32_t id);
     void edgeFlagUpdated(const std::string &key);
+    void clear();
     // void flagUpdated(const std::string &key);
 
 private:

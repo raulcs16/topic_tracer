@@ -29,6 +29,7 @@ void TGStore::onClear() {
     m_labels.clear();
     m_topicFlags.clear();
     m_edgeFlags.clear();
+    emit clear();
 }
 
 QString TGStore::label(uint32_t id) {

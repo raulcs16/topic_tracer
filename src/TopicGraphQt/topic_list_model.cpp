@@ -107,54 +107,7 @@ std::vector<uint32_t> TopicListModel::getIdInRange(uint32_t start, uint32_t end)
     }
     return ids;
 }
-void TopicListModel::rangeSelect(int target) {
-    // if (target < 0 || target >= m_topics.size() || target == m_lastSelectedIndex) {
-    //     return;
-    // }
-
-    // //remove previous range
-    // if (m_rangeSelectedIndex != -1) {
-    //     int min = qMin(m_lastSelectedIndex, m_rangeSelectedIndex);
-    //     int max = qMax(m_lastSelectedIndex, m_rangeSelectedIndex);
-    //     std::vector<int> toRemove;
-    //     toRemove.reserve(max - min + 1);
-    //     for (int i : m_selectedIndexes) {
-    //         if (i >= min && i <= max && i != m_lastSelectedIndex) {
-    //             toRemove.push_back(i);
-    //         }
-    //     }
-    //     for (int i : toRemove) {
-    //         removeFlags(i, StateFlag::Selected);
-    //         emit topicUnSelected(m_topics[i].id);
-    //         auto it = std::find(m_selectedIndexes.begin(), m_selectedIndexes.end(), i);
-    //         if (it != m_selectedIndexes.end()) {
-    //             m_selectedIndexes.erase(it);
-    //         }
-    //     }
-    // }
-
-    // //add range
-    // int min = qMin(m_lastSelectedIndex, target);
-    // int max = qMax(m_lastSelectedIndex, target);
-    // for (; min <= max; min++) {
-    //     if (min == m_lastSelectedIndex)
-    //         continue;
-    //     emit topicSelected(m_topics[min].id);
-    //     addFlags(min, StateFlag::Selected);
-    //     m_selectedIndexes.push_back(min);
-    // }
-    // m_rangeSelectedIndex = target;
-}
-void TopicListModel::clearSelection() {
-    // for (auto i : m_selectedIndexes) {
-    //     removeFlags(i, StateFlag::Selected);
-    //     emit topicUnSelected(m_topics[i].id);
-    // }
-    // m_selectedIndexes.clear();
-    // m_lastSelectedIndex = -1;
-    // m_rangeSelectedIndex = -1;
-}
-
+void TopicListModel::onClear() { clear(); }
 
 void TopicListModel::clear() {
     if (m_ids.isEmpty())

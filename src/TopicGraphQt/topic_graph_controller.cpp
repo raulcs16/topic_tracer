@@ -43,6 +43,8 @@ TopicGraphController::TopicGraphController(QObject *parent)
             &TGStore::edgeFlagUpdated,
             m_edgeList,
             &EdgeListModel::onFlagUpdated);
+    connect(m_tgstore, &TGStore::clear, m_topicList, &TopicListModel::onClear);
+
     //----TG Store Singals END----
     //----TopicListModel Singals Begin----
     connect(m_topicList,

@@ -31,13 +31,7 @@ public:
 
     //multiple selections
     std::vector<uint32_t> getIdInRange(uint32_t start, uint32_t target);
-    Q_INVOKABLE void rangeSelect(int target);
-    void clearSelection();
 
-    //API
-    // Q_INVOKABLE void addItem(const QString &name);
-    // Q_INVOKABLE bool removeItem(int index);
-    // Q_INVOKABLE bool editItem(int index, const QString &newName);
     bool isAddingNewTopic() const { return m_isAddingNewTopic; }
     void setIsAddingNewTopic(bool value);
 
@@ -54,6 +48,7 @@ public slots:
     //add or update a label
     void onLabelUpdated(uint32_t id);
     void onFlagUpdated(uint32_t id);
+    void onClear();
 
 
 protected:
