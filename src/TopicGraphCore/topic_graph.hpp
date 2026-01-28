@@ -61,18 +61,17 @@ public:
     void addObserver(ITopicGraphObserver *observer);
     void removeObserver(ITopicGraphObserver *observer);
 
+    void beginBatchLoad();
+    void endBatchLoad();
+
 private:
     uint32_t nextId();
     std::string makeKey(uint32_t from, uint32_t to);
 
 
 private:
-    void notifyTopicAdded(const Topic &topic);
-    void notifyTopicRemoved(const Topic &topic);
-    void notifyTopicRenamed(const Topic &topic);
-    void notifyEdgeAdded(const Edge &edge);
-    void notifyEdgeRemoved(const std::string &key);
-    void notifyClear();
+    template <typename Func, typename... Args>
+    void notify(Func memberFunc, Args &&...args);
 
 private:
     std::unordered_map<uint32_t, Topic> m_topics;
@@ -81,4 +80,5 @@ private:
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjOutMap;
     std::unordered_map<uint32_t, std::vector<uint32_t>> m_adjInMap;
     uint32_t m_id_ref = 1;
+    bool m_isLoading = false;
 };

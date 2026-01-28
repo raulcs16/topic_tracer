@@ -31,6 +31,7 @@ public:
     void addEdge(uint32_t from, uint32_t to);
     void removeEdge(const std::string &key);
     void clear();
+    void applyBatchUpdate();
 
     size_t clusterCount() { return m_clusters; }
 
@@ -44,14 +45,11 @@ public:
     void onEdgeAdded(const Edge &edge) override;
     void onEdgeRemoved(const std::string &key) override;
     void onClear() override;
+    void enableBatchUpdate(bool enabled = true) { m_batchUpdate = enabled; }
 
 private:
-    void notifyNodeAdded(const GraphNode &node, std::shared_ptr<IClusterLayout>);
-    void notifyNodeUpdated(const GraphNode &node, std::shared_ptr<IClusterLayout>);
-    void notifyNodeRemoved(uint32_t id);
-    void notifyEdgeAdded(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
-    void notifyEdgeRemoved(const std::string &key);
-    void notifyClear();
+    template <typename Func, typename... Args>
+    void notify(Func memberFunc, Args &&...args);
 
 private:
     //both in pool
@@ -64,12 +62,15 @@ private:
                                                                 bool fromInPool);
     bool intersects(std::shared_ptr<IClusterLayout> a, std::shared_ptr<IClusterLayout> b);
     void resolveCollisions(std::shared_ptr<IClusterLayout> newCluster);
+    GraphNode toScreenNode(const GraphNode &node, std::shared_ptr<IClusterLayout>);
+    GraphEdge toScreenEdge(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
 
 private:
     std::shared_ptr<LayoutStrategy> m_poolStrat;
     std::shared_ptr<OGDFStrategy> m_ogdfStrat;
     std::shared_ptr<PoolCluster> m_pool;
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
+    bool m_batchUpdate = false;
     std::vector<ILayoutObserver *> m_observers;
     Camera m_camera;
     size_t m_clusters = 1;

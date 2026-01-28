@@ -21,19 +21,19 @@ LayoutEngine::~LayoutEngine() {
 void LayoutEngine::clear() {
     m_clusterMap.clear();
     m_pool->clear();
-    notifyClear();
+    notify(&ILayoutObserver::onClear);
 }
 void LayoutEngine::addNode(uint32_t id) {
     auto gNode = m_pool->addNode(id);
     gNode.id = id;
     m_clusterMap[id] = m_pool;
-    notifyNodeAdded(gNode, m_pool);
+    notify(&ILayoutObserver::onNodeAdded, toScreenNode(gNode, m_pool));
 }
 void LayoutEngine::removeNode(uint32_t id) {
     auto it = m_clusterMap.find(id);
     if (it != m_clusterMap.end()) {
         it->second->removeNode(id);
-        notifyNodeRemoved(id);
+        notify(&ILayoutObserver::onNodeRemoved, id);
     }
 }
 void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
@@ -63,16 +63,32 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     } else {
         merger = mergeClusters(from, to);
     }
-    if (merger) {
+    if (merger && !m_batchUpdate) {
         merger->apply();
         if (merger != m_pool) {
             resolveCollisions(merger);
         }
         for (auto const &node : merger->nodes()) {
-            notifyNodeUpdated(node, merger);
+            notify(&ILayoutObserver::onNodeUpdated, toScreenNode(node, merger));
         }
         for (auto const &edge : merger->edges()) {
-            notifyEdgeAdded(edge, merger);
+            notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, merger));
+        }
+    }
+}
+void LayoutEngine::applyBatchUpdate() {
+    if (m_batchUpdate)
+        return;
+    for (const auto [_, cluster] : m_clusterMap) {
+        if (cluster == m_pool)
+            continue;
+        cluster->apply();
+        resolveCollisions(cluster);
+        for (auto const &node : cluster->nodes()) {
+            notify(&ILayoutObserver::onNodeUpdated, toScreenNode(node, cluster));
+        }
+        for (auto const &edge : cluster->edges()) {
+            notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, cluster));
         }
     }
 }
@@ -86,7 +102,7 @@ void LayoutEngine::removeEdge(const std::string &k) {
         return;
     }
     fromIt->second->removeEdge(fromIt->first, toIt->first);
-    notifyEdgeRemoved(k);
+    notify(&ILayoutObserver::onEdgeRemoved, k);
 }
 std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
                                                                uint32_t to) {
@@ -181,24 +197,15 @@ void LayoutEngine::removeObserver(ILayoutObserver *observer) {
                        m_observers.end(),
                        [observer](ILayoutObserver *it) { return it == observer; }));
 }
-void LayoutEngine::notifyNodeAdded(const GraphNode &node,
-                                   std::shared_ptr<IClusterLayout> cluster) {
 
-    auto transform = cluster.get()->transform();
-    float screenX{0.0f}, screenY{0.0f};
-    m_camera.project(transform, node.x, node.y, screenX, screenY);
-
-    GraphNode screenNode = node;
-    screenNode.id = node.id;
-    screenNode.x = screenX;
-    screenNode.y = screenY;
-    for (const auto &obs : m_observers) {
-        obs->onNodeAdded(screenNode);
+template <typename Func, typename... Args>
+void LayoutEngine::notify(Func memberFunc, Args &&...args) {
+    for (auto *obs : m_observers) {
+        (obs->*memberFunc)(std::forward<Args>(args)...);
     }
 }
-void LayoutEngine::notifyNodeUpdated(const GraphNode &node,
+GraphNode LayoutEngine::toScreenNode(const GraphNode &node,
                                      std::shared_ptr<IClusterLayout> cluster) {
-
     auto transform = cluster.get()->transform();
     float screenX{0.0f}, screenY{0.0f};
     m_camera.project(transform, node.x, node.y, screenX, screenY);
@@ -207,17 +214,10 @@ void LayoutEngine::notifyNodeUpdated(const GraphNode &node,
     screenNode.id = node.id;
     screenNode.x = screenX;
     screenNode.y = screenY;
-    for (const auto &obs : m_observers) {
-        obs->onNodeUpdated(screenNode);
-    }
+    return screenNode;
 }
-void LayoutEngine::notifyNodeRemoved(uint32_t id) {
-    for (const auto &obs : m_observers) {
-        obs->onNodeRemoved(id);
-    }
-}
-void LayoutEngine::notifyEdgeAdded(const GraphEdge &edge,
-                                   std::shared_ptr<IClusterLayout> cluster) {
+GraphEdge LayoutEngine::toScreenEdge(const GraphEdge &edge,
+                                     std::shared_ptr<IClusterLayout> cluster) {
     auto transform = cluster.get()->transform();
     float targetX{}, targetY{}, sourceX{}, sourceY{};
     m_camera.project(transform, edge.target_x, edge.target_y, targetX, targetY);
@@ -237,21 +237,9 @@ void LayoutEngine::notifyEdgeAdded(const GraphEdge &edge,
     screenEdge.target_x = targetX;
     screenEdge.target_y = targetY;
     screenEdge.bends = screenbends;
+    return screenEdge;
+}
 
-    for (const auto &obs : m_observers) {
-        obs->onEdgeAdded(screenEdge);
-    }
-}
-void LayoutEngine::notifyEdgeRemoved(const std::string &key) {
-    for (const auto &obs : m_observers) {
-        obs->onEdgeRemoved(key);
-    }
-}
-void LayoutEngine::notifyClear() {
-    for (const auto &obs : m_observers) {
-        obs->onClear();
-    }
-}
 bool LayoutEngine::intersects(std::shared_ptr<IClusterLayout> a,
                               std::shared_ptr<IClusterLayout> b) {
     if (a == b || !a || !b)

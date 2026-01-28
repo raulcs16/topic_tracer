@@ -17,7 +17,7 @@ bool TopicGraph::addTopic(const std::string &name) {
     m_topics[id] = topic;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    notifyTopicAdded(topic);
+    notify(&ITopicGraphObserver::onTopicAdded, topic);
     return true;
 }
 bool TopicGraph::addTopic(uint32_t id, const std::string &name) {
@@ -29,7 +29,7 @@ bool TopicGraph::addTopic(uint32_t id, const std::string &name) {
     m_topics[id] = topic;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    notifyTopicAdded(topic);
+    notify(&ITopicGraphObserver::onTopicAdded, topic);
     return true;
 }
 bool TopicGraph::renameTopic(const std::string &name, const std::string &new_name) {
@@ -47,7 +47,7 @@ bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
         return false;
     }
     it->second.name = new_name;
-    notifyTopicRenamed(it->second);
+    notify(&ITopicGraphObserver::onTopicRenamed, (it->second));
     return true;
 }
 
@@ -71,7 +71,7 @@ bool TopicGraph::deleteTopic(uint32_t id) {
     for (const auto edge : outEdges) {
         removeEdge(edge->from, edge->to);
     }
-    notifyTopicRemoved(*topic);
+    notify(&ITopicGraphObserver::onTopicRemoved, id);
     return m_topics.erase(id);
 }
 
@@ -95,9 +95,6 @@ std::vector<const Topic *> TopicGraph::topics() const {
     return result;
 }
 
-/*
-Enforce Rules such as making sure EdgeType matches TopicType(s) beign connected
-*/
 bool TopicGraph::addEdge(Edge edge) {
     auto [it, inserted] = m_edges.try_emplace(edge.key, std::move(edge));
     if (!inserted) {
@@ -108,7 +105,7 @@ bool TopicGraph::addEdge(Edge edge) {
     m_adjInMap[storedEdge.to].push_back(storedEdge.from);
     m_adjOutMap[storedEdge.from].push_back(storedEdge.to);
 
-    notifyEdgeAdded(storedEdge);
+    notify(&ITopicGraphObserver::onEdgeAdded, storedEdge);
     return true;
 }
 
@@ -126,7 +123,7 @@ bool TopicGraph::addEdge(const Topic *a, const Topic *b, EdgeType type) {
     m_edges[key] = edge;
     m_adjOutMap[a->id].push_back(b->id);
     m_adjInMap[b->id].push_back(a->id);
-    notifyEdgeAdded(edge);
+    notify(&ITopicGraphObserver::onEdgeAdded, edge);
     return true;
 }
 bool TopicGraph::addEdge(uint32_t from, uint32_t to, EdgeType type) {
@@ -156,7 +153,7 @@ bool TopicGraph::removeEdge(uint32_t from, uint32_t to) {
     out.erase(std::remove(out.begin(), out.end(), to), out.end());
 
     m_edges.erase(it);
-    notifyEdgeRemoved(key);
+    notify(&ITopicGraphObserver::onEdgeRemoved, key);
     return true;
 }
 bool TopicGraph::removeEdge(const std::string &topicA, const std::string &topicB) {
@@ -248,7 +245,7 @@ void TopicGraph::clear() {
     m_adjInMap.clear();
     m_adjOutMap.clear();
     m_id_ref = 1;
-    notifyClear();
+    notify(&ITopicGraphObserver::onClear);
 }
 
 void TopicGraph::addObserver(ITopicGraphObserver *observer) {
@@ -260,33 +257,18 @@ void TopicGraph::removeObserver(ITopicGraphObserver *observer) {
                        m_observers.end(),
                        [observer](ITopicGraphObserver *it) { return it == observer; }));
 }
-void TopicGraph::notifyTopicAdded(const Topic &topic) {
-    for (const auto obs : m_observers) {
-        obs->onTopicAdded(topic);
+template <typename Func, typename... Args>
+void TopicGraph::notify(Func memberFunc, Args &&...args) {
+    if (m_isLoading)
+        return;
+    for (auto *obs : m_observers) {
+        (obs->*memberFunc)(std::forward<Args>(args)...);
     }
 }
-void TopicGraph::notifyTopicRemoved(const Topic &topic) {
-    for (const auto obs : m_observers) {
-        obs->onTopicRemoved(topic.id);
-    }
-}
-void TopicGraph::notifyTopicRenamed(const Topic &topic) {
-    for (const auto obs : m_observers) {
-        obs->onTopicRenamed(topic);
-    }
-}
-void TopicGraph::notifyEdgeAdded(const Edge &edge) {
-    for (const auto obs : m_observers) {
-        obs->onEdgeAdded(edge);
-    }
-}
-void TopicGraph::notifyEdgeRemoved(const std::string &key) {
-    for (const auto obs : m_observers) {
-        obs->onEdgeRemoved(key);
-    }
-}
-void TopicGraph::notifyClear() {
-    for (const auto obs : m_observers) {
-        obs->onClear();
-    }
+
+void TopicGraph::beginBatchLoad() { m_isLoading = true; }
+void TopicGraph::endBatchLoad() {
+    m_isLoading = false;
+    // GraphBlueprint blueprint = calculateSemanticCluster();
+    // emit graphBatchUpdate(blueprint);
 }
