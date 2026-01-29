@@ -146,10 +146,8 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name) {
         // qDebug() << "TGR::load::Cannot open file for reading";
         return false;
     }
-
     QJsonParseError parseErr;
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseErr);
-
     if (parseErr.error != QJsonParseError::NoError) {
         // qDebug() << "TGR::load::JSON PArseError";
         return false;

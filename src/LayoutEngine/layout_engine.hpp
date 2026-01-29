@@ -8,6 +8,7 @@
 #include "ogdf_strategy.hpp"
 #include "pool_cluster.hpp"
 #include "topic_graph.hpp"
+#include <set>
 
 
 struct ILayoutObserver {
@@ -33,7 +34,7 @@ public:
     void clear();
     void applyBatchUpdate();
 
-    size_t clusterCount() { return m_clusters; }
+    size_t clusterCount() { return m_clusters.size(); }
 
 
     void addObserver(ILayoutObserver *observer);
@@ -46,6 +47,7 @@ public:
     void onEdgeRemoved(const std::string &key) override;
     void onClear() override;
     void enableBatchUpdate(bool enabled = true) { m_batchUpdate = enabled; }
+    void onGraphBluePrint(GraphBlueprint blueprint) override;
 
 private:
     template <typename Func, typename... Args>
@@ -68,10 +70,12 @@ private:
 private:
     std::shared_ptr<LayoutStrategy> m_poolStrat;
     std::shared_ptr<OGDFStrategy> m_ogdfStrat;
+
     std::shared_ptr<PoolCluster> m_pool;
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
+    std::set<std::shared_ptr<IClusterLayout>> m_clusters;
+
     bool m_batchUpdate = false;
     std::vector<ILayoutObserver *> m_observers;
     Camera m_camera;
-    size_t m_clusters = 1;
 };

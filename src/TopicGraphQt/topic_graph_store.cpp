@@ -80,3 +80,18 @@ void TGStore::setEdgeState(const std::string &key, StateFlag flag, bool state) {
     }
     emit edgeFlagUpdated(key);
 }
+void TGStore::onGraphBluePrint(GraphBlueprint blueprint) {
+    clear();
+
+    for (const auto &topic : blueprint.isoTopics) {
+        onTopicAdded(topic);
+    }
+    for (const auto &cluster : blueprint.clusters) {
+        for (const auto &topic : cluster.topics) {
+            onTopicAdded(topic);
+        }
+        for (const auto &edge : cluster.edges) {
+            onEdgeAdded(edge);
+        }
+    }
+}

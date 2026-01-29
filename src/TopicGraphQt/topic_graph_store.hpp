@@ -17,6 +17,7 @@ public:
     void onEdgeAdded(const Edge &edge) override;
     void onEdgeRemoved(const std::string &key) override;
     void onClear() override;
+    void onGraphBluePrint(GraphBlueprint blueprint) override;
 
     QString label(uint32_t id);
     StateFlags flags(uint32_t id);

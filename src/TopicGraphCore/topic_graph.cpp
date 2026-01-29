@@ -269,6 +269,61 @@ void TopicGraph::notify(Func memberFunc, Args &&...args) {
 void TopicGraph::beginBatchLoad() { m_isLoading = true; }
 void TopicGraph::endBatchLoad() {
     m_isLoading = false;
-    // GraphBlueprint blueprint = calculateSemanticCluster();
-    // emit graphBatchUpdate(blueprint);
+    GraphBlueprint blueprint = buildGraphBlueprint();
+
+    notify(&ITopicGraphObserver::onGraphBluePrint, blueprint);
+}
+
+GraphBlueprint TopicGraph::buildGraphBlueprint() {
+    //dfs
+    GraphBlueprint blueprint;
+    std::unordered_set<uint32_t> visited;
+    for (auto const &[id, topic] : m_topics) {
+        //already accounted for
+        if (visited.contains(id))
+            continue;
+        //check if has edges
+        if (m_adjInMap[id].empty() && m_adjOutMap[id].empty()) {
+            blueprint.isoTopics.push_back(topic);
+            visited.insert(id);
+            continue;
+        }
+        //has edges aka part of a cluster
+        SemanticCluster cluster;
+        std::vector<Topic> stack = {topic};
+        std::unordered_set<std::string> addedEdges;
+        visited.insert(id);
+        //dfs
+        while (!stack.empty()) {
+            Topic curr = stack.back();
+            stack.pop_back();
+            cluster.topics.push_back(curr);
+
+            // Explore Outbound neighbors
+            for (const Edge *edge : getOutEdges(curr.id)) {
+                if (!addedEdges.contains(edge->key)) {
+                    cluster.edges.push_back(*edge);
+                    addedEdges.insert(edge->key);
+                }
+                if (!visited.contains(edge->to)) {
+                    visited.insert(edge->to);
+                    stack.push_back(*getTopic(edge->to));
+                }
+            }
+
+            // Explore Inbound neighbors (treating as undirected)
+            for (const Edge *edge : getInEdges(curr.id)) {
+                if (!addedEdges.contains(edge->key)) {
+                    cluster.edges.push_back(*edge);
+                    addedEdges.insert(edge->key);
+                }
+                if (!visited.contains(edge->from)) {
+                    visited.insert(edge->from);
+                    stack.push_back(*getTopic(edge->from));
+                }
+            }
+        }
+        blueprint.clusters.push_back(std::move(cluster));
+    }
+    return blueprint;
 }

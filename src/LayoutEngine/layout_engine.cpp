@@ -11,7 +11,7 @@ LayoutEngine::LayoutEngine() {
     m_pool = std::make_shared<PoolCluster>(m_poolStrat, 20);
     m_pool->transform().scale = 50;
     m_pool->transform().x = -m_camera.screenW / 4;
-    m_clusters = 1;
+    m_clusters.insert(m_pool);
 }
 LayoutEngine::~LayoutEngine() {
     clear();
@@ -114,7 +114,7 @@ std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
     newCluster->addEdge(from, to);
     m_clusterMap[from] = newCluster;
     m_clusterMap[to] = newCluster;
-    m_clusters++;
+    m_clusters.insert(newCluster);
     return newCluster;
 }
 
@@ -146,11 +146,13 @@ std::shared_ptr<OGDFCluster> LayoutEngine::mergeClusters(uint32_t from, uint32_t
     }
     newCluster->addEdge(from, to);
     m_clusterMap.erase(fromIt);
+    m_clusters.erase(fromIt->second);
     m_clusterMap.erase(toIt);
-    m_clusters--; //only remove one to account for new one created
+    m_clusters.erase(toIt->second);
     m_clusterMap[from] = newCluster;
     m_clusterMap[to] = newCluster;
 
+    m_clusters.insert(newCluster);
     return newCluster;
 }
 std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
@@ -200,6 +202,8 @@ void LayoutEngine::removeObserver(ILayoutObserver *observer) {
 
 template <typename Func, typename... Args>
 void LayoutEngine::notify(Func memberFunc, Args &&...args) {
+    if (m_batchUpdate)
+        return;
     for (auto *obs : m_observers) {
         (obs->*memberFunc)(std::forward<Args>(args)...);
     }
@@ -300,6 +304,36 @@ void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster)
                 collisionFound = true;
                 break; // Restart the 'for' loop via the 'while' loop
             }
+        }
+    }
+}
+void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
+    clear();
+    m_batchUpdate = true;
+    //create pool nodes
+    for (auto topic : blueprint.isoTopics) {
+        addNode(topic.id);
+    }
+    for (auto cluster : blueprint.clusters) {
+        auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
+        m_clusters.insert(newCluster);
+        for (auto topic : cluster.topics) {
+            newCluster->addNode(topic.id);
+            m_clusterMap[topic.id] = newCluster;
+        }
+        for (auto edge : cluster.edges) {
+            newCluster->addEdge(edge.from, edge.to);
+        }
+        newCluster->apply();
+        resolveCollisions(newCluster);
+    }
+    m_batchUpdate = false;
+    for (auto cluster : m_clusters) {
+        for (auto const &node : cluster->nodes()) {
+            notify(&ILayoutObserver::onNodeAdded, toScreenNode(node, cluster));
+        }
+        for (auto const &edge : cluster->edges()) {
+            notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, cluster));
         }
     }
 }

@@ -14,8 +14,8 @@ struct ITopicGraphObserver {
     virtual void onTopicRenamed(const Topic &topic) {}
     virtual void onEdgeAdded(const Edge &edge) {}
     virtual void onEdgeRemoved(const std::string &key) {}
-
     virtual void onClear() {}
+    virtual void onGraphBluePrint(GraphBlueprint blueprint) {}
 };
 
 class TopicGraph {
@@ -67,6 +67,8 @@ public:
 private:
     uint32_t nextId();
     std::string makeKey(uint32_t from, uint32_t to);
+
+    GraphBlueprint buildGraphBlueprint();
 
 
 private:

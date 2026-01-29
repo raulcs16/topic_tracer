@@ -233,11 +233,10 @@ void TopicGraphController::load(QString fileName) {
     if (!m_repo || !m_graph)
         return;
     m_graph->clear();
-    m_layout->enableBatchUpdate();
+    m_graph->beginBatchLoad();
     bool load = m_repo->load(*m_graph, fileName);
-    m_layout->enableBatchUpdate(false);
-    m_layout->applyBatchUpdate();
-    calculateHeatScores();
+    m_graph->endBatchLoad();
+    // calculateHeatScores();
     // qDebug() << "TGC::load::";
     // for (const auto &topic : m_graph->topics()) {
     //     auto edges = m_graph->getOutEdges(topic->id);
