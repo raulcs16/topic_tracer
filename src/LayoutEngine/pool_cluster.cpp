@@ -60,7 +60,25 @@ void PoolCluster::removeNode(uint32_t id) {
 }
 void PoolCluster::addEdge(uint32_t from, uint32_t to) {}
 void PoolCluster::removeEdge(uint32_t from, uint32_t to) {}
-void PoolCluster::clear() {}
+void PoolCluster::clear() {
+    m_indexMap.clear();
+    for (auto &slot : m_slots) {
+        slot.used = false;
+        slot.id = 0;
+    }
+}
+std::vector<GraphNode> PoolCluster::nodes() const {
+    std::vector<GraphNode> activeNodes;
+    for (const auto &node : m_nodes) {
+        auto it = m_indexMap.find(node.id);
+        if (it == m_indexMap.end())
+            continue;
+        if (m_slots[it->second].used) {
+            activeNodes.push_back(node);
+        }
+    }
+    return activeNodes;
+}
 void PoolCluster::apply() {
     if (m_strategy) {
         std::vector<GraphEdge> edges;

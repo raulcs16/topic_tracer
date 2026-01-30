@@ -21,6 +21,10 @@ LayoutEngine::~LayoutEngine() {
 void LayoutEngine::clear() {
     m_clusterMap.clear();
     m_pool->clear();
+
+    m_clusters.clear();
+    m_clusters.insert(m_pool);
+
     notify(&ILayoutObserver::onClear);
 }
 void LayoutEngine::addNode(uint32_t id) {
@@ -40,10 +44,6 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     auto fromIt = m_clusterMap.find(from);
     auto toIt = m_clusterMap.find(to);
     if (fromIt == m_clusterMap.end() || toIt == m_clusterMap.end()) {
-        std::cout << "clusterMapNodes:\n";
-        for (const auto [node, _] : m_clusterMap) {
-            std::cout << "\t" << node << "\n";
-        }
         throw std::invalid_argument("invalid id");
     }
     std::shared_ptr<IClusterLayout> merger;
@@ -311,9 +311,11 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
     clear();
     m_batchUpdate = true;
     //create pool nodes
+    std::cout << "LE::onGraphBluePrint::start\n";
     for (auto topic : blueprint.isoTopics) {
         addNode(topic.id);
     }
+    size_t i = 1;
     for (auto cluster : blueprint.clusters) {
         auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
         m_clusters.insert(newCluster);

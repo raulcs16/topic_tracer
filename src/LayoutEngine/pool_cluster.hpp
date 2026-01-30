@@ -18,7 +18,7 @@ public:
     void apply() override;
     BoundingBox boundingBox() const override;
     void setStrategy(std::shared_ptr<LayoutStrategy> s) override;
-    std::vector<GraphNode> nodes() const override { return m_nodes; }
+    std::vector<GraphNode> nodes() const override;
     std::vector<GraphEdge> edges() const override { return m_edges; }
     Transform &transform() override { return m_transfrom; }
     const Transform &transform() const override { return m_transfrom; }
@@ -35,7 +35,7 @@ private:
 
     Transform m_transfrom;
     std::vector<GraphNode> m_nodes; // actual positioned nodes
-    std::vector<GraphEdge> m_edges; // actual positioned nodes
+    std::vector<GraphEdge> m_edges; // actual positioned edges
     BoundingBox m_bbox;
     std::vector<Slot> m_slots;                    // occupancy map
     std::unordered_map<uint32_t, int> m_indexMap; // id → slot index

@@ -290,36 +290,39 @@ GraphBlueprint TopicGraph::buildGraphBlueprint() {
         }
         //has edges aka part of a cluster
         SemanticCluster cluster;
-        std::vector<Topic> stack = {topic};
+        std::vector<uint32_t> stack = {id};
         std::unordered_set<std::string> addedEdges;
         visited.insert(id);
         //dfs
         while (!stack.empty()) {
-            Topic curr = stack.back();
+            uint32_t curr = stack.back();
             stack.pop_back();
-            cluster.topics.push_back(curr);
+            auto topic = getTopic(curr);
+            if (topic == nullptr)
+                continue;
+            cluster.topics.push_back(*topic);
 
             // Explore Outbound neighbors
-            for (const Edge *edge : getOutEdges(curr.id)) {
+            for (const Edge *edge : getOutEdges(curr)) {
                 if (!addedEdges.contains(edge->key)) {
                     cluster.edges.push_back(*edge);
                     addedEdges.insert(edge->key);
                 }
                 if (!visited.contains(edge->to)) {
                     visited.insert(edge->to);
-                    stack.push_back(*getTopic(edge->to));
+                    stack.push_back(edge->to);
                 }
             }
 
             // Explore Inbound neighbors (treating as undirected)
-            for (const Edge *edge : getInEdges(curr.id)) {
+            for (const Edge *edge : getInEdges(curr)) {
                 if (!addedEdges.contains(edge->key)) {
                     cluster.edges.push_back(*edge);
                     addedEdges.insert(edge->key);
                 }
                 if (!visited.contains(edge->from)) {
                     visited.insert(edge->from);
-                    stack.push_back(*getTopic(edge->from));
+                    stack.push_back(edge->from);
                 }
             }
         }
