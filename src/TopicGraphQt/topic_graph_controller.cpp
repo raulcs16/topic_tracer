@@ -12,7 +12,8 @@ TopicGraphController::TopicGraphController(QObject *parent)
       m_repo{new TopicGraphRepository("./data")}, m_layout{new LayoutEngine()},
       m_tgstore{new TGStore()}, m_topicList{new TopicListModel(m_tgstore, this)},
       m_nodeList{new NodeListModel(m_tgstore, this)},
-      m_edgeList(new EdgeListModel(m_tgstore, this)), m_evidenceDb{new EvidenceDB()},
+      m_edgeList(new EdgeListModel(m_tgstore, this)), m_rectList(new RectListModel(this)),
+      m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)) {
 
     if (!m_graph || !m_repo || !m_layout || !m_tgstore || !m_topicList || !m_nodeList ||
@@ -22,6 +23,7 @@ TopicGraphController::TopicGraphController(QObject *parent)
     m_graph->addObserver(m_layout);
     m_layout->addObserver(m_nodeList);
     m_layout->addObserver(m_edgeList);
+    m_layout->addObserver(m_rectList);
     //----TG Store Singals BEGIN----
     connect(m_tgstore,
             &TGStore::labelUpdated,

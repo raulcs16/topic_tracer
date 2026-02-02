@@ -32,6 +32,9 @@ qt_add_qml_module(TopicGraphQt
 
         node_list_model.hpp
         node_list_model.cpp
+         
+        rect_list_model.hpp
+        rect_list_model.cpp
         
         ui_states.hpp
         ui_states.cpp
@@ -48,6 +51,7 @@ qt_add_qml_module(TopicGraphQt
         CanvasView.qml
         EdgeSpline.qml
         NodeDelegate.qml
+        RectDelegate.qml
 
     IMPORT_PATH 
         ${QT_QML_OUTPUT_DIRECTORY}

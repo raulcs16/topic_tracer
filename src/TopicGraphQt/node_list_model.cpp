@@ -111,8 +111,7 @@ void NodeListModel::onNodeRemoved(uint32_t id) {
     }
     endRemoveRows();
 }
-void NodeListModel::onEdgeAdded(const GraphEdge &edge) {}
-void NodeListModel::onEdgeRemoved(const std::string &edge) {}
+
 void NodeListModel::onClear() {
     beginResetModel();
     m_nodes.clear();

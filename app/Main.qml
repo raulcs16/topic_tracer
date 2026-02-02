@@ -192,6 +192,7 @@ ApplicationWindow {
                     GraphView {
                         edgeModel: topic_controller.edgeListModel
                         nodeModel: topic_controller.nodeListModel
+                        rectModel: topic_controller.rectListModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null

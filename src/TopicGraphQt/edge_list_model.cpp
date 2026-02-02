@@ -69,29 +69,6 @@ size_t EdgeListModel::getIndex(const std::string &key) {
 
     return index;
 }
-// bool EdgeListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-//     if (!index.isValid())
-//         return false;
-
-//     ogdf::edge v = m_edges[index.row()];
-//     switch (role) {
-//     case SourceRole: break;
-//     case SourceXRole: break;
-//     case SourceYRole: break;
-//     case TargetRole: break;
-//     case TargetXRole: break;
-//     case TargetYRole: break;
-//     case BendsRole: break;
-//     default: return false;
-//     }
-
-//     QVector<int> roles;
-//     roles << SourceRole << SourceXRole << SourceYRole << TargetRole << TargetXRole
-//           << TargetYRole << BendsRole;
-//     emit dataChanged(index, index, roles);
-//     m_graph->layout()->invalidate();
-//     return true;
-// }
 
 
 void EdgeListModel::deleteEdge(const std::string &key) {
@@ -123,8 +100,7 @@ void EdgeListModel::addItem(EdgeItem item) {
                      {BendsRole, SourceXRole, SourceXRole, TargetXRole, TargetYRole});
 }
 
-void EdgeListModel::onNodeAdded(const GraphNode &node) {}
-void EdgeListModel::onNodeRemoved(uint32_t id) {}
+
 void EdgeListModel::onEdgeAdded(const GraphEdge &edge) {
     int index = getIndex(edge.key);
     if (index < m_edges.size())

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "layout_engine.hpp"
+#include "layout_types.hpp"
 #include "topic_graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
@@ -49,11 +49,17 @@ public:
     void deleteEdge(const std::string &key);
 
     //layout engine observer
-    void onNodeAdded(const GraphNode &node) override;
-    void onNodeRemoved(uint32_t id) override;
     void onEdgeAdded(const GraphEdge &edge) override;
     void onEdgeRemoved(const std::string &key) override;
     void onClear() override;
+
+    void onNodeAdded(const GraphNode &node) override {}
+    void onNodeRemoved(uint32_t id) override {}
+    void onClusterRectUpdated(uint32_t clusterId,
+                              float x,
+                              float y,
+                              float w,
+                              float h) override {}
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

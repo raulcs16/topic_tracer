@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "layout_engine.hpp"
+#include "layout_types.hpp"
 #include "topic_graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
@@ -44,11 +44,17 @@ public:
     void updateHeatScore(uint32_t id, int score);
 
     void onNodeAdded(const GraphNode &node) override;
-    void onNodeUpdated(const GraphNode &node) override;
     void onNodeRemoved(uint32_t id) override;
-    void onEdgeAdded(const GraphEdge &edge) override;
-    void onEdgeRemoved(const std::string &edge) override;
+    void onNodeUpdated(const GraphNode &node) override;
     void onClear() override;
+
+    void onEdgeAdded(const GraphEdge &edge) override {}
+    void onEdgeRemoved(const std::string &edge) override {}
+    void onClusterRectUpdated(uint32_t clusterId,
+                              float x,
+                              float y,
+                              float w,
+                              float h) override {}
 
 signals:
     void hoverRequested(uint32_t id, bool isHovered);

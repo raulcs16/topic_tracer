@@ -11,16 +11,6 @@
 #include <set>
 
 
-struct ILayoutObserver {
-    virtual ~ILayoutObserver() = default;
-    virtual void onNodeAdded(const GraphNode &node) {}
-    virtual void onNodeUpdated(const GraphNode &node) {}
-    virtual void onNodeRemoved(uint32_t id) {}
-    virtual void onEdgeAdded(const GraphEdge &edge) {}
-    virtual void onEdgeRemoved(const std::string &key) {}
-    virtual void onClear() {}
-};
-
 class LayoutEngine : public ITopicGraphObserver {
 
 public:
@@ -66,6 +56,7 @@ private:
     void resolveCollisions(std::shared_ptr<IClusterLayout> newCluster);
     GraphNode toScreenNode(const GraphNode &node, std::shared_ptr<IClusterLayout>);
     GraphEdge toScreenEdge(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
+    void updateGlobalBoundingBox();
 
 private:
     std::shared_ptr<LayoutStrategy> m_poolStrat;
@@ -74,6 +65,7 @@ private:
     std::shared_ptr<PoolCluster> m_pool;
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
     std::set<std::shared_ptr<IClusterLayout>> m_clusters;
+    BoundingBox m_global_bb;
 
     bool m_batchUpdate = false;
     std::vector<ILayoutObserver *> m_observers;

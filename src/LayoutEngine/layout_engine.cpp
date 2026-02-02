@@ -24,7 +24,7 @@ void LayoutEngine::clear() {
 
     m_clusters.clear();
     m_clusters.insert(m_pool);
-
+    updateGlobalBoundingBox();
     notify(&ILayoutObserver::onClear);
 }
 void LayoutEngine::addNode(uint32_t id) {
@@ -271,15 +271,13 @@ void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster)
     bool collisionFound = true;
 
     // We keep looping until we complete a full pass without hitting anything
+    std::set<std::shared_ptr<IClusterLayout>> uniqueClusters;
+    for (auto const &[id, cluster] : m_clusterMap) {
+        if (cluster != m_pool)
+            uniqueClusters.insert(cluster);
+    }
     while (collisionFound) {
         collisionFound = false;
-
-        // Collect unique clusters (since m_clusterMap has many nodes pointing to same cluster)
-        std::set<std::shared_ptr<IClusterLayout>> uniqueClusters;
-        for (auto const &[id, cluster] : m_clusterMap) {
-            if (cluster != m_pool)
-                uniqueClusters.insert(cluster);
-        }
 
         for (auto const &existingCluster : uniqueClusters) {
             if (newCluster == existingCluster)
@@ -306,6 +304,19 @@ void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster)
             }
         }
     }
+    updateGlobalBoundingBox();
+    size_t id = 1;
+    for (auto const &cluster : uniqueClusters) {
+        auto bb = cluster->boundingBox();
+        auto trans = cluster->transform();
+
+        float wx{}, wy{};
+        m_camera.project(trans, bb.min_x, bb.min_y, wx, wy);
+        float ww = (bb.max_x - bb.min_x) * trans.scale;
+        float wh = (bb.max_y - bb.min_y) * trans.scale;
+
+        notify(&ILayoutObserver::onClusterRectUpdated, id++, wx, wy, ww, wh);
+    }
 }
 void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
     clear();
@@ -329,6 +340,7 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         resolveCollisions(newCluster);
     }
     m_batchUpdate = false;
+    size_t id = 1;
     for (auto cluster : m_clusters) {
         for (auto const &node : cluster->nodes()) {
             notify(&ILayoutObserver::onNodeAdded, toScreenNode(node, cluster));
@@ -336,5 +348,54 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         for (auto const &edge : cluster->edges()) {
             notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, cluster));
         }
+        auto bb = cluster->boundingBox();
+        auto trans = cluster->transform();
+        float wx{}, wy{};
+        m_camera.project(trans, bb.min_x, bb.min_y, wx, wy);
+        float ww = (bb.max_x - bb.min_x) * trans.scale;
+        float wh = (bb.max_y - bb.min_y) * trans.scale;
+        notify(&ILayoutObserver::onClusterRectUpdated, id++, wx, wy, ww, wh);
     }
+}
+void LayoutEngine::updateGlobalBoundingBox() {
+    if (m_clusters.empty()) {
+        m_global_bb = {0, 0, 0, 0};
+        return;
+    }
+    float minX = std::numeric_limits<float>::max();
+    float minY = std::numeric_limits<float>::max();
+
+    float maxX = std::numeric_limits<float>::lowest();
+    float maxY = std::numeric_limits<float>::lowest();
+
+    for (const auto &cluster : m_clusters) {
+        auto bb = cluster->boundingBox();
+        auto trans = cluster->transform();
+
+        // Convert local cluster BB to World Space
+        float cMinX = bb.min_x * trans.scale + trans.x;
+        float cMaxX = bb.max_x * trans.scale + trans.x;
+        float cMinY = bb.min_y * trans.scale + trans.y;
+        float cMaxY = bb.max_y * trans.scale + trans.y;
+
+        if (cMinX < minX)
+            minX = cMinX;
+        if (cMaxX > maxX)
+            maxX = cMaxX;
+        if (cMinY < minY)
+            minY = cMinY;
+        if (cMaxY > maxY)
+            maxY = cMaxY;
+    }
+
+    m_global_bb.min_x = minX;
+    m_global_bb.min_y = minY;
+    m_global_bb.max_x = maxX;
+    m_global_bb.max_y = maxY;
+    float wx{}, wy{};
+    Transform trans;
+    m_camera.project(trans, m_global_bb.min_x, m_global_bb.min_y, wx, wy);
+    float ww = (m_global_bb.max_x - m_global_bb.min_x) * trans.scale;
+    float wh = (m_global_bb.max_y - m_global_bb.min_y) * trans.scale;
+    notify(&ILayoutObserver::onClusterRectUpdated, 0, wx, wy, ww, wh);
 }

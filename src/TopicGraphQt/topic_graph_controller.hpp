@@ -5,6 +5,7 @@
 #include "heat_score.hpp"
 #include "layout_engine.hpp"
 #include "node_list_model.hpp"
+#include "rect_list_model.hpp"
 #include "topic_graph.hpp"
 #include "topic_graph_repo.hpp"
 #include "topic_list_model.hpp"
@@ -19,7 +20,7 @@ class TopicGraphController : public QObject {
     Q_PROPERTY(TopicListModel *topicListModel READ topicListModel CONSTANT)
     Q_PROPERTY(EdgeListModel *edgeListModel READ edgeListModel CONSTANT)
     Q_PROPERTY(NodeListModel *nodeListModel READ nodeListModel CONSTANT)
-
+    Q_PROPERTY(RectListModel *rectListModel READ rectListModel CONSTANT)
 
 public:
     explicit TopicGraphController(QObject *parent = nullptr);
@@ -27,6 +28,7 @@ public:
     TopicListModel *topicListModel() const { return m_topicList; }
     NodeListModel *nodeListModel() const { return m_nodeList; }
     EdgeListModel *edgeListModel() const { return m_edgeList; }
+    RectListModel *rectListModel() const { return m_rectList; }
 
     void calculateHeatScores();
     //QML API
@@ -75,6 +77,7 @@ private:
     TopicListModel *m_topicList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;
+    RectListModel *m_rectList;
 
 
     EvidenceDB *m_evidenceDb;

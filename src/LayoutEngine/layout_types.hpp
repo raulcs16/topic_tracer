@@ -74,3 +74,18 @@ struct Camera {
         sY = (ndcY + 1.0f) * (screenH / 2.0f);
     }
 };
+struct ILayoutObserver {
+    virtual ~ILayoutObserver() = default;
+    virtual void onNodeAdded(const GraphNode &node) {}
+    virtual void onNodeUpdated(const GraphNode &node) {}
+    virtual void onNodeRemoved(uint32_t id) {}
+    virtual void onEdgeAdded(const GraphEdge &edge) {}
+    virtual void onEdgeRemoved(const std::string &key) {}
+
+    virtual void onClusterRectUpdated(uint32_t clusterId,
+                                      float x,
+                                      float y,
+                                      float w,
+                                      float h) {}
+    virtual void onClear() {}
+};
