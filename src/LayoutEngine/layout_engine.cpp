@@ -311,7 +311,6 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
     clear();
     m_batchUpdate = true;
     //create pool nodes
-    std::cout << "LE::onGraphBluePrint::start\n";
     for (auto topic : blueprint.isoTopics) {
         addNode(topic.id);
     }
