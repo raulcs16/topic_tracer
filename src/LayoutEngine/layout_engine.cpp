@@ -10,7 +10,7 @@ LayoutEngine::LayoutEngine() {
     m_ogdfStrat = std::make_shared<FMMMStrategy>();
     m_pool = std::make_shared<PoolCluster>(m_poolStrat, 20);
     m_pool->transform().scale = 50;
-    m_pool->transform().x = 1300 / 4; // screenW
+    m_pool->transform().x = -1300 / 4; // screenW
     m_clusters.insert(m_pool);
 }
 LayoutEngine::~LayoutEngine() {
