@@ -52,6 +52,7 @@ qt_add_qml_module(TopicGraphQt
         EdgeSpline.qml
         NodeDelegate.qml
         RectDelegate.qml
+        ViewPort.qml
 
     IMPORT_PATH 
         ${QT_QML_OUTPUT_DIRECTORY}

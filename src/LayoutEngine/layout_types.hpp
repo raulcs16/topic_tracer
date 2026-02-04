@@ -44,36 +44,10 @@ struct GraphData {
 struct Transform {
     float x = 0.0f, y = 0.0f;
     float scale = 1.0f;
+    float worldX(float localX) { return localX * scale + x; }
+    float worldY(float localY) { return localY * scale + y; }
 };
 
-struct Camera {
-    float screenW = 1300, screenH = 900;
-    float zoom = 1.0f;
-    float centerX = 0, centerY = 0;
-
-    void project(Transform transform,
-                 float localX,
-                 float localY,
-                 float &sX,
-                 float &sY) const {
-        float worldX = localX * transform.scale + transform.x;
-        float worldY = localY * transform.scale + transform.y;
-
-        float halfViewWidth = (screenW / 2.0f) / zoom;
-        float halfViewHeight = (screenH / 2.0f) / zoom;
-
-        float Left = centerX - halfViewWidth;
-        float Right = centerX + halfViewWidth;
-        float Bottom = centerY - halfViewHeight;
-        float Top = centerY + halfViewHeight;
-
-        float ndcX = (worldX - centerX) / halfViewWidth;
-        float ndcY = (worldY - centerY) / halfViewHeight;
-
-        sX = (ndcX + 1.0f) * (screenW / 2.0f);
-        sY = (ndcY + 1.0f) * (screenH / 2.0f);
-    }
-};
 struct ILayoutObserver {
     virtual ~ILayoutObserver() = default;
     virtual void onNodeAdded(const GraphNode &node) {}

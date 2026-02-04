@@ -6,6 +6,9 @@ Item {
     anchors.fill: parent
     clip: true
 
+    width: childrenRect.width
+    height: childrenRect.height
+
     // --- Control Interface (The Source of Truth) ---
     property real centerX: 0
     property real centerY: 0
@@ -48,6 +51,9 @@ Item {
     }
     function zoomOut() {
         zoom *= 0.9;
+    }
+    function toggleGrid() {
+        gridOn = !gridOn;
     }
 
     function fitArea(rectX, rectY, rectW, rectH) {

@@ -10,7 +10,7 @@ LayoutEngine::LayoutEngine() {
     m_ogdfStrat = std::make_shared<FMMMStrategy>();
     m_pool = std::make_shared<PoolCluster>(m_poolStrat, 20);
     m_pool->transform().scale = 50;
-    m_pool->transform().x = -m_camera.screenW / 4;
+    m_pool->transform().x = 1300 / 4; // screenW
     m_clusters.insert(m_pool);
 }
 LayoutEngine::~LayoutEngine() {
@@ -211,27 +211,26 @@ void LayoutEngine::notify(Func memberFunc, Args &&...args) {
 GraphNode LayoutEngine::toScreenNode(const GraphNode &node,
                                      std::shared_ptr<IClusterLayout> cluster) {
     auto transform = cluster.get()->transform();
-    float screenX{0.0f}, screenY{0.0f};
-    m_camera.project(transform, node.x, node.y, screenX, screenY);
 
     GraphNode screenNode = node;
     screenNode.id = node.id;
-    screenNode.x = screenX;
-    screenNode.y = screenY;
+    screenNode.x = transform.worldX(node.x);
+    screenNode.y = transform.worldY(node.y);
     return screenNode;
 }
 GraphEdge LayoutEngine::toScreenEdge(const GraphEdge &edge,
                                      std::shared_ptr<IClusterLayout> cluster) {
     auto transform = cluster.get()->transform();
-    float targetX{}, targetY{}, sourceX{}, sourceY{};
-    m_camera.project(transform, edge.target_x, edge.target_y, targetX, targetY);
-    m_camera.project(transform, edge.source_x, edge.source_y, sourceX, sourceY);
+    float targetX = transform.worldX(edge.target_x);
+    float targetY = transform.worldY(edge.target_y);
+    float sourceX = transform.worldX(edge.source_x);
+    float sourceY = transform.worldY(edge.source_y);
 
     std::vector<ogdf::DPoint> screenbends;
     screenbends.reserve(edge.bends.size());
     for (const auto &point : edge.bends) {
-        float x{}, y{};
-        m_camera.project(transform, point.m_x, point.m_y, x, y);
+        float x = transform.worldX(point.m_x);
+        float y = transform.worldY(point.m_y);
         screenbends.emplace_back(x, y);
     }
 
@@ -254,15 +253,15 @@ bool LayoutEngine::intersects(std::shared_ptr<IClusterLayout> a,
     auto transB = b->transform();
 
 
-    float aMinX = bbA.min_x * transA.scale + transA.x;
-    float aMaxX = bbA.max_x * transA.scale + transA.x;
-    float aMinY = bbA.min_y * transA.scale + transA.y;
-    float aMaxY = bbA.max_y * transA.scale + transA.y;
+    float aMinX = transA.worldX(bbA.min_x);
+    float aMaxX = transA.worldX(bbA.max_x);
+    float aMinY = transA.worldY(bbA.min_y);
+    float aMaxY = transA.worldY(bbA.max_y);
 
-    float bMaxX = bbB.max_x * transB.scale + transB.x;
-    float bMinX = bbB.min_x * transB.scale + transB.x;
-    float bMaxY = bbB.max_y * transB.scale + transB.y;
-    float bMinY = bbB.min_y * transB.scale + transB.y;
+    float bMaxX = transB.worldX(bbB.max_x);
+    float bMinX = transB.worldX(bbB.min_x);
+    float bMaxY = transB.worldY(bbB.max_y);
+    float bMinY = transB.worldY(bbB.min_y);
 
 
     return (aMinX <= bMaxX && aMaxX >= bMinX && aMinY <= bMaxY && aMaxY >= bMinY);
@@ -310,8 +309,8 @@ void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster)
         auto bb = cluster->boundingBox();
         auto trans = cluster->transform();
 
-        float wx{}, wy{};
-        m_camera.project(trans, bb.min_x, bb.min_y, wx, wy);
+        float wx = trans.worldX(bb.min_x);
+        float wy = trans.worldY(bb.min_y);
         float ww = (bb.max_x - bb.min_x) * trans.scale;
         float wh = (bb.max_y - bb.min_y) * trans.scale;
 
@@ -350,8 +349,8 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         }
         auto bb = cluster->boundingBox();
         auto trans = cluster->transform();
-        float wx{}, wy{};
-        m_camera.project(trans, bb.min_x, bb.min_y, wx, wy);
+        float wx = trans.worldX(bb.min_x);
+        float wy = trans.worldY(bb.min_y);
         float ww = (bb.max_x - bb.min_x) * trans.scale;
         float wh = (bb.max_y - bb.min_y) * trans.scale;
         notify(&ILayoutObserver::onClusterRectUpdated, id++, wx, wy, ww, wh);
@@ -373,10 +372,10 @@ void LayoutEngine::updateGlobalBoundingBox() {
         auto trans = cluster->transform();
 
         // Convert local cluster BB to World Space
-        float cMinX = bb.min_x * trans.scale + trans.x;
-        float cMaxX = bb.max_x * trans.scale + trans.x;
-        float cMinY = bb.min_y * trans.scale + trans.y;
-        float cMaxY = bb.max_y * trans.scale + trans.y;
+        float cMinX = trans.worldX(bb.min_x);
+        float cMaxX = trans.worldX(bb.max_x);
+        float cMinY = trans.worldY(bb.min_y);
+        float cMaxY = trans.worldY(bb.max_y);
 
         if (cMinX < minX)
             minX = cMinX;
@@ -392,9 +391,9 @@ void LayoutEngine::updateGlobalBoundingBox() {
     m_global_bb.min_y = minY;
     m_global_bb.max_x = maxX;
     m_global_bb.max_y = maxY;
-    float wx{}, wy{};
     Transform trans;
-    m_camera.project(trans, m_global_bb.min_x, m_global_bb.min_y, wx, wy);
+    float wx = trans.worldX(m_global_bb.min_x);
+    float wy = trans.worldX(m_global_bb.min_y);
     float ww = (m_global_bb.max_x - m_global_bb.min_x) * trans.scale;
     float wh = (m_global_bb.max_y - m_global_bb.min_y) * trans.scale;
     notify(&ILayoutObserver::onClusterRectUpdated, 0, wx, wy, ww, wh);

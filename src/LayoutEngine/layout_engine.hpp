@@ -69,5 +69,4 @@ private:
 
     bool m_batchUpdate = false;
     std::vector<ILayoutObserver *> m_observers;
-    Camera m_camera;
 };

@@ -175,7 +175,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 border.width: 2
-                border.color: app.focusItem == canvas ? Colors.accent : "transparent"
+                border.color: app.focusItem == viewport ? Colors.accent : "transparent"
 
                 Text {
                     text: `v${app.major}.${app.minor}.${app.patch}`
@@ -185,8 +185,8 @@ ApplicationWindow {
                     padding: 10
                 }
 
-                CanvasView {
-                    id: canvas
+                ViewPort {
+                    id: viewport
                     anchors.fill: parent
                     clip: true
                     GraphView {
@@ -199,14 +199,56 @@ ApplicationWindow {
                         viewWidth: main_content.width
                         viewHeight: main_content.height
                     }
-                }
-                MouseArea {
-                    enabled: app.focusItem != canvas
-                    anchors.fill: parent
-                    propagateComposedEvents: true
-                    onClicked: {
-                        app.focusItem = canvas;
-                        canvas.forceActiveFocus();
+                    Keys.onPressed: event => {
+                        if (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
+                            viewport.zoomIn();
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Minus) {
+                            viewport.zoomOut();
+                            event.accepted = true;
+                        }
+                        if (event.key === Qt.Key_K) {
+                            viewport.panUp();
+                            event.accepted = true;
+                        }
+                        if (event.key === Qt.Key_J) {
+                            viewport.panDown();
+                            event.accepted = true;
+                        }
+                        if (event.key === Qt.Key_H) {
+                            viewport.panLeft();
+                            event.accepted = true;
+                        }
+                        if (event.key === Qt.Key_L) {
+                            viewport.panRight();
+                            event.accepted = true;
+                        }
+                        if (event.key === Qt.Key_0) {
+                            viewport.resetView();
+                            event.accepted = true;
+                        }
+                        if (event.key == Qt.Key_1) {
+                            viewport.toggleGrid();
+                            event.accepted = true;
+                        }
+                        if (event.key === Qt.Key_X) {
+                            // Test: Fit to a random 400x400 area in the world
+                            let randomX = Math.random() * 1000 - 500;
+                            let randomY = Math.random() * 1000 - 500;
+                            console.log("Fitting to random area at: ", randomX, randomY);
+
+                            viewport.fitArea(randomX, randomY, 400, 400);
+                            event.accepted = true;
+                        }
+                    }
+                    MouseArea {
+                        enabled: app.focusItem != viewport
+                        anchors.fill: parent
+                        propagateComposedEvents: true
+                        onClicked: {
+                            app.focusItem = viewport;
+                            viewport.forceActiveFocus();
+                        }
                     }
                 }
             }
@@ -261,15 +303,14 @@ ApplicationWindow {
                         //     commandInput.text = suggestion;
                         // }
                         Keys.onEscapePressed: {
-                            app.focusItem = canvas;
-                            canvas.forceActiveFocus();
+                            app.focusItem = viewport;
+                            viewport.forceActiveFocus();
                             commandInput.focus = false;
                         }
                     }
                 }
             }
         }
-
         // Sidebar
         ColumnLayout {
             spacing: 0
@@ -318,6 +359,6 @@ ApplicationWindow {
         }
     }
     Component.onCompleted: {
-        app.focusItem = canvas;
+        app.focusItem = viewport;
     }
 }
