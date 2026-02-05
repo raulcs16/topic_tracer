@@ -199,7 +199,13 @@ ApplicationWindow {
                         viewWidth: main_content.width
                         viewHeight: main_content.height
                     }
-
+                    Connections {
+                        target: topic_controller.rectListModel
+                        function onSceneBoundsChanged() {
+                            let rect = topic_controller.rectListModel.sceneBounds;
+                            viewport.fitArea(rect.x, rect.y, rect.width, rect.height);
+                        }
+                    }
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
                             viewport.zoomIn();
