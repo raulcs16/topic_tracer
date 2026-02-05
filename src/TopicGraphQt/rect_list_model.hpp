@@ -5,6 +5,7 @@
 #include <QAbstractListModel>
 #include <QObject>
 #include <QPointF>
+#include <QRectF>
 #include <QtQml/qqml.h>
 #include <vector>
 
@@ -18,6 +19,7 @@ class RectListModel : public QAbstractListModel, public ILayoutObserver {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Use Graph.rects instead")
+    Q_PROPERTY(QRectF sceneBounds READ sceneBounds NOTIFY sceneBoundsChanged)
 public:
     enum RectRoles {
         RectX = Qt::UserRole + 1,
@@ -43,10 +45,14 @@ public:
                               float w,
                               float h) override;
     void onClear() override;
+    QRectF sceneBounds() const { return m_sceneBounds; }
+signals:
+    void sceneBoundsChanged();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     QVector<RectData> m_rects;
+    QRectF m_sceneBounds;
 };

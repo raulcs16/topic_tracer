@@ -199,6 +199,7 @@ ApplicationWindow {
                         viewWidth: main_content.width
                         viewHeight: main_content.height
                     }
+
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
                             viewport.zoomIn();

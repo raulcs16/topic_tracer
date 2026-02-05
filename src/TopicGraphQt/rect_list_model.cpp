@@ -55,6 +55,10 @@ void RectListModel::onClusterRectUpdated(uint32_t id,
         m_rects.push_back({id, x, y, w, h});
         endInsertRows();
     }
+    if (id == 0) {
+        m_sceneBounds = QRectF(x, y, w, h);
+        emit sceneBoundsChanged();
+    }
 }
 void RectListModel::onClear() {
     beginResetModel();

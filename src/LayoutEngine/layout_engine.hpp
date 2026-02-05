@@ -25,18 +25,19 @@ public:
     void applyBatchUpdate();
 
     size_t clusterCount() { return m_clusters.size(); }
+    void enableBatchUpdate(bool enabled = true) { m_batchUpdate = enabled; }
 
 
     void addObserver(ILayoutObserver *observer);
     void removeObserver(ILayoutObserver *observer);
 
+    //ITopicGraphObserver interface
     void onTopicAdded(const Topic &topic) override;
     void onTopicRemoved(uint32_t id) override;
     void onTopicRenamed(const Topic &topic) override;
     void onEdgeAdded(const Edge &edge) override;
     void onEdgeRemoved(const std::string &key) override;
     void onClear() override;
-    void enableBatchUpdate(bool enabled = true) { m_batchUpdate = enabled; }
     void onGraphBluePrint(GraphBlueprint blueprint) override;
 
 private:
@@ -57,6 +58,9 @@ private:
     GraphNode toScreenNode(const GraphNode &node, std::shared_ptr<IClusterLayout>);
     GraphEdge toScreenEdge(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
     void updateGlobalBoundingBox();
+
+    bool migrate(std::shared_ptr<IClusterLayout> source,
+                 std::shared_ptr<IClusterLayout> target);
 
 private:
     std::shared_ptr<LayoutStrategy> m_poolStrat;

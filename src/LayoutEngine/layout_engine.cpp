@@ -52,8 +52,12 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         if (fromIt->second == m_pool && toIt->second == m_pool) {
             merger = makeClusterFromPool(from, to);
         } else { //both not in pool but same cluster
-            fromIt->second->addEdge(from, to);
-            merger = fromIt->second;
+            merger = std::make_shared<OGDFCluster>(m_ogdfStrat);
+            bool success = migrate(fromIt->second, merger);
+            if (!success)
+                return;
+            merger->addEdge(from, to);
+            m_clusters.erase(fromIt->second);
         }
         //from or to in pool
     } else if (fromIt->second == m_pool || toIt->second == m_pool) {
@@ -61,7 +65,16 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         merger = extractFromPoolMergeNewCluster(from, to, fromInPool);
         //mergeCluster
     } else {
-        merger = mergeClusters(from, to);
+        merger = std::make_shared<OGDFCluster>(m_ogdfStrat);
+        bool success = migrate(fromIt->second, merger);
+        if (!success)
+            return;
+        success = migrate(toIt->second, merger);
+        if (!success)
+            return;
+        merger->addEdge(from, to);
+        m_clusters.erase(fromIt->second);
+        m_clusters.erase(toIt->second);
     }
     if (merger && !m_batchUpdate) {
         merger->apply();
@@ -355,6 +368,7 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         float wh = (bb.max_y - bb.min_y) * trans.scale;
         notify(&ILayoutObserver::onClusterRectUpdated, id++, wx, wy, ww, wh);
     }
+    updateGlobalBoundingBox();
 }
 void LayoutEngine::updateGlobalBoundingBox() {
     if (m_clusters.empty()) {
@@ -397,4 +411,20 @@ void LayoutEngine::updateGlobalBoundingBox() {
     float ww = (m_global_bb.max_x - m_global_bb.min_x) * trans.scale;
     float wh = (m_global_bb.max_y - m_global_bb.min_y) * trans.scale;
     notify(&ILayoutObserver::onClusterRectUpdated, 0, wx, wy, ww, wh);
+}
+
+// Logic to move everything from source to target and update the map
+bool LayoutEngine::migrate(std::shared_ptr<IClusterLayout> source,
+                           std::shared_ptr<IClusterLayout> target) {
+    if (!source || !target || source == target)
+        return false;
+
+    for (auto node : source->nodes()) {
+        target->addNode(node.id);
+        m_clusterMap[node.id] = target;
+    }
+    for (auto edge : source->edges()) {
+        target->addEdge(edge.from, edge.to);
+    }
+    return true;
 }
