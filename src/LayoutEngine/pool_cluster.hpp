@@ -7,11 +7,11 @@
 class PoolCluster : public IClusterLayout {
 
 public:
-    PoolCluster(std::shared_ptr<LayoutStrategy> strategy, size_t capacity);
-
-    GraphNode &addNode(uint32_t id) override;
-    void appendNode(uint32_t id) override;
+    PoolCluster(uint32_t id, std::shared_ptr<LayoutStrategy> strategy, size_t capacity);
+    uint32_t id() const override { return m_id; }
+    void addNode(uint32_t id) override;
     void removeNode(uint32_t id) override;
+    GraphNode *getNode(uint32_t id) const override;
     void addEdge(uint32_t from, uint32_t to) override;
     void removeEdge(uint32_t from, uint32_t to) override;
     void clear() override;
@@ -27,6 +27,7 @@ private:
     size_t getFreeSlot();
 
 private:
+    uint32_t m_id;
     //allocate size
     struct Slot {
         bool used = false;

@@ -5,10 +5,6 @@ Item {
     id: viewport
     anchors.fill: parent
     clip: true
-
-    width: childrenRect.width
-    height: childrenRect.height
-
     // --- Control Interface (The Source of Truth) ---
     property real centerX: 0
     property real centerY: 0

@@ -1,7 +1,10 @@
 #include "pool_cluster.hpp"
 
-PoolCluster::PoolCluster(std::shared_ptr<LayoutStrategy> strategy, size_t capacity)
-    : m_strategy{strategy} {
+PoolCluster::PoolCluster(uint32_t id,
+                         std::shared_ptr<LayoutStrategy> strategy,
+                         size_t capacity)
+
+    : m_id(id), m_strategy{strategy} {
     m_capacity = capacity;
     m_nodes.reserve(capacity);
     m_slots.reserve(capacity);
@@ -13,17 +16,14 @@ PoolCluster::PoolCluster(std::shared_ptr<LayoutStrategy> strategy, size_t capaci
     apply();
 }
 
-GraphNode &PoolCluster::addNode(uint32_t id) {
+void PoolCluster::addNode(uint32_t id) {
     size_t slot = getFreeSlot();
     m_slots[slot].used = true;
     m_slots[slot].id = id;
     m_indexMap[id] = slot;
-
     auto &node = m_nodes[slot];
     node.id = id;
-    return node;
 }
-void PoolCluster::appendNode(uint32_t id) { addNode(id); }
 
 
 size_t PoolCluster::getFreeSlot() {
@@ -66,6 +66,14 @@ void PoolCluster::clear() {
         slot.used = false;
         slot.id = 0;
     }
+}
+GraphNode *PoolCluster::getNode(uint32_t id) const {
+    for (size_t i = 0; i < m_nodes.size(); ++i) {
+        if (m_slots[i].used && m_nodes[i].id == id) {
+            return const_cast<GraphNode *>(&m_nodes[i]);
+        }
+    }
+    return nullptr;
 }
 std::vector<GraphNode> PoolCluster::nodes() const {
     std::vector<GraphNode> activeNodes;

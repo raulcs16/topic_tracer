@@ -8,7 +8,7 @@
 LayoutEngine::LayoutEngine() {
     m_poolStrat = std::make_shared<FermatSpiralStrategy>();
     m_ogdfStrat = std::make_shared<FMMMStrategy>();
-    m_pool = std::make_shared<PoolCluster>(m_poolStrat, 20);
+    m_pool = std::make_shared<PoolCluster>(0, m_poolStrat, 20);
     m_pool->transform().scale = 50;
     m_pool->transform().x = -1300 / 4; // screenW
     m_clusters.insert(m_pool);
@@ -28,10 +28,12 @@ void LayoutEngine::clear() {
     notify(&ILayoutObserver::onClear);
 }
 void LayoutEngine::addNode(uint32_t id) {
-    auto gNode = m_pool->addNode(id);
-    gNode.id = id;
+    m_pool->addNode(id);
+    GraphNode *gNode = m_pool->getNode(id);
+    if (gNode == nullptr)
+        return;
     m_clusterMap[id] = m_pool;
-    notify(&ILayoutObserver::onNodeAdded, toScreenNode(gNode, m_pool));
+    notify(&ILayoutObserver::onNodeAdded, toScreenNode(*gNode, m_pool));
 }
 void LayoutEngine::removeNode(uint32_t id) {
     auto it = m_clusterMap.find(id);
@@ -52,7 +54,7 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         if (fromIt->second == m_pool && toIt->second == m_pool) {
             merger = makeClusterFromPool(from, to);
         } else { //both not in pool but same cluster
-            merger = std::make_shared<OGDFCluster>(m_ogdfStrat);
+            merger = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
             bool success = migrate(fromIt->second, merger);
             if (!success)
                 return;
@@ -65,7 +67,7 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         merger = extractFromPoolMergeNewCluster(from, to, fromInPool);
         //mergeCluster
     } else {
-        merger = std::make_shared<OGDFCluster>(m_ogdfStrat);
+        merger = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
         bool success = migrate(fromIt->second, merger);
         if (!success)
             return;
@@ -119,11 +121,11 @@ void LayoutEngine::removeEdge(const std::string &k) {
 }
 std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
                                                                uint32_t to) {
-    auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
+    auto newCluster = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
     m_pool->removeNode(from);
     m_pool->removeNode(to);
-    newCluster->appendNode(from);
-    newCluster->appendNode(to);
+    newCluster->addNode(from);
+    newCluster->addNode(to);
     newCluster->addEdge(from, to);
     m_clusterMap[from] = newCluster;
     m_clusterMap[to] = newCluster;
@@ -140,7 +142,7 @@ std::shared_ptr<OGDFCluster> LayoutEngine::mergeClusters(uint32_t from, uint32_t
     if (toIt == m_clusterMap.end() || toIt->second == m_pool) {
         return nullptr;
     }
-    auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
+    auto newCluster = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
     auto fromCluster = fromIt->second;
     auto cluster = toIt->second;
     for (auto node : fromCluster->nodes()) {
@@ -181,7 +183,7 @@ std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
     }
     m_pool->removeNode(pool_id);
     auto cluster = it->second;
-    auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
+    auto newCluster = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
     for (auto node : cluster->nodes()) {
         newCluster->addNode(node.id);
         m_clusterMap[node.id] = newCluster;
@@ -317,7 +319,7 @@ void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster)
         }
     }
     updateGlobalBoundingBox();
-    size_t id = 1;
+
     for (auto const &cluster : uniqueClusters) {
         auto bb = cluster->boundingBox();
         auto trans = cluster->transform();
@@ -327,7 +329,7 @@ void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster)
         float ww = (bb.max_x - bb.min_x) * trans.scale;
         float wh = (bb.max_y - bb.min_y) * trans.scale;
 
-        notify(&ILayoutObserver::onClusterRectUpdated, id++, wx, wy, ww, wh);
+        notify(&ILayoutObserver::onClusterRectUpdated, cluster->id(), wx, wy, ww, wh);
     }
 }
 void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
@@ -339,7 +341,7 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
     }
     size_t i = 1;
     for (auto cluster : blueprint.clusters) {
-        auto newCluster = std::make_shared<OGDFCluster>(m_ogdfStrat);
+        auto newCluster = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
         m_clusters.insert(newCluster);
         for (auto topic : cluster.topics) {
             newCluster->addNode(topic.id);
@@ -352,7 +354,6 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         resolveCollisions(newCluster);
     }
     m_batchUpdate = false;
-    size_t id = 1;
     for (auto cluster : m_clusters) {
         for (auto const &node : cluster->nodes()) {
             notify(&ILayoutObserver::onNodeAdded, toScreenNode(node, cluster));
@@ -366,7 +367,7 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         float wy = trans.worldY(bb.min_y);
         float ww = (bb.max_x - bb.min_x) * trans.scale;
         float wh = (bb.max_y - bb.min_y) * trans.scale;
-        notify(&ILayoutObserver::onClusterRectUpdated, id++, wx, wy, ww, wh);
+        notify(&ILayoutObserver::onClusterRectUpdated, cluster->id(), wx, wy, ww, wh);
     }
     updateGlobalBoundingBox();
 }

@@ -1,20 +1,24 @@
 #include "graph_keys.hpp"
 #include "ogdf_cluster.hpp"
 
-OGDFCluster::OGDFCluster(std::shared_ptr<OGDFStrategy> strategy) : m_strategy{strategy} {
+OGDFCluster::OGDFCluster(uint32_t id, std::shared_ptr<OGDFStrategy> strategy)
+    : m_id(id), m_strategy{strategy} {
     m_ogdf = std::make_shared<OGDFContext>();
     m_ogdf->attributes = ogdf::GraphAttributes(m_ogdf->graph);
     m_strategy->setContext(m_ogdf);
 }
-GraphNode &OGDFCluster::addNode(uint32_t id) {
-    appendNode(id);
-    apply();
-    return m_nodes.back();
-}
-void OGDFCluster::appendNode(uint32_t id) {
+void OGDFCluster::addNode(uint32_t id) {
     auto node = m_ogdf->graph.newNode(id);
     m_ogdf->idToNode[id] = node;
     m_nodes.emplace_back(id, 0, 0);
+}
+GraphNode *OGDFCluster::getNode(uint32_t id) const {
+    for (size_t i = 0; i < m_nodes.size(); ++i) {
+        if (m_nodes[i].id == id) {
+            return const_cast<GraphNode *>(&m_nodes[i]);
+        }
+    }
+    return nullptr;
 }
 void OGDFCluster::removeNode(uint32_t id) {
     auto it = m_ogdf->idToNode.find(id);
@@ -42,7 +46,6 @@ void OGDFCluster::addEdge(uint32_t from, uint32_t to) {
     std::string k = GraphKeys::key(from, to);
     m_ogdf->keyToEdge[k] = edge;
     m_edges.push_back(GraphEdge{.key = k, .from = from, .to = to, .bends = {}});
-    apply();
 }
 void OGDFCluster::removeEdge(uint32_t from, uint32_t to) {
     auto key = GraphKeys::key(from, to);

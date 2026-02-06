@@ -45,6 +45,7 @@ private:
     void notify(Func memberFunc, Args &&...args);
 
 private:
+    uint32_t nextId() { return m_cluster_id_ref++; }
     //both in pool
     std::shared_ptr<OGDFCluster> makeClusterFromPool(uint32_t from, uint32_t to);
     //both not in pool
@@ -63,6 +64,7 @@ private:
                  std::shared_ptr<IClusterLayout> target);
 
 private:
+    uint32_t m_cluster_id_ref = 1;
     std::shared_ptr<LayoutStrategy> m_poolStrat;
     std::shared_ptr<OGDFStrategy> m_ogdfStrat;
 

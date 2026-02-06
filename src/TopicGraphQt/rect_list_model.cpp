@@ -44,20 +44,17 @@ void RectListModel::onClusterRectUpdated(uint32_t id,
     auto it = std::find_if(m_rects.begin(), m_rects.end(), [id](const RectData &r) {
         return r.id == id;
     });
-
-    if (it != m_rects.end()) {
+    if (id == 0) {
+        m_sceneBounds = QRectF(x, y, w, h);
+        emit sceneBoundsChanged();
+    } else if (it != m_rects.end()) {
         *it = {id, x, y, w, h};
         int row = std::distance(m_rects.begin(), it);
         emit dataChanged(index(row), index(row));
     } else {
         beginInsertRows(QModelIndex(), m_rects.size(), m_rects.size());
-        qDebug() << "rect inserted: " << id;
         m_rects.push_back({id, x, y, w, h});
         endInsertRows();
-    }
-    if (id == 0) {
-        m_sceneBounds = QRectF(x, y, w, h);
-        emit sceneBoundsChanged();
     }
 }
 void RectListModel::onClear() {

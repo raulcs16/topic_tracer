@@ -8,10 +8,10 @@
 
 class IClusterLayout {
 public:
-    virtual GraphNode &addNode(uint32_t id) = 0;
-    //silent add
-    virtual void appendNode(uint32_t id) = 0;
+    virtual uint32_t id() const = 0;
+    virtual void addNode(uint32_t id) = 0;
     virtual void removeNode(uint32_t id) = 0;
+    virtual GraphNode *getNode(uint32_t id) const = 0;
     virtual void addEdge(uint32_t from, uint32_t to) = 0;
     virtual void removeEdge(uint32_t from, uint32_t to) = 0;
     virtual void clear() = 0;
