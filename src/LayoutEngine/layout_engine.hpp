@@ -24,7 +24,7 @@ public:
     void clear();
     void applyBatchUpdate();
 
-    size_t clusterCount() { return m_clusters.size(); }
+    size_t clusterCount() { return m_clusterMap.size(); }
     void enableBatchUpdate(bool enabled = true) { m_batchUpdate = enabled; }
 
 
@@ -63,16 +63,23 @@ private:
     bool migrate(std::shared_ptr<IClusterLayout> source,
                  std::shared_ptr<IClusterLayout> target);
 
+    void initPool();
+
 private:
-    uint32_t m_cluster_id_ref = 1;
+    const uint32_t M_POOL_ID = 1;
+    uint32_t m_cluster_id_ref = 2;
     std::shared_ptr<LayoutStrategy> m_poolStrat;
     std::shared_ptr<OGDFStrategy> m_ogdfStrat;
 
-    std::shared_ptr<PoolCluster> m_pool;
+    //m_pool get rid of? use m_POOL_ID
+    // std::shared_ptr<PoolCluster> m_pool;
+    //map cluster Id to cluster
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
-    std::set<std::shared_ptr<IClusterLayout>> m_clusters;
+    //map nodeId to clusterId
+    std::unordered_map<uint32_t, uint32_t> m_nodeToCluster;
+    //get rid of?
+    // std::set<std::shared_ptr<IClusterLayout>> m_clusters;
     BoundingBox m_global_bb;
-
     bool m_batchUpdate = false;
     std::vector<ILayoutObserver *> m_observers;
 };
