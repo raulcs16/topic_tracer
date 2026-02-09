@@ -101,7 +101,6 @@ ApplicationWindow {
                 }
                 let topicA = args[0];
                 let topicB = args[1];
-                console.log("join " + topicA + " " + topicB);
                 topic_controller.join(topicA, topicB, type);
                 break;
             }

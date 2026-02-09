@@ -442,3 +442,17 @@ void LayoutEngine::eraseCluster(
     notify(&ILayoutObserver::onClusterRectDeleted, it->second->id());
     m_clusterMap.erase(it);
 }
+
+BoundingBox LayoutEngine::getNodeBoundingBox(uint32_t nodeId) {
+    auto clusterId = m_nodeToCluster[nodeId];
+    auto cluster = m_clusterMap[clusterId];
+    auto bb = cluster->boundingBox();
+    auto trans = cluster->transform();
+    BoundingBox screenBox;
+    screenBox.min_x = trans.worldX(bb.min_x);
+    screenBox.min_y = trans.worldY(bb.min_y);
+
+    screenBox.max_x = trans.worldX(bb.max_x);
+    screenBox.max_y = trans.worldY(bb.max_y);
+    return screenBox;
+}

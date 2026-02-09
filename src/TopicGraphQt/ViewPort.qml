@@ -10,7 +10,24 @@ Item {
     property real centerY: 0
     property real zoom: 1.0
     property real panStep: 30
-
+    Behavior on centerX {
+        NumberAnimation {
+            duration: 400
+            easing.type: Easing.OutCubic
+        }
+    }
+    Behavior on centerY {
+        NumberAnimation {
+            duration: 400
+            easing.type: Easing.OutCubic
+        }
+    }
+    Behavior on zoom {
+        NumberAnimation {
+            duration: 400
+            easing.type: Easing.OutCubic
+        }
+    }
     // --- State ---
     property bool gridOn: false
     default property alias content: contentItem.data

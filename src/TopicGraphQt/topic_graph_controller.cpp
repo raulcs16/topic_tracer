@@ -101,6 +101,12 @@ void TopicGraphController::createTopic(const QString &name) {
 void TopicGraphController::onTopicHoverRequested(uint32_t id, bool isHovered) {
     if (m_tgstore)
         m_tgstore->setTopicState(id, StateFlag::Hovered, isHovered);
+    if (m_layout) {
+        auto boundingBox = m_layout->getNodeBoundingBox(id);
+        if (m_rectList) {
+            m_rectList->setSceneBounds(boundingBox);
+        }
+    }
 }
 void TopicGraphController::clearSelection() {
     if (!m_tgstore)

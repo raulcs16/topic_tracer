@@ -30,6 +30,8 @@ public:
     void addObserver(ILayoutObserver *observer);
     void removeObserver(ILayoutObserver *observer);
 
+    BoundingBox getNodeBoundingBox(uint32_t nodeId);
+
     //ITopicGraphObserver interface
     void onTopicAdded(const Topic &topic) override;
     void onTopicRemoved(uint32_t id) override;

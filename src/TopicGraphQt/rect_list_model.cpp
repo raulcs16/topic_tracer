@@ -75,3 +75,10 @@ void RectListModel::onClusterRectDeleted(uint32_t id) {
     m_rects.erase(it);
     endRemoveRows();
 }
+
+void RectListModel::setSceneBounds(BoundingBox box) {
+    auto width = box.max_x - box.min_x;
+    auto height = box.max_y - box.min_y;
+    m_sceneBounds = QRectF(box.min_x, box.min_y, width, height);
+    emit sceneBoundsChanged();
+}

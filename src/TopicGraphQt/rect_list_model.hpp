@@ -46,6 +46,7 @@ public:
                               float h) override;
     void onClear() override;
     void onClusterRectDeleted(uint32_t) override;
+    void setSceneBounds(BoundingBox box);
     QRectF sceneBounds() const { return m_sceneBounds; }
 signals:
     void sceneBoundsChanged();
