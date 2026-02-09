@@ -62,3 +62,16 @@ void RectListModel::onClear() {
     m_rects.clear();
     endResetModel();
 }
+
+void RectListModel::onClusterRectDeleted(uint32_t id) {
+    auto it = std::find_if(m_rects.begin(), m_rects.end(), [id](const RectData &r) {
+        return r.id == id;
+    });
+    if (it == m_rects.end()) {
+        return;
+    }
+    int row = std::distance(m_rects.begin(), it);
+    beginRemoveRows(QModelIndex(), row, row);
+    m_rects.erase(it);
+    endRemoveRows();
+}

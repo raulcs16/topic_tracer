@@ -91,8 +91,10 @@ void NodeListModel::onNodeUpdated(const GraphNode &node) {
 }
 void NodeListModel::onNodeAdded(const GraphNode &node) {
     int index = getIndex(node.id);
-    if (index >= 0)
+    if (index >= 0) {
+        updatePos(index, node.x, node.y);
         return;
+    }
     index = m_nodes.size();
     beginInsertRows(QModelIndex(), index, index);
     m_nodes.push_back(NodeItem{.x = node.x, .y = node.y, .id = node.id, .heat = 0});

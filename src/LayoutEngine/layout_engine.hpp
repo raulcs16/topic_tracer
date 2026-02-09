@@ -27,7 +27,6 @@ public:
     size_t clusterCount() { return m_clusterMap.size(); }
     void enableBatchUpdate(bool enabled = true) { m_batchUpdate = enabled; }
 
-
     void addObserver(ILayoutObserver *observer);
     void removeObserver(ILayoutObserver *observer);
 
@@ -59,26 +58,24 @@ private:
     GraphNode toScreenNode(const GraphNode &node, std::shared_ptr<IClusterLayout>);
     GraphEdge toScreenEdge(const GraphEdge &edge, std::shared_ptr<IClusterLayout>);
     void updateGlobalBoundingBox();
-
     bool migrate(std::shared_ptr<IClusterLayout> source,
                  std::shared_ptr<IClusterLayout> target);
-
     void initPool();
+    void notifyClusterUpdates(std::shared_ptr<IClusterLayout> cluster);
+    void eraseCluster(
+        std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>>::iterator it);
 
 private:
+    const uint32_t M_BB_ID = 0;
     const uint32_t M_POOL_ID = 1;
     uint32_t m_cluster_id_ref = 2;
     std::shared_ptr<LayoutStrategy> m_poolStrat;
     std::shared_ptr<OGDFStrategy> m_ogdfStrat;
 
-    //m_pool get rid of? use m_POOL_ID
-    // std::shared_ptr<PoolCluster> m_pool;
     //map cluster Id to cluster
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
     //map nodeId to clusterId
     std::unordered_map<uint32_t, uint32_t> m_nodeToCluster;
-    //get rid of?
-    // std::set<std::shared_ptr<IClusterLayout>> m_clusters;
     BoundingBox m_global_bb;
     bool m_batchUpdate = false;
     std::vector<ILayoutObserver *> m_observers;

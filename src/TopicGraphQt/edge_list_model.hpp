@@ -61,6 +61,8 @@ public:
                               float w,
                               float h) override {}
 
+    void onClusterRectDeleted(uint32_t) override {}
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

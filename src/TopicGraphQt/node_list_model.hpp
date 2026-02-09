@@ -55,6 +55,8 @@ public:
                               float y,
                               float w,
                               float h) override {}
+    void onClusterRectDeleted(uint32_t) override {}
+
 
 signals:
     void hoverRequested(uint32_t id, bool isHovered);

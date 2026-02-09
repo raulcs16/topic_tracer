@@ -13,7 +13,7 @@ LayoutEngine::LayoutEngine() {
 void LayoutEngine::initPool() {
     auto pool = std::make_shared<PoolCluster>(M_POOL_ID, m_poolStrat, 20);
     pool->transform().scale = 50;
-    pool->transform().x = -1300 / 4; // screenW
+    pool->transform().x = -1300 / 4; // screenW //TODO: get rid of magic number
     m_clusterMap.emplace(M_POOL_ID, pool);
 }
 LayoutEngine::~LayoutEngine() {
@@ -50,6 +50,12 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
     auto fromIt = m_clusterMap.find(fromClusterId);
     auto toIt = m_clusterMap.find(toClusterId);
     if (fromIt == m_clusterMap.end() || toIt == m_clusterMap.end()) {
+        std::cout << "addEdge:\n";
+        std::cout << "from=" << from << "\tfromClusterId=" << fromClusterId
+                  << "\tfromIt==end?" << (fromIt == m_clusterMap.end()) << std::endl;
+        std::cout << "to=" << to << "\ttoClusterId=" << toClusterId << "\ttoIt==end?"
+                  << (toIt == m_clusterMap.end()) << std::endl;
+
         throw std::invalid_argument("invalid id");
     }
     std::shared_ptr<IClusterLayout> merger;
@@ -63,7 +69,7 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
             if (!success)
                 return;
             merger->addEdge(from, to);
-            m_clusterMap.erase(fromIt);
+            eraseCluster(fromIt);
         }
         //from or to in pool
     } else if (fromClusterId == M_POOL_ID || toClusterId == M_POOL_ID) {
@@ -79,20 +85,15 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         if (!success)
             return;
         merger->addEdge(from, to);
-        m_clusterMap.erase(fromIt);
-        m_clusterMap.erase(toIt);
+        eraseCluster(fromIt);
+        eraseCluster(toIt);
     }
     if (merger && !m_batchUpdate) {
         merger->apply();
         if (merger->id() != M_POOL_ID) {
             resolveCollisions(merger);
         }
-        for (auto const &node : merger->nodes()) {
-            notify(&ILayoutObserver::onNodeUpdated, toScreenNode(node, merger));
-        }
-        for (auto const &edge : merger->edges()) {
-            notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, merger));
-        }
+        notifyClusterUpdates(merger);
     }
 }
 void LayoutEngine::applyBatchUpdate() {
@@ -103,12 +104,7 @@ void LayoutEngine::applyBatchUpdate() {
             continue;
         cluster->apply();
         resolveCollisions(cluster);
-        for (auto const &node : cluster->nodes()) {
-            notify(&ILayoutObserver::onNodeUpdated, toScreenNode(node, cluster));
-        }
-        for (auto const &edge : cluster->edges()) {
-            notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, cluster));
-        }
+        notifyClusterUpdates(cluster);
     }
 }
 void LayoutEngine::removeEdge(const std::string &k) {
@@ -170,8 +166,8 @@ std::shared_ptr<OGDFCluster> LayoutEngine::mergeClusters(uint32_t from, uint32_t
     }
     newCluster->addEdge(from, to);
 
-    m_clusterMap.erase(fromIt);
-    m_clusterMap.erase(toIt);
+    eraseCluster(fromIt);
+    eraseCluster(toIt);
     return newCluster;
 }
 std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
@@ -206,6 +202,7 @@ std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
     newCluster->addNode(nodeIdInPool);
     m_nodeToCluster[nodeIdInPool] = newCluster->id();
     newCluster->addEdge(from, to);
+    eraseCluster(it);
     return newCluster;
 }
 
@@ -361,12 +358,7 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
     }
     m_batchUpdate = false;
     for (auto const &[_, cluster] : m_clusterMap) {
-        for (auto const &node : cluster->nodes()) {
-            notify(&ILayoutObserver::onNodeAdded, toScreenNode(node, cluster));
-        }
-        for (auto const &edge : cluster->edges()) {
-            notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, cluster));
-        }
+        notifyClusterUpdates(cluster);
         auto bb = cluster->boundingBox();
         auto trans = cluster->transform();
         float wx = trans.worldX(bb.min_x);
@@ -417,7 +409,7 @@ void LayoutEngine::updateGlobalBoundingBox() {
     float wy = trans.worldX(m_global_bb.min_y);
     float ww = (m_global_bb.max_x - m_global_bb.min_x) * trans.scale;
     float wh = (m_global_bb.max_y - m_global_bb.min_y) * trans.scale;
-    notify(&ILayoutObserver::onClusterRectUpdated, 0, wx, wy, ww, wh);
+    notify(&ILayoutObserver::onClusterRectUpdated, M_BB_ID, wx, wy, ww, wh);
 }
 
 // Logic to move everything from source to target and update the map
@@ -434,4 +426,19 @@ bool LayoutEngine::migrate(std::shared_ptr<IClusterLayout> source,
         target->addEdge(edge.from, edge.to);
     }
     return true;
+}
+void LayoutEngine::notifyClusterUpdates(std::shared_ptr<IClusterLayout> cluster) {
+    for (auto const &node : cluster->nodes()) {
+        notify(&ILayoutObserver::onNodeAdded, toScreenNode(node, cluster));
+    }
+    for (auto const &edge : cluster->edges()) {
+        notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, cluster));
+    }
+}
+void LayoutEngine::eraseCluster(
+    std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>>::iterator it) {
+    if (it == m_clusterMap.end())
+        return;
+    notify(&ILayoutObserver::onClusterRectDeleted, it->second->id());
+    m_clusterMap.erase(it);
 }

@@ -61,5 +61,6 @@ struct ILayoutObserver {
                                       float y,
                                       float w,
                                       float h) {}
+    virtual void onClusterRectDeleted(uint32_t) {}
     virtual void onClear() {}
 };
