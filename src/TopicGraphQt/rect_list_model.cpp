@@ -78,10 +78,8 @@ void RectListModel::onClusterRectDeleted(uint32_t id) {
 }
 
 void RectListModel::setSceneBounds(uint32_t id) {
-    qDebug() << "setSceneBounds::id=" << id;
     if (id == 0) {
         m_sceneBounds = m_globalBounds;
-        qDebug() << "sceneBoundsChanged()!";
         emit sceneBoundsChanged();
         return;
     }
@@ -89,13 +87,8 @@ void RectListModel::setSceneBounds(uint32_t id) {
         return r.id == id;
     });
     if (it == m_rects.end()) {
-        qDebug() << "not found!";
-        for (auto rects : m_rects) {
-            qDebug() << "\t rect.id=" << rects.id;
-        }
         return;
     }
     m_sceneBounds = QRectF(it->x, it->y, it->w, it->h);
-    qDebug() << "sceneBoundsChanged()!";
     emit sceneBoundsChanged();
 }

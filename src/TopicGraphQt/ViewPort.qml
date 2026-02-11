@@ -70,14 +70,18 @@ Item {
     }
 
     function fitArea(rectX, rectY, rectW, rectH) {
-        // 1. Center the camera on the middle of the provided bounding box
         centerX = rectX + (rectW / 2);
         centerY = rectY + (rectH / 2);
+        const minWorldWidth = 200; // The "limit" - e.g., 200 units in your world
+        const minWorldHeight = 200;
 
-        // 2. Calculate zoom to fit with 10% padding
+        // Use the larger of the requested width or the minimum allowed width
+        let effectiveW = Math.max(rectW, minWorldWidth);
+        let effectiveH = Math.max(rectH, minWorldHeight);
+
         let padding = 0.9;
-        let zoomX = (width / rectW) * padding;
-        let zoomY = (height / rectH) * padding;
+        let zoomX = (width / effectiveW) * padding;
+        let zoomY = (height / effectiveH) * padding;
 
         zoom = Math.min(zoomX, zoomY);
     }

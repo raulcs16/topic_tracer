@@ -99,11 +99,9 @@ void TopicGraphController::createTopic(const QString &name) {
     }
 }
 void TopicGraphController::onTopicHoverRequested(uint32_t id, bool isHovered) {
-    qDebug() << "onHoverRequested::begin";
-    qDebug() << "id=" << id << "isHovered=" << isHovered;
+
     m_tgstore->setTopicState(id, StateFlag::Hovered, isHovered);
 
-    qDebug() << "m_hoveredId=" << m_hoveredId;
     if (isHovered) {
         m_hoveredId = id;
     } else if (m_hoveredId == id) {
@@ -111,12 +109,9 @@ void TopicGraphController::onTopicHoverRequested(uint32_t id, bool isHovered) {
     } else {
         return;
     }
-    qDebug() << "m_hoveredId=" << m_hoveredId;
-    auto boundingBoxId = m_hoveredId >= 0 ? m_layout->getNodeBoundingBox(id)
-                                          : m_layout->getGlobalBoundingBox();
-    qDebug() << "boundingBoxId=" << boundingBoxId;
+    auto boundingBoxId = m_hoveredId == id ? m_layout->getNodeBoundingBox(id)
+                                           : m_layout->getGlobalBoundingBox();
     m_rectList->setSceneBounds(boundingBoxId);
-    qDebug() << "onHoverRequested::end";
 }
 void TopicGraphController::clearSelection() {
     if (!m_tgstore)
@@ -130,12 +125,13 @@ void TopicGraphController::clearSelection() {
 }
 //left click
 void TopicGraphController::onTopicSelectedRequested(uint32_t id) {
-    if (!m_tgstore)
-        return;
+    bool isTogglingOff = m_lastSelectedId == id;
     clearSelection();
-    m_tgstore->setTopicState(id, StateFlag::Selected, true);
-    m_selectedIds.push_back(id);
-    m_lastSelectedId = id;
+    if (!isTogglingOff) {
+        m_tgstore->setTopicState(id, StateFlag::Selected, true);
+        m_selectedIds.push_back(id);
+        m_lastSelectedId = id;
+    }
 }
 //cmd click
 void TopicGraphController::onTopicToggleSelectionRequest(uint32_t id) {
