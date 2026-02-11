@@ -46,6 +46,7 @@ void RectListModel::onClusterRectUpdated(uint32_t id,
     });
     if (id == 0) {
         m_sceneBounds = QRectF(x, y, w, h);
+        m_globalBounds = m_sceneBounds;
         emit sceneBoundsChanged();
     } else if (it != m_rects.end()) {
         *it = {id, x, y, w, h};
@@ -76,9 +77,25 @@ void RectListModel::onClusterRectDeleted(uint32_t id) {
     endRemoveRows();
 }
 
-void RectListModel::setSceneBounds(BoundingBox box) {
-    auto width = box.max_x - box.min_x;
-    auto height = box.max_y - box.min_y;
-    m_sceneBounds = QRectF(box.min_x, box.min_y, width, height);
+void RectListModel::setSceneBounds(uint32_t id) {
+    qDebug() << "setSceneBounds::id=" << id;
+    if (id == 0) {
+        m_sceneBounds = m_globalBounds;
+        qDebug() << "sceneBoundsChanged()!";
+        emit sceneBoundsChanged();
+        return;
+    }
+    auto it = std::find_if(m_rects.begin(), m_rects.end(), [id](const RectData &r) {
+        return r.id == id;
+    });
+    if (it == m_rects.end()) {
+        qDebug() << "not found!";
+        for (auto rects : m_rects) {
+            qDebug() << "\t rect.id=" << rects.id;
+        }
+        return;
+    }
+    m_sceneBounds = QRectF(it->x, it->y, it->w, it->h);
+    qDebug() << "sceneBoundsChanged()!";
     emit sceneBoundsChanged();
 }

@@ -38,8 +38,14 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        onEntered: root.model.hoverRequested(root.topicId, true)
-        onExited: root.model.hoverRequested(root.topicId, false)
+        onEntered: {
+            console.log("onEnter:", root.topicId);
+            root.model.hoverRequested(root.topicId, true);
+        }
+        onExited: {
+            console.log("onExit:", root.topicId);
+            root.model.hoverRequested(root.topicId, false);
+        }
 
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: mouse => {

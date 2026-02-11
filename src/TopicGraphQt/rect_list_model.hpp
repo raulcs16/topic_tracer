@@ -46,7 +46,7 @@ public:
                               float h) override;
     void onClear() override;
     void onClusterRectDeleted(uint32_t) override;
-    void setSceneBounds(BoundingBox box);
+    void setSceneBounds(uint32_t);
     QRectF sceneBounds() const { return m_sceneBounds; }
 signals:
     void sceneBoundsChanged();
@@ -57,4 +57,5 @@ protected:
 private:
     QVector<RectData> m_rects;
     QRectF m_sceneBounds;
+    QRectF m_globalBounds;
 };

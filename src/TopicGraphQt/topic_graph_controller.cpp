@@ -99,14 +99,24 @@ void TopicGraphController::createTopic(const QString &name) {
     }
 }
 void TopicGraphController::onTopicHoverRequested(uint32_t id, bool isHovered) {
-    if (m_tgstore)
-        m_tgstore->setTopicState(id, StateFlag::Hovered, isHovered);
-    if (m_layout) {
-        auto boundingBox = m_layout->getNodeBoundingBox(id);
-        if (m_rectList) {
-            m_rectList->setSceneBounds(boundingBox);
-        }
+    qDebug() << "onHoverRequested::begin";
+    qDebug() << "id=" << id << "isHovered=" << isHovered;
+    m_tgstore->setTopicState(id, StateFlag::Hovered, isHovered);
+
+    qDebug() << "m_hoveredId=" << m_hoveredId;
+    if (isHovered) {
+        m_hoveredId = id;
+    } else if (m_hoveredId == id) {
+        m_hoveredId = -1;
+    } else {
+        return;
     }
+    qDebug() << "m_hoveredId=" << m_hoveredId;
+    auto boundingBoxId = m_hoveredId >= 0 ? m_layout->getNodeBoundingBox(id)
+                                          : m_layout->getGlobalBoundingBox();
+    qDebug() << "boundingBoxId=" << boundingBoxId;
+    m_rectList->setSceneBounds(boundingBoxId);
+    qDebug() << "onHoverRequested::end";
 }
 void TopicGraphController::clearSelection() {
     if (!m_tgstore)

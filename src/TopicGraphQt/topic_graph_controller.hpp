@@ -89,4 +89,5 @@ private:
     std::vector<uint32_t> m_selectedIds;
     int m_lastSelectedId = -1;
     int m_rangeSelectedId = -1;
+    int m_hoveredId = -1;
 };
