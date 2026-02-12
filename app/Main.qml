@@ -20,140 +20,7 @@ ApplicationWindow {
     TopicGraphController {
         id: topic_controller
     }
-    function parseCommand(cmd) {
-        if (cmd.length == 0)
-            return;
-        const parts = cmd.split(" ");
-        const command = parts[0];
-        const args = parts.slice(1);
 
-        switch (command) {
-        case "clear":
-            topic_controller.clearAll();
-            break;
-        case "save":
-            {
-                if (args.length < 1) {
-                    console.warn("Usage: save <file>");
-                    return;
-                }
-                if (args[0].length == 0) {
-                    break;
-                }
-                topic_controller.save(args[0]);
-                break;
-            }
-        case "load":
-            if (args.length < 1) {
-                console.warn("Usage: load <file>");
-                return;
-            }
-            if (args[0].length == 0)
-                break;
-            topic_controller.load(args[0]);
-            break;
-        case "touch":
-            {
-                if (args.length < 1) {
-                    console.warn("Usage: touch <name>");
-                    return;
-                }
-                // let joinConcept = null;
-                // if (args[args.length - 1][0] == ">") {
-                //     joinConcept = args[args.length - 1].substring(1); // remove the ">" prefix
-                //     args.pop();
-                // }
-
-                for (let i = 0; i < args.length; i++) {
-                    const topicName = args[i];
-                    if (topicName.length == 0)
-                        continue;
-                    topic_controller.createTopic(topicName);
-                    // if (joinConcept) {
-                    //     topic_controller.join(topicName, joinConcept, ENUMS.EdgeType.Example);
-                    // }
-                }
-
-                break;
-            }
-        case "join":
-            {
-                if (args.length < 2 || args.length > 3) {
-                    console.warn("Usage: join <topicA> <topicB>");
-                    return;
-                }
-                let type = ENUMS.EdgeType.ComposedOf;
-                if (args[0] === "-ComposedOf") {
-                    type = ENUMS.EdgeType.ComposedOf;
-                    args.shift(); // Remove the flag from args
-                }
-                if (args[0] === "-DependsOn") {
-                    type = ENUMS.EdgeType.DependsOn;
-                    args.shift(); // Remove the flag from args
-                }
-                if (args[0] === "-AlternativeTo") {
-                    type = ENUMS.EdgeType.AlternativeTo;
-                    args.shift(); // Remove the flag from args
-                }
-                if (args[0] === "-RelatedTo") {
-                    type = ENUMS.EdgeType.RelatedTo;
-                    args.shift(); // Remove the flag from args
-                }
-                let topicA = args[0];
-                let topicB = args[1];
-                topic_controller.join(topicA, topicB, type);
-                break;
-            }
-        case "remove":
-            {
-                if (args.length < 1) {
-                    console.warn("Usage: remove <name>");
-                    return;
-                }
-                const topic = args[0];
-                topic_controller.deleteTopic(topic);
-                break;
-            }
-        case "no":
-            {
-                if (args.length < 1) {
-                    return;
-                }
-                if (args[0] == "join") {
-                    if (args.length < 3)
-                        return;
-                    let topicA = args[1];
-                    let topicB = args[2];
-                    topic_controller.noJoin(topicA, topicB);
-                } else if (args[0] == "path") {
-                    topic_controller.noPath();
-                }
-                break;
-            }
-        case "path":
-            {
-                if (args.length < 2) {
-                    return;
-                }
-                let topicA = args[0];
-                let topicB = args[1];
-                topic_controller.path(topicA, topicB);
-                break;
-            }
-        case "mv":
-            {
-                if (args.length < 2) {
-                    return;
-                }
-                let topic = args[0];
-                let newName = args[1];
-                topic_controller.rename(topic, newName);
-                break;
-            }
-        default:
-            console.warn("Unknown command:", command);
-        }
-    }
     Shortcut {
         sequence: [":"]
         onActivated: commandInput.focus = true
@@ -297,18 +164,12 @@ ApplicationWindow {
                             }
                         }
                         Keys.onReturnPressed: {
-                            const cmd = commandInput.text.trim();
-                            if (cmd.length === 0)
-                                return;
-                            app.parseCommand(cmd);
+                            topic_controller.executeCommand(commandInput.text.trim());
                             commandInput.text = "";
                         }
-                        // Keys.onTabPressed: {
-                        //     if (commandInput.text.length == 0)
-                        //         return;
-                        //     let suggestion = topic_controller.handleAutoComplete();
-                        //     commandInput.text = suggestion;
-                        // }
+                        Keys.onTabPressed: {
+                            commandInput.text = topic_controller.getAutoComplete(commandInput.text.trim());
+                        }
                         Keys.onEscapePressed: {
                             app.focusItem = viewport;
                             viewport.forceActiveFocus();

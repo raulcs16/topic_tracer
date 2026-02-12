@@ -49,6 +49,8 @@ public:
     Q_INVOKABLE void clearAll();
 
     Q_INVOKABLE void updateBuffer(const QString &buffer);
+    Q_INVOKABLE void executeCommand(QString raw_cmd);
+    Q_INVOKABLE QString getAutoComplete(QString raw_cmd);
     Q_INVOKABLE void executeCurrentCommand();
     Q_INVOKABLE QString handleAutoComplete();
 

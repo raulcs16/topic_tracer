@@ -355,3 +355,73 @@ QString TopicGraphController::buildNewBuffer(const QString &replacement,
     m_currentBuffer = newBuffer;
     return newBuffer;
 }
+void TopicGraphController::executeCommand(QString raw_cmd) {
+    raw_cmd = raw_cmd.trimmed();
+    QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
+    if (parts.empty())
+        return;
+    QString cmd = parts.takeFirst().toLower();
+    if (cmd == "clear") {
+        clearAll();
+    }
+    //if remaining parts
+    if (parts.length() == 1) {
+        QString arg = parts.takeFirst();
+        if (cmd == "save") {
+            save(arg);
+        } else if (cmd == "load") {
+            load(arg);
+        } else if (cmd == "rm") {
+            deleteTopic(arg);
+        } else if (cmd == "touch") {
+            createTopic(arg);
+        }
+    } else if (parts.length() == 2) {
+        QString arg1 = parts.takeFirst();
+        QString arg2 = parts.takeFirst();
+        if (cmd == "path") {
+            path(arg1, arg2);
+        } else if (cmd == "mv") {
+            rename(arg1, arg2);
+        } else if (cmd == "join") {
+            join(arg1, arg2);
+        } else if (cmd == "touch") {
+            createTopic(arg1);
+            createTopic(arg2);
+        }
+    } else if (parts.length() > 2) {
+        if (cmd == "touch") {
+            while (parts.length()) {
+                createTopic(parts.takeFirst());
+            }
+        } else if (cmd == "no") {
+            QString nextCmd = parts.takeFirst();
+            if (nextCmd == "path") {
+                noPath();
+            } else if (nextCmd == "join") {
+                if (parts.length() != 2)
+                    return;
+                QString arg1 = parts.takeFirst();
+                QString arg2 = parts.takeFirst();
+                noJoin(arg1, arg2);
+            }
+        }
+    }
+}
+
+QString TopicGraphController::getAutoComplete(QString raw_cmd) {
+    raw_cmd = raw_cmd.trimmed();
+    QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
+    if (parts.empty())
+        return raw_cmd;
+    //autocomplete suggests a cmd
+    if (parts.size() == 1) {
+        QString partial = parts.takeFirst();
+        static QStringList commands =
+            {"clear", "save", "load", "touch", "join", "rm", "path"};
+        for (auto &cmd : commands)
+            if (cmd.startsWith(partial))
+                return cmd; //TODO: return all matches
+    }
+    return raw_cmd;
+}
