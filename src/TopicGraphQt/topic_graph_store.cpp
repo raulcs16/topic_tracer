@@ -96,3 +96,15 @@ void TGStore::onGraphBluePrint(GraphBlueprint blueprint) {
         }
     }
 }
+QString TGStore::findMatch(QString pattern) {
+    QString match{};
+
+    for (const auto &[_, label] : m_labels) {
+        if (label.startsWith(pattern)) {
+            match = label;
+            break;
+        }
+    }
+
+    return match;
+}

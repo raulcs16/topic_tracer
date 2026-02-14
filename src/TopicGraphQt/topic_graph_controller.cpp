@@ -422,6 +422,17 @@ QString TopicGraphController::getAutoComplete(QString raw_cmd) {
         for (auto &cmd : commands)
             if (cmd.startsWith(partial))
                 return cmd; //TODO: return all matches
+        return raw_cmd;
+    }
+    //else
+    QString cmd = parts.takeFirst().toLower();
+    if (cmd == "join") {
+        QString partial = parts.takeLast();
+        QString match = m_tgstore->findMatch(partial);
+        if (!match.isEmpty()) {
+            parts.append(match);
+            return cmd + " " + parts.join(" ");
+        }
     }
     return raw_cmd;
 }

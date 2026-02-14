@@ -25,6 +25,7 @@ public:
 
     void setTopicState(uint32_t id, StateFlag flag, bool state);
     void setEdgeState(const std::string &key, StateFlag flag, bool state);
+    QString findMatch(QString pattern);
 
 
 signals:

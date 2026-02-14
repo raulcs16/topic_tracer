@@ -157,7 +157,6 @@ ApplicationWindow {
                         background: Rectangle {
                             color: "transparent"
                         }
-                        // onTextChanged: topic_controller.updateBuffer(commandInput.text)
                         onFocusChanged: {
                             if (focus) {
                                 app.focusItem = commandInput;
