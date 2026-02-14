@@ -48,11 +48,9 @@ public:
     Q_INVOKABLE void load(QString fileName);
     Q_INVOKABLE void clearAll();
 
-    Q_INVOKABLE void updateBuffer(const QString &buffer);
     Q_INVOKABLE void executeCommand(QString raw_cmd);
     Q_INVOKABLE QString getAutoComplete(QString raw_cmd);
-    Q_INVOKABLE void executeCurrentCommand();
-    Q_INVOKABLE QString handleAutoComplete();
+
 
 public slots:
     void onTopicRequested(const QString &topic);
@@ -62,12 +60,6 @@ public slots:
     void onTopicRangeSelectionRequest(uint32_t id);
 
 private:
-    QString autoCompleteCommand(const QString &buffer, const QStringList &parts);
-    QString autoCompleteTopics(const QStringList &parts, const QString &prefix);
-    QString processAutocomplete(const QString &prefix,
-                                const QStringList &matches,
-                                const QStringList &parts);
-    QString buildNewBuffer(const QString &replacement, const QStringList &parts);
     void clearSelection();
 
 
@@ -84,9 +76,7 @@ private:
 
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;
-    QString m_currentBuffer;
-    QString m_lastPrefix;
-    QStringList m_lastMatches;
+
     int m_cycleIndex = -1;
     std::vector<uint32_t> m_selectedIds;
     int m_lastSelectedId = -1;
