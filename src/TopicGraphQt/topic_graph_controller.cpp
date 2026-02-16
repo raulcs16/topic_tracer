@@ -250,12 +250,7 @@ void TopicGraphController::load(QString fileName) {
     m_graph->beginBatchLoad();
     bool load = m_repo->load(*m_graph, fileName);
     m_graph->endBatchLoad();
-    // calculateHeatScores();
-    // qDebug() << "TGC::load::";
-    // for (const auto &topic : m_graph->topics()) {
-    //     auto edges = m_graph->getOutEdges(topic->id);
-    //     qDebug() << "Topic" << topic->id << "has" << edges.size() << "out-edges";
-    // }
+    calculateHeatScores();
 }
 void TopicGraphController::clearAll() { m_graph->clear(); }
 
