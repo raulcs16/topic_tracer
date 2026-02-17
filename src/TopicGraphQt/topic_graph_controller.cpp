@@ -305,8 +305,19 @@ void TopicGraphController::executeCommand(QString raw_cmd) {
         }
     } else if (parts.length() > 2) {
         if (cmd == "touch") {
+            QString last = parts.takeLast();
+            QString preLast = parts.takeLast();
+            bool joinLast = preLast == ">";
+            if (!joinLast) {
+                parts.append(preLast);
+                parts.append(last);
+            }
             while (parts.length()) {
-                createTopic(parts.takeFirst());
+                auto arg = parts.takeFirst();
+                createTopic(arg);
+                if (joinLast) {
+                    join(last, arg);
+                }
             }
         } else if (cmd == "no") {
             QString nextCmd = parts.takeFirst();
@@ -342,32 +353,7 @@ QString TopicGraphController::getAutoComplete(QString raw_cmd) {
         parts.append(match);
         return parts.join(" ");
     }
-    //else
-    // QString cmd = parts.takeFirst().toLower();
-    // if (cmd == "join") {
-    //     QString partial = parts.takeLast();
-    //     QString match = m_tgstore->findMatch(partial);
-    //     if (!match.isEmpty()) {
-    //         parts.append(match);
-    //         return cmd + " " + parts.join(" ");
-    //     }
-    // } else if (cmd == "no") {
-    //     if (parts.length() == 1) {
-    //         QString partial = parts.takeFirst();
-    //         for (auto &c : commands)
-    //             if (c.startsWith(partial))
-    //                 return cmd + " " + c;
-    //     }
-    //     QString cmd2 = parts.takeFirst().toLower();
-    //     if (cmd2 == "join") {
-    //         QString partial = parts.takeLast();
-    //         QString match = m_tgstore->findMatch(partial);
-    //         if (!match.isEmpty()) {
-    //             parts.append(match);
-    //             return cmd + " " + cmd2 + " " + parts.join(" ");
-    //         }
-    //     }
-    // }
+
     return raw_cmd;
 }
 
