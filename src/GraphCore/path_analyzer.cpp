@@ -1,7 +1,6 @@
 #include "edge_semantic.hpp"
 #include "graph_keys.hpp"
 #include "path_analyzer.hpp"
-#include "topic_graph.hpp"
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -11,7 +10,7 @@ using nodeDist = std::pair<uint32_t, double>;
 
 
 namespace TG::PathAnalyzer {
-BFSResult bfs(const TopicGraph &g, uint32_t start) {
+BFSResult bfs(const Graph &g, uint32_t start) {
     BFSResult result;
     std::queue<uint32_t> q;
     std::unordered_set<uint32_t> visited;
@@ -27,8 +26,7 @@ BFSResult bfs(const TopicGraph &g, uint32_t start) {
         result.order.push_back(u);
         //traverse hirarichal edges
         for (auto &edge : g.getOutEdges(u)) {
-            if (TG::Semantic::of(edge->type) !=
-                TG::Semantic::EdgeSemantic::Hierarchical) {
+            if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
                 continue;
             }
             uint32_t v = edge->to;
@@ -42,7 +40,7 @@ BFSResult bfs(const TopicGraph &g, uint32_t start) {
     }
     return result;
 }
-void dfsVist(const TopicGraph &g,
+void dfsVist(const Graph &g,
              uint32_t u,
              std::unordered_set<uint32_t> &visited,
              std::unordered_map<uint32_t, uint32_t> &parent,
@@ -54,7 +52,7 @@ void dfsVist(const TopicGraph &g,
     entry[u] = time++;
     order.push_back(u);
     for (auto &edge : g.getOutEdges(u)) {
-        if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::Hierarchical) {
+        if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
             continue;
         }
         uint32_t v = edge->to;
@@ -66,7 +64,7 @@ void dfsVist(const TopicGraph &g,
     exit[u] = time++;
 }
 
-DFSResult dfs(const TopicGraph &g, uint32_t start) {
+DFSResult dfs(const Graph &g, uint32_t start) {
     DFSResult result;
     std::unordered_set<uint32_t> visited;
     int time = 0;
@@ -85,21 +83,20 @@ DFSResult dfs(const TopicGraph &g, uint32_t start) {
 
     return result;
 }
-std::vector<uint32_t> topologicalSort(const TopicGraph &g) {
+std::vector<uint32_t> topologicalSort(const Graph &g) {
     std::unordered_map<uint32_t, int> inDegree;
     std::queue<uint32_t> q;
     std::vector<uint32_t> sorted;
 
     // Initialize in-degree counts for hierarchical edges
-    for (auto &topic : g.topics()) {
-        uint32_t id = topic->id;
+    for (auto &node : g.nodes()) {
+        uint32_t id = node->id;
         inDegree[id] = 0;
     }
-    for (auto &topic : g.topics()) {
-        uint32_t u = topic->id;
+    for (auto &node : g.nodes()) {
+        uint32_t u = node->id;
         for (auto &edge : g.getOutEdges(u)) {
-            if (TG::Semantic::of(edge->type) !=
-                TG::Semantic::EdgeSemantic::Hierarchical) {
+            if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
                 continue;
             }
             inDegree[edge->to]++;
@@ -118,8 +115,7 @@ std::vector<uint32_t> topologicalSort(const TopicGraph &g) {
         sorted.push_back(u);
 
         for (auto &edge : g.getOutEdges(u)) {
-            if (TG::Semantic::of(edge->type) !=
-                TG::Semantic::EdgeSemantic::Hierarchical) {
+            if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
                 continue;
             }
 
@@ -130,7 +126,7 @@ std::vector<uint32_t> topologicalSort(const TopicGraph &g) {
         }
     }
     // If sorted size != total nodes, there is a cycle
-    if (sorted.size() != g.topicCount()) {
+    if (sorted.size() != g.nodeCount()) {
         throw std::runtime_error("Cycle detected in hierarchical edges");
     }
 
@@ -169,7 +165,7 @@ std::vector<std::string> edgePath(std::vector<uint32_t> topicPath) {
     return edgeKeys;
 }
 
-std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
+std::unordered_map<uint32_t, int> dijsktras(Graph &graph,
                                             uint32_t start_id,
                                             uint32_t goal_id) {
 
@@ -180,7 +176,7 @@ std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
 
     std::unordered_map<uint32_t, double> dist;
     std::unordered_map<uint32_t, int> parents;
-    for (const auto &v : graph.topics()) {
+    for (const auto &v : graph.nodes()) {
         dist[v->id] = std::numeric_limits<double>::infinity();
         parents[v->id] = -1;
     }

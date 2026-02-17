@@ -1,19 +1,19 @@
-#include "topic_graph_repo.hpp"
+#include "graph_repo.hpp"
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
 
-QJsonDocument TopicGraphSerializer::toJson(const TopicGraph &graph) {
+QJsonDocument GraphSerializer::toJson(const Graph &graph) {
 
     QJsonObject root;
     root["version"] = 1;
 
-    QJsonArray topicArray;
-    for (const auto &t : graph.topics()) {
-        topicArray.append(encodeTopic(*t));
+    QJsonArray nodeArry;
+    for (const auto &t : graph.nodes()) {
+        nodeArry.append(encodeNode(*t));
     }
-    root["topics"] = topicArray;
+    root["nodes"] = nodeArry;
     QJsonArray edgesArray;
     for (const auto &e : graph.edges()) {
         edgesArray.append(encodeEdge(*e));
@@ -22,7 +22,7 @@ QJsonDocument TopicGraphSerializer::toJson(const TopicGraph &graph) {
     return QJsonDocument(root);
 }
 
-bool TopicGraphSerializer::fromJson(const QJsonDocument &doc, TopicGraph &graph) {
+bool GraphSerializer::fromJson(const QJsonDocument &doc, Graph &graph) {
     if (!doc.isObject()) {
         qDebug() << "json root not an object";
         return false;
@@ -31,12 +31,12 @@ bool TopicGraphSerializer::fromJson(const QJsonDocument &doc, TopicGraph &graph)
     int version = root["version"].toInt(1);
     Q_UNUSED(version);
 
-    QHash<int, const Topic *> idMap;
+    QHash<int, const Node *> idMap;
     bool succes = true;
-    QJsonArray topics = root["topics"].toArray();
+    QJsonArray topics = root["nodes"].toArray();
     for (auto it : topics) {
         QJsonObject obj = it.toObject();
-        if (!decodeTopic(obj, graph, idMap))
+        if (!decodeNode(obj, graph, idMap))
             succes = false;
     }
     QJsonArray edges = root["edges"].toArray();
@@ -50,15 +50,15 @@ bool TopicGraphSerializer::fromJson(const QJsonDocument &doc, TopicGraph &graph)
     return succes;
 }
 
-QJsonObject TopicGraphSerializer::encodeTopic(const Topic &t) {
-    QJsonObject topic;
-    topic["id"] = static_cast<int>(t.id);
-    topic["name"] = QString::fromStdString(t.name);
-    return topic;
+QJsonObject GraphSerializer::encodeNode(const Node &t) {
+    QJsonObject node;
+    node["id"] = static_cast<int>(t.id);
+    node["label"] = QString::fromStdString(t.label);
+    return node;
 }
 
 
-QJsonObject TopicGraphSerializer::encodeEdge(const Edge &e) {
+QJsonObject GraphSerializer::encodeEdge(const Edge &e) {
     QJsonObject edge;
     edge["key"] = QString::fromStdString(e.key);
     edge["from"] = static_cast<int>(e.from);
@@ -67,31 +67,31 @@ QJsonObject TopicGraphSerializer::encodeEdge(const Edge &e) {
     return edge;
 }
 
-bool TopicGraphSerializer::decodeTopic(const QJsonObject &obj,
-                                       TopicGraph &graph,
-                                       QHash<int, const Topic *> &idMap) {
-    if (!obj.contains("id") || !obj.contains("name")) {
-        qDebug() << "topic missing required fields";
+bool GraphSerializer::decodeNode(const QJsonObject &obj,
+                                 Graph &graph,
+                                 QHash<int, const Node *> &idMap) {
+    if (!obj.contains("id") || !obj.contains("label")) {
+        qDebug() << "node missing required fields";
         return false;
     }
 
     uint32_t id = static_cast<uint32_t>(obj["id"].toInt());
-    std::string name = obj["name"].toString().toStdString();
-    bool success = graph.addTopic(id, name);
+    std::string name = obj["label"].toString().toStdString();
+    bool success = graph.addNode(id, name);
     if (!success) {
-        qDebug() << "failed to add topic";
+        qDebug() << "failed to add node";
     }
-    auto topic = graph.getTopic(id);
-    if (!topic) {
-        qDebug() << "failed to fetch topic";
+    auto node = graph.getNode(id);
+    if (!node) {
+        qDebug() << "failed to fetch node";
     }
-    idMap[id] = topic;
+    idMap[id] = node;
 
     return true;
 }
-bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
-                                      TopicGraph &graph,
-                                      const QHash<int, const Topic *> &idMap) {
+bool GraphSerializer::decodeEdge(const QJsonObject &obj,
+                                 Graph &graph,
+                                 const QHash<int, const Node *> &idMap) {
     if (!obj.contains("key") || !obj.contains("from") || !obj.contains("to") ||
         !obj.contains("type")) {
         // qDebug() << "TGS::decodeEdge::Edge missing required fields";
@@ -107,7 +107,7 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
     // qDebug() << "TGR::decodeEdge::edge=" << key << "type=" << static_cast<int>(type);
 
     if (!idMap.contains(fromId) || !idMap.contains(toId)) {
-        // qDebug() << "TGR::decodeEdge::Edge references invalid topic ID"
+        // qDebug() << "TGR::decodeEdge::Edge references invalid node ID"
         // << "from=" << fromId << "," << "to=" << toId;
         return false;
     }
@@ -120,13 +120,13 @@ bool TopicGraphSerializer::decodeEdge(const QJsonObject &obj,
 
     return true;
 }
-TopicGraphRepository::TopicGraphRepository(QString basePath) : m_basePath(basePath) {
+GraphRepository::GraphRepository(QString basePath) : m_basePath(basePath) {
     QDir dir(m_basePath);
     if (!dir.exists()) {
         dir.mkpath(".");
     }
 }
-bool TopicGraphRepository::save(const TopicGraph &graph, QString fileName) {
+bool GraphRepository::save(const Graph &graph, QString fileName) {
 
     QFile file(m_basePath + "/" + fileName + ".json");
     if (!file.open(QIODevice::WriteOnly)) {
@@ -134,12 +134,12 @@ bool TopicGraphRepository::save(const TopicGraph &graph, QString fileName) {
         return false;
     }
 
-    QJsonDocument doc = TopicGraphSerializer::toJson(graph);
+    QJsonDocument doc = GraphSerializer::toJson(graph);
     file.write(doc.toJson(QJsonDocument::Indented));
     file.close();
     return true;
 }
-bool TopicGraphRepository::load(TopicGraph &graph, QString file_name) {
+bool GraphRepository::load(Graph &graph, QString file_name) {
 
     QFile file(m_basePath + "/" + file_name + ".json");
     if (!file.open(QIODevice::ReadOnly)) {
@@ -153,5 +153,5 @@ bool TopicGraphRepository::load(TopicGraph &graph, QString file_name) {
         return false;
     }
     file.close();
-    return TopicGraphSerializer::fromJson(doc, graph);
+    return GraphSerializer::fromJson(doc, graph);
 }

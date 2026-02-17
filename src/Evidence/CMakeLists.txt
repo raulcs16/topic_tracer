@@ -6,7 +6,7 @@ add_library(Evidence STATIC
 )
 
 target_link_libraries(Evidence 
-PUBLIC TopicGraphCore
+PUBLIC GraphCore
 PRIVATE nlohmann_json::nlohmann_json
 )
 

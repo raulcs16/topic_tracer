@@ -1,5 +1,5 @@
 #pragma once
-#include "topic_graph.hpp"
+#include "graph.hpp"
 #include <set>
 #include <unordered_map>
 
@@ -19,15 +19,15 @@ struct DFSResult {
     std::unordered_map<uint32_t, int> exit;
 };
 
-BFSResult bfs(const TopicGraph &g, uint32_t start);
+BFSResult bfs(const Graph &g, uint32_t start);
 
-DFSResult dfs(const TopicGraph &g, uint32_t start);
+DFSResult dfs(const Graph &g, uint32_t start);
 
-std::vector<uint32_t> topologicalSort(const TopicGraph &G);
+std::vector<uint32_t> topologicalSort(const Graph &G);
 double edgeWeight(EdgeType type);
 std::vector<uint32_t> topicPath(std::unordered_map<uint32_t, int> parents, uint32_t dest);
 std::vector<std::string> edgePath(std::vector<uint32_t> topicPath);
-std::unordered_map<uint32_t, int> dijsktras(TopicGraph &graph,
+std::unordered_map<uint32_t, int> dijsktras(Graph &graph,
                                             uint32_t start_id,
                                             uint32_t goal_id);
 

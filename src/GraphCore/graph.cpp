@@ -1,67 +1,67 @@
+#include "graph.hpp"
 #include "graph_keys.hpp"
-#include "topic_graph.hpp"
 #include <iostream>
 
 
-//Topic API
-TopicGraph::~TopicGraph() {
+//Node API
+Graph::~Graph() {
     clear();
     m_observers.clear();
 }
-bool TopicGraph::addTopic(const std::string &name) {
-    if (getTopic(name) != nullptr)
+bool Graph::addNode(const std::string &label) {
+    if (getNode(label) != nullptr)
         return false;
     uint32_t id = nextId();
-    // std::cout << "tg:addTopic:" << name << ",id:" << id << std::endl;
-    auto topic = Topic{.id = id, .name = name};
-    m_topics[id] = topic;
+    // std::cout << "tg:addTopic:" << label << ",id:" << id << std::endl;
+    auto node = Node{.id = id, .label = label};
+    m_nodes[id] = node;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    notify(&ITopicGraphObserver::onTopicAdded, topic);
+    notify(&IGraphObserver::onNodeAdded, node);
     return true;
 }
-bool TopicGraph::addTopic(uint32_t id, const std::string &name) {
+bool Graph::addNode(uint32_t id, const std::string &label) {
     m_id_ref = std::max(m_id_ref, id);
-    if (getTopic(name) != nullptr) {
+    if (getNode(label) != nullptr) {
         return false;
     }
-    auto topic = Topic{.id = id, .name = name};
-    m_topics[id] = topic;
+    auto node = Node{.id = id, .label = label};
+    m_nodes[id] = node;
     m_adjOutMap[id] = {};
     m_adjInMap[id] = {};
-    notify(&ITopicGraphObserver::onTopicAdded, topic);
+    notify(&IGraphObserver::onNodeAdded, node);
     return true;
 }
-bool TopicGraph::renameTopic(const std::string &name, const std::string &new_name) {
-    auto topic = getTopic(name);
-    if (topic == nullptr)
+bool Graph::renameNode(const std::string &label, const std::string &new_name) {
+    auto node = getNode(label);
+    if (node == nullptr)
         return false;
-    return renameTopic(topic->id, new_name);
+    return renameNode(node->id, new_name);
 }
-bool TopicGraph::renameTopic(uint32_t id, const std::string &new_name) {
-    auto it = m_topics.find(id);
-    if (it == m_topics.end())
+bool Graph::renameNode(uint32_t id, const std::string &new_name) {
+    auto it = m_nodes.find(id);
+    if (it == m_nodes.end())
         return false;
-    auto exist = getTopic(new_name);
+    auto exist = getNode(new_name);
     if (exist != nullptr) {
         return false;
     }
-    it->second.name = new_name;
-    notify(&ITopicGraphObserver::onTopicRenamed, (it->second));
+    it->second.label = new_name;
+    notify(&IGraphObserver::onNodeRenamed, (it->second));
     return true;
 }
 
-bool TopicGraph::deleteTopic(const std::string &name) {
-    auto topic = getTopic(name);
-    if (topic == nullptr)
+bool Graph::deleteNode(const std::string &label) {
+    auto node = getNode(label);
+    if (node == nullptr)
         return false;
-    return deleteTopic(topic->id);
+    return deleteNode(node->id);
 }
 
-bool TopicGraph::deleteTopic(uint32_t id) {
-    // Remove the topic
-    auto topic = getTopic(id);
-    if (!topic)
+bool Graph::deleteNode(uint32_t id) {
+    // Remove the node
+    auto node = getNode(id);
+    if (!node)
         return true;
     auto outEdges = getOutEdges(id);
     for (const auto edge : outEdges) {
@@ -71,31 +71,31 @@ bool TopicGraph::deleteTopic(uint32_t id) {
     for (const auto edge : outEdges) {
         removeEdge(edge->from, edge->to);
     }
-    notify(&ITopicGraphObserver::onTopicRemoved, id);
-    return m_topics.erase(id);
+    notify(&IGraphObserver::onNodeRemoved, id);
+    return m_nodes.erase(id);
 }
 
-const Topic *TopicGraph::getTopic(uint32_t id) const {
-    auto it = m_topics.find(id);
-    return it == m_topics.end() ? nullptr : &it->second;
+const Node *Graph::getNode(uint32_t id) const {
+    auto it = m_nodes.find(id);
+    return it == m_nodes.end() ? nullptr : &it->second;
 }
-const Topic *TopicGraph::getTopic(const std::string &name) const {
-    auto found = std::find_if(m_topics.begin(), m_topics.end(), [name](auto &pair) {
-        return pair.second.name == name;
+const Node *Graph::getNode(const std::string &label) const {
+    auto found = std::find_if(m_nodes.begin(), m_nodes.end(), [label](auto &pair) {
+        return pair.second.label == label;
     });
-    return found == m_topics.end() ? nullptr : &found->second;
+    return found == m_nodes.end() ? nullptr : &found->second;
 }
-std::vector<const Topic *> TopicGraph::topics() const {
-    std::vector<const Topic *> result;
-    result.reserve(m_topics.size());
+std::vector<const Node *> Graph::nodes() const {
+    std::vector<const Node *> result;
+    result.reserve(m_nodes.size());
 
-    for (const auto &[id, topic] : m_topics) {
-        result.push_back(&topic);
+    for (const auto &[id, node] : m_nodes) {
+        result.push_back(&node);
     }
     return result;
 }
 
-bool TopicGraph::addEdge(Edge edge) {
+bool Graph::addEdge(Edge edge) {
     auto [it, inserted] = m_edges.try_emplace(edge.key, std::move(edge));
     if (!inserted) {
         return false;
@@ -105,14 +105,14 @@ bool TopicGraph::addEdge(Edge edge) {
     m_adjInMap[storedEdge.to].push_back(storedEdge.from);
     m_adjOutMap[storedEdge.from].push_back(storedEdge.to);
 
-    notify(&ITopicGraphObserver::onEdgeAdded, storedEdge);
+    notify(&IGraphObserver::onEdgeAdded, storedEdge);
     return true;
 }
 
-bool TopicGraph::addEdge(const Topic *a, const Topic *b, EdgeType type) {
+bool Graph::addEdge(const Node *a, const Node *b, EdgeType type) {
     if (!a || !b)
         return false;
-    if (!m_topics.contains(a->id) || !m_topics.contains(b->id)) {
+    if (!m_nodes.contains(a->id) || !m_nodes.contains(b->id)) {
         return false;
     }
     std::string key = makeKey(a->id, b->id);
@@ -123,23 +123,21 @@ bool TopicGraph::addEdge(const Topic *a, const Topic *b, EdgeType type) {
     m_edges[key] = edge;
     m_adjOutMap[a->id].push_back(b->id);
     m_adjInMap[b->id].push_back(a->id);
-    notify(&ITopicGraphObserver::onEdgeAdded, edge);
+    notify(&IGraphObserver::onEdgeAdded, edge);
     return true;
 }
-bool TopicGraph::addEdge(uint32_t from, uint32_t to, EdgeType type) {
-    auto pFrom = getTopic(from);
-    auto pTo = getTopic(to);
+bool Graph::addEdge(uint32_t from, uint32_t to, EdgeType type) {
+    auto pFrom = getNode(from);
+    auto pTo = getNode(to);
     return addEdge(pFrom, pTo, type);
 }
-bool TopicGraph::addEdge(const std::string &topicA,
-                         const std::string &topicB,
-                         EdgeType type) {
-    auto ta = getTopic(topicA);
-    auto tb = getTopic(topicB);
+bool Graph::addEdge(const std::string &topicA, const std::string &topicB, EdgeType type) {
+    auto ta = getNode(topicA);
+    auto tb = getNode(topicB);
     return addEdge(ta, tb, type);
 }
-bool TopicGraph::hasEdge(const std::string &key) { return m_edges.contains(key); }
-bool TopicGraph::removeEdge(uint32_t from, uint32_t to) {
+bool Graph::hasEdge(const std::string &key) { return m_edges.contains(key); }
+bool Graph::removeEdge(uint32_t from, uint32_t to) {
     std::string key = makeKey(from, to);
 
     auto it = m_edges.find(key);
@@ -153,25 +151,25 @@ bool TopicGraph::removeEdge(uint32_t from, uint32_t to) {
     out.erase(std::remove(out.begin(), out.end(), to), out.end());
 
     m_edges.erase(it);
-    notify(&ITopicGraphObserver::onEdgeRemoved, key);
+    notify(&IGraphObserver::onEdgeRemoved, key);
     return true;
 }
-bool TopicGraph::removeEdge(const std::string &topicA, const std::string &topicB) {
-    auto ta = getTopic(topicA);
-    auto tb = getTopic(topicB);
+bool Graph::removeEdge(const std::string &topicA, const std::string &topicB) {
+    auto ta = getNode(topicA);
+    auto tb = getNode(topicB);
     if (ta == nullptr || tb == nullptr)
         return false;
     return removeEdge(ta->id, tb->id);
 }
-const Edge *TopicGraph::getEdge(uint32_t from, uint32_t to) const {
+const Edge *Graph::getEdge(uint32_t from, uint32_t to) const {
     auto it = m_edges.find(GraphKeys::key(from, to));
     return it == m_edges.end() ? nullptr : &it->second;
 }
-const Edge *TopicGraph::getEdge(const std::string &key) const {
+const Edge *Graph::getEdge(const std::string &key) const {
     auto it = m_edges.find(key);
     return it == m_edges.end() ? nullptr : &it->second;
 }
-std::vector<const Edge *> TopicGraph::edges() const {
+std::vector<const Edge *> Graph::edges() const {
     std::vector<const Edge *> result;
     result.reserve(m_edges.size());
 
@@ -180,7 +178,7 @@ std::vector<const Edge *> TopicGraph::edges() const {
     }
     return result;
 }
-std::vector<const Edge *> TopicGraph::getOutEdges(uint32_t from) const {
+std::vector<const Edge *> Graph::getOutEdges(uint32_t from) const {
     auto it = m_adjOutMap.find(from);
     if (it == m_adjOutMap.end())
         return {};
@@ -193,7 +191,7 @@ std::vector<const Edge *> TopicGraph::getOutEdges(uint32_t from) const {
     }
     return result;
 }
-std::vector<const Edge *> TopicGraph::getInEdges(uint32_t to) const {
+std::vector<const Edge *> Graph::getInEdges(uint32_t to) const {
     auto it = m_adjInMap.find(to);
     if (it == m_adjOutMap.end())
         return {};
@@ -206,59 +204,57 @@ std::vector<const Edge *> TopicGraph::getInEdges(uint32_t to) const {
     }
     return result;
 }
-std::vector<const Topic *> TopicGraph::parentsOf(uint32_t id) {
+std::vector<const Node *> Graph::parentsOf(uint32_t id) {
     auto it = m_adjInMap.find(id);
     if (it == m_adjInMap.end())
         return {};
 
-    std::vector<const Topic *> parents;
+    std::vector<const Node *> parents;
     for (auto i = it->second.begin(); i != it->second.end(); i++) {
-        auto t = m_topics.find((*i));
-        if (t == m_topics.end())
+        auto t = m_nodes.find((*i));
+        if (t == m_nodes.end())
             continue;
         parents.push_back(&t->second);
     }
     return parents;
 }
-std::vector<const Topic *> TopicGraph::childrenOf(uint32_t id) {
+std::vector<const Node *> Graph::childrenOf(uint32_t id) {
     auto it = m_adjOutMap.find(id);
     if (it == m_adjOutMap.end())
         return {};
 
-    std::vector<const Topic *> children;
+    std::vector<const Node *> children;
     for (const auto id : it->second) {
-        auto topic = getTopic(id);
-        if (!topic)
+        auto node = getNode(id);
+        if (!node)
             continue;
-        children.push_back(topic);
+        children.push_back(node);
     }
     return children;
 }
-uint32_t TopicGraph::nextId() { return ++m_id_ref; }
-std::string TopicGraph::makeKey(uint32_t from, uint32_t to) {
+uint32_t Graph::nextId() { return ++m_id_ref; }
+std::string Graph::makeKey(uint32_t from, uint32_t to) {
     return GraphKeys::key(from, to);
 }
 
-void TopicGraph::clear() {
-    m_topics.clear();
+void Graph::clear() {
+    m_nodes.clear();
     m_edges.clear();
     m_adjInMap.clear();
     m_adjOutMap.clear();
     m_id_ref = 1;
-    notify(&ITopicGraphObserver::onClear);
+    notify(&IGraphObserver::onClear);
 }
 
-void TopicGraph::addObserver(ITopicGraphObserver *observer) {
-    m_observers.push_back(observer);
-}
-void TopicGraph::removeObserver(ITopicGraphObserver *observer) {
+void Graph::addObserver(IGraphObserver *observer) { m_observers.push_back(observer); }
+void Graph::removeObserver(IGraphObserver *observer) {
     m_observers.erase(
         std::remove_if(m_observers.begin(),
                        m_observers.end(),
-                       [observer](ITopicGraphObserver *it) { return it == observer; }));
+                       [observer](IGraphObserver *it) { return it == observer; }));
 }
 template <typename Func, typename... Args>
-void TopicGraph::notify(Func memberFunc, Args &&...args) {
+void Graph::notify(Func memberFunc, Args &&...args) {
     if (m_isLoading)
         return;
     for (auto *obs : m_observers) {
@@ -266,25 +262,25 @@ void TopicGraph::notify(Func memberFunc, Args &&...args) {
     }
 }
 
-void TopicGraph::beginBatchLoad() { m_isLoading = true; }
-void TopicGraph::endBatchLoad() {
+void Graph::beginBatchLoad() { m_isLoading = true; }
+void Graph::endBatchLoad() {
     m_isLoading = false;
     GraphBlueprint blueprint = buildGraphBlueprint();
 
-    notify(&ITopicGraphObserver::onGraphBluePrint, blueprint);
+    notify(&IGraphObserver::onGraphBluePrint, blueprint);
 }
 
-GraphBlueprint TopicGraph::buildGraphBlueprint() {
+GraphBlueprint Graph::buildGraphBlueprint() {
     //dfs
     GraphBlueprint blueprint;
     std::unordered_set<uint32_t> visited;
-    for (auto const &[id, topic] : m_topics) {
+    for (auto const &[id, node] : m_nodes) {
         //already accounted for
         if (visited.contains(id))
             continue;
         //check if has edges
         if (m_adjInMap[id].empty() && m_adjOutMap[id].empty()) {
-            blueprint.isoTopics.push_back(topic);
+            blueprint.isoNodes.push_back(node);
             visited.insert(id);
             continue;
         }
@@ -297,10 +293,10 @@ GraphBlueprint TopicGraph::buildGraphBlueprint() {
         while (!stack.empty()) {
             uint32_t curr = stack.back();
             stack.pop_back();
-            auto topic = getTopic(curr);
-            if (topic == nullptr)
+            auto node = getNode(curr);
+            if (node == nullptr)
                 continue;
-            cluster.topics.push_back(*topic);
+            cluster.nodes.push_back(*node);
 
             // Explore Outbound neighbors
             for (const Edge *edge : getOutEdges(curr)) {

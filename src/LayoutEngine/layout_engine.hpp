@@ -1,17 +1,17 @@
 #pragma once
 
 #include "disjoint_set.hpp"
+#include "graph.hpp"
 #include "icluster_layout.hpp"
 #include "layout_strategy.hpp"
 #include "layout_types.hpp"
 #include "ogdf_cluster.hpp"
 #include "ogdf_strategy.hpp"
 #include "pool_cluster.hpp"
-#include "topic_graph.hpp"
 #include <set>
 
 
-class LayoutEngine : public ITopicGraphObserver {
+class LayoutEngine : public IGraphObserver {
 
 public:
     explicit LayoutEngine();
@@ -33,10 +33,10 @@ public:
     uint32_t getNodeBoundingBox(uint32_t nodeId);
     uint32_t getGlobalBoundingBox();
 
-    //ITopicGraphObserver interface
-    void onTopicAdded(const Topic &topic) override;
-    void onTopicRemoved(uint32_t id) override;
-    void onTopicRenamed(const Topic &topic) override;
+    //IGraphObserver interface
+    void onNodeAdded(const Node &node) override;
+    void onNodeRemoved(uint32_t id) override;
+    void onNodeRenamed(const Node &node) override;
     void onEdgeAdded(const Edge &edge) override;
     void onEdgeRemoved(const std::string &key) override;
     void onClear() override;
@@ -74,7 +74,6 @@ private:
     uint32_t m_cluster_id_ref = 2;
     std::shared_ptr<LayoutStrategy> m_poolStrat;
     std::shared_ptr<OGDFStrategy> m_ogdfStrat;
-
     //map cluster Id to cluster
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
     //map nodeId to clusterId

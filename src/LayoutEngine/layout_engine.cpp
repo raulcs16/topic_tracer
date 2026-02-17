@@ -206,9 +206,9 @@ std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
     return newCluster;
 }
 
-void LayoutEngine::onTopicAdded(const Topic &topic) { this->addNode(topic.id); }
-void LayoutEngine::onTopicRemoved(uint32_t id) { this->removeNode(id); }
-void LayoutEngine::onTopicRenamed(const Topic &topic) {}
+void LayoutEngine::onNodeAdded(const Node &node) { this->addNode(node.id); }
+void LayoutEngine::onNodeRemoved(uint32_t id) { this->removeNode(id); }
+void LayoutEngine::onNodeRenamed(const Node &node) {}
 void LayoutEngine::onEdgeAdded(const Edge &edge) { this->addEdge(edge.from, edge.to); }
 void LayoutEngine::onEdgeRemoved(const std::string &key) { this->removeEdge(key); }
 void LayoutEngine::onClear() { clear(); }
@@ -339,16 +339,16 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
     clear();
     m_batchUpdate = true;
     //create pool nodes
-    for (auto topic : blueprint.isoTopics) {
-        addNode(topic.id);
+    for (auto node : blueprint.isoNodes) {
+        addNode(node.id);
     }
     size_t i = 1;
     for (auto cluster : blueprint.clusters) {
         auto newCluster = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
         m_clusterMap.emplace(newCluster->id(), newCluster);
-        for (auto topic : cluster.topics) {
-            newCluster->addNode(topic.id);
-            m_nodeToCluster[topic.id] = newCluster->id();
+        for (auto node : cluster.nodes) {
+            newCluster->addNode(node.id);
+            m_nodeToCluster[node.id] = newCluster->id();
         }
         for (auto edge : cluster.edges) {
             newCluster->addEdge(edge.from, edge.to);

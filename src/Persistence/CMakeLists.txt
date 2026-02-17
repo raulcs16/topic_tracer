@@ -1,10 +1,10 @@
 add_library(Persistence STATIC
-    topic_graph_repo.hpp
-    topic_graph_repo.cpp
+    graph_repo.hpp
+    graph_repo.cpp
 )
 target_link_libraries(Persistence
     PRIVATE Qt6::Core
-    PUBLIC TopicGraphCore
+    PUBLIC GraphCore
 )
 target_include_directories(Persistence
     PUBLIC

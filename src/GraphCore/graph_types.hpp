@@ -3,18 +3,21 @@
 #include <string>
 #include <vector>
 
-struct Topic {
-    uint32_t id;
-    std::string name;
-};
-
 enum class EdgeType {
     ComposedOf,
     DependsOn,
     AlternativeTo,
-    RelatedTo
+    RelatedTo,
+
+    Import,
+    Inject,
+    Implements,
 };
 
+struct Node {
+    uint32_t id;
+    std::string label;
+};
 struct Edge {
     std::string key;
     uint32_t from;
@@ -23,11 +26,11 @@ struct Edge {
 };
 
 struct SemanticCluster {
-    std::vector<Topic> topics;
+    std::vector<Node> nodes;
     std::vector<Edge> edges;
 };
 
 struct GraphBlueprint {
     std::vector<SemanticCluster> clusters;
-    std::vector<Topic> isoTopics;
+    std::vector<Node> isoNodes;
 };

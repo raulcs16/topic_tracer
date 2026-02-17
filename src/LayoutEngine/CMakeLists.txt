@@ -30,7 +30,7 @@ add_library(LayoutEngine STATIC
 target_link_libraries(LayoutEngine
     PUBLIC OGDF
     PUBLIC Utils
-    PUBLIC TopicGraphCore
+    PUBLIC GraphCore
 )
 target_include_directories(LayoutEngine
     PUBLIC
