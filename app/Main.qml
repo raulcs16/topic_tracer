@@ -213,6 +213,10 @@ ApplicationWindow {
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }
+                Shortcut {
+                    sequence: StandardKey.Copy
+                    onActivated: topic_controller.copySelection()
+                }
                 MouseArea {
                     enabled: app.focusItem != topicListView
                     anchors.fill: parent

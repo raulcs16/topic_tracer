@@ -47,7 +47,6 @@ void RectListModel::onClusterRectUpdated(uint32_t id,
     if (id == 0) {
         m_sceneBounds = QRectF(x, y, w, h);
         m_globalBounds = m_sceneBounds;
-        emit sceneBoundsChanged();
     } else if (it != m_rects.end()) {
         *it = {id, x, y, w, h};
         int row = std::distance(m_rects.begin(), it);

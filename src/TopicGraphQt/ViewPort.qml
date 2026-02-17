@@ -70,19 +70,28 @@ Item {
     }
 
     function fitArea(rectX, rectY, rectW, rectH) {
+        // 1. Calculate the center of the target cluster
         centerX = rectX + (rectW / 2);
         centerY = rectY + (rectH / 2);
-        const minWorldWidth = 200; // The "limit" - e.g., 200 units in your world
-        const minWorldHeight = 200;
 
-        // Use the larger of the requested width or the minimum allowed width
+        const minWorldWidth = 500;
+        const minWorldHeight = 500;
+
+        // 2. Ensure we don't zoom in too far on tiny clusters
         let effectiveW = Math.max(rectW, minWorldWidth);
         let effectiveH = Math.max(rectH, minWorldHeight);
 
-        let padding = 0.9;
-        let zoomX = (width / effectiveW) * padding;
-        let zoomY = (height / effectiveH) * padding;
+        // 3. Define explicit padding in pixels (e.g., 40px on all sides)
+        const paddingBuffer = 60;
+        const usableWidth = width - (paddingBuffer * 2);
+        const usableHeight = height - (paddingBuffer * 2);
 
+        // 4. Calculate zoom for both axes based on usable space
+        let zoomX = usableWidth / effectiveW;
+        let zoomY = usableHeight / effectiveH;
+
+        // 5. Use Math.min to ensure the "most restrictive" dimension
+        // forces the other to stay within bounds.
         zoom = Math.min(zoomX, zoomY);
     }
 

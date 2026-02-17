@@ -15,7 +15,13 @@ void TGStore::onTopicRemoved(uint32_t id) {
         return;
     m_topicFlags.erase(tt);
 }
-void TGStore::onTopicRenamed(const Topic &topic) {}
+void TGStore::onTopicRenamed(const Topic &topic) {
+    auto it = m_labels.find(topic.id);
+    if (it == m_labels.end())
+        return;
+    it->second = QString::fromStdString(topic.name);
+    emit labelUpdated(topic.id);
+}
 void TGStore::onEdgeAdded(const Edge &edge) {
     m_edgeFlags.emplace(edge.key, StateFlag::None);
 }
@@ -35,8 +41,7 @@ void TGStore::onClear() {
 QString TGStore::label(uint32_t id) {
     auto it = m_labels.find(id);
     if (it == m_labels.end()) {
-        qDebug() << "id:" << id << "not found\n";
-        return m_notFound;
+        return "";
     }
     return it->second;
 }

@@ -5,7 +5,9 @@
 #include "path_analyzer.hpp"
 #include "sugiyama_strategy.hpp"
 #include "topic_graph_controller.hpp"
+#include <QClipboard>
 #include <QTimer>
+#include <QtGui/qguiapplication.h>
 
 TopicGraphController::TopicGraphController(QObject *parent)
     : QObject{parent}, m_graph{new TopicGraph()},
@@ -167,8 +169,7 @@ void TopicGraphController::deleteTopic(const QString &topic) {
         m_graph->deleteTopic(topic.toStdString());
 }
 void TopicGraphController::rename(const QString &topic, const QString &new_name) {
-    if (m_graph)
-        m_graph->renameTopic(topic.toStdString(), new_name.toStdString());
+    m_graph->renameTopic(topic.toStdString(), new_name.toStdString());
 }
 
 void TopicGraphController::join(const QString &topicA,
@@ -251,6 +252,7 @@ void TopicGraphController::load(QString fileName) {
     bool load = m_repo->load(*m_graph, fileName);
     m_graph->endBatchLoad();
     calculateHeatScores();
+    m_rectList->setSceneBounds(m_layout->getGlobalBoundingBox());
 }
 void TopicGraphController::clearAll() { m_graph->clear(); }
 
@@ -275,6 +277,18 @@ void TopicGraphController::executeCommand(QString raw_cmd) {
             deleteTopic(arg);
         } else if (cmd == "touch") {
             createTopic(arg);
+        } else if (cmd == "focus") {
+            auto topic = m_graph->getTopic(arg.toStdString());
+            if (topic != nullptr) {
+                auto clusterId = m_layout->getNodeBoundingBox(topic->id);
+                m_rectList->setSceneBounds(clusterId);
+            }
+        } else if (cmd == "no") {
+            if (arg == "path") {
+                noPath();
+            } else if (arg == "focus") {
+                m_rectList->setSceneBounds(m_layout->getGlobalBoundingBox());
+            }
         }
     } else if (parts.length() == 2) {
         QString arg1 = parts.takeFirst();
@@ -296,9 +310,7 @@ void TopicGraphController::executeCommand(QString raw_cmd) {
             }
         } else if (cmd == "no") {
             QString nextCmd = parts.takeFirst();
-            if (nextCmd == "path") {
-                noPath();
-            } else if (nextCmd == "join") {
+            if (nextCmd == "join") {
                 if (parts.length() != 2)
                     return;
                 QString arg1 = parts.takeFirst();
@@ -312,27 +324,61 @@ void TopicGraphController::executeCommand(QString raw_cmd) {
 QString TopicGraphController::getAutoComplete(QString raw_cmd) {
     raw_cmd = raw_cmd.trimmed();
     QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
+    static QStringList commands =
+        {"clear", "save", "load", "touch", "join", "rm", "path", "mv", "focus"};
     if (parts.empty())
         return raw_cmd;
     //autocomplete suggests a cmd
     if (parts.size() == 1) {
         QString partial = parts.takeFirst();
-        static QStringList commands =
-            {"clear", "save", "load", "touch", "join", "rm", "path"};
         for (auto &cmd : commands)
             if (cmd.startsWith(partial))
                 return cmd; //TODO: return all matches
         return raw_cmd;
     }
+    QString partial = parts.takeLast();
+    QString match = m_tgstore->findMatch(partial);
+    if (!match.isEmpty()) {
+        parts.append(match);
+        return parts.join(" ");
+    }
     //else
-    QString cmd = parts.takeFirst().toLower();
-    if (cmd == "join") {
-        QString partial = parts.takeLast();
-        QString match = m_tgstore->findMatch(partial);
-        if (!match.isEmpty()) {
-            parts.append(match);
-            return cmd + " " + parts.join(" ");
+    // QString cmd = parts.takeFirst().toLower();
+    // if (cmd == "join") {
+    //     QString partial = parts.takeLast();
+    //     QString match = m_tgstore->findMatch(partial);
+    //     if (!match.isEmpty()) {
+    //         parts.append(match);
+    //         return cmd + " " + parts.join(" ");
+    //     }
+    // } else if (cmd == "no") {
+    //     if (parts.length() == 1) {
+    //         QString partial = parts.takeFirst();
+    //         for (auto &c : commands)
+    //             if (c.startsWith(partial))
+    //                 return cmd + " " + c;
+    //     }
+    //     QString cmd2 = parts.takeFirst().toLower();
+    //     if (cmd2 == "join") {
+    //         QString partial = parts.takeLast();
+    //         QString match = m_tgstore->findMatch(partial);
+    //         if (!match.isEmpty()) {
+    //             parts.append(match);
+    //             return cmd + " " + cmd2 + " " + parts.join(" ");
+    //         }
+    //     }
+    // }
+    return raw_cmd;
+}
+
+void TopicGraphController::copySelection() {
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    QStringList list;
+    for (const auto id : m_selectedIds) {
+        auto label = m_tgstore->label(id);
+        if (!label.isEmpty()) {
+            list.push_back(label);
         }
     }
-    return raw_cmd;
+    clipboard->setText(list.join("\n"));
 }

@@ -51,6 +51,8 @@ public:
     Q_INVOKABLE void executeCommand(QString raw_cmd);
     Q_INVOKABLE QString getAutoComplete(QString raw_cmd);
 
+    Q_INVOKABLE void copySelection();
+
 
 public slots:
     void onTopicRequested(const QString &topic);

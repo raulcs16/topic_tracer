@@ -30,6 +30,7 @@ Item {
         id: delegateMenu
         property int clickedIndex: -1
         background: MenuBackground {}
+
         MenuItemCard {
             text: qsTr("Rename...")
             onTriggered:
