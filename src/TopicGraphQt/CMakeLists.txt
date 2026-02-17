@@ -18,8 +18,8 @@ qt_add_qml_module(TopicGraphQt
     URI TopicGraph
     VERSION 1.0
     SOURCES
-        topic_graph_controller.hpp
-        topic_graph_controller.cpp
+        app_controller.hpp
+        app_controller.cpp
 
         topic_graph_store.hpp
         topic_graph_store.cpp

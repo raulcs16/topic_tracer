@@ -17,8 +17,8 @@ ApplicationWindow {
     required property int patch
     property Item focusItem: null
 
-    TopicGraphController {
-        id: topic_controller
+    AppController {
+        id: app_controller
     }
 
     Shortcut {
@@ -57,9 +57,9 @@ ApplicationWindow {
                     anchors.fill: parent
                     clip: true
                     GraphView {
-                        edgeModel: topic_controller.edgeListModel
-                        nodeModel: topic_controller.nodeListModel
-                        rectModel: topic_controller.rectListModel
+                        edgeModel: app_controller.edgeListModel
+                        nodeModel: app_controller.nodeListModel
+                        rectModel: app_controller.rectListModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
@@ -67,9 +67,9 @@ ApplicationWindow {
                         viewHeight: main_content.height
                     }
                     Connections {
-                        target: topic_controller.rectListModel
+                        target: app_controller.rectListModel
                         function onSceneBoundsChanged() {
-                            let rect = topic_controller.rectListModel.sceneBounds;
+                            let rect = app_controller.rectListModel.sceneBounds;
                             viewport.fitArea(rect.x, rect.y, rect.width, rect.height);
                         }
                     }
@@ -163,11 +163,11 @@ ApplicationWindow {
                             }
                         }
                         Keys.onReturnPressed: {
-                            topic_controller.executeCommand(commandInput.text.trim());
+                            app_controller.executeCommand(commandInput.text.trim());
                             commandInput.text = "";
                         }
                         Keys.onTabPressed: {
-                            commandInput.text = topic_controller.getAutoComplete(commandInput.text.trim());
+                            commandInput.text = app_controller.getAutoComplete(commandInput.text.trim());
                         }
                         Keys.onEscapePressed: {
                             app.focusItem = viewport;
@@ -209,17 +209,17 @@ ApplicationWindow {
                 border.color: app.focusItem == topicListView ? Colors.accent : "transparent"
                 TopicListView {
                     id: topicListView
-                    model: topic_controller.topicListModel
+                    model: app_controller.topicListModel
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }
                 Shortcut {
                     sequence: StandardKey.Copy
-                    onActivated: topic_controller.copySelection()
+                    onActivated: app_controller.copySelection()
                 }
                 Shortcut {
                     sequence: StandardKey.SelectAll
-                    onActivated: topic_controller.selectAll()
+                    onActivated: app_controller.selectAll()
                 }
                 MouseArea {
                     enabled: app.focusItem != topicListView
