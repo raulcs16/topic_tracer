@@ -52,6 +52,7 @@ public:
     Q_INVOKABLE QString getAutoComplete(QString raw_cmd);
 
     Q_INVOKABLE void copySelection();
+    Q_INVOKABLE void selectAll();
 
 
 public slots:

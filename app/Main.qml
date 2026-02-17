@@ -217,6 +217,10 @@ ApplicationWindow {
                     sequence: StandardKey.Copy
                     onActivated: topic_controller.copySelection()
                 }
+                Shortcut {
+                    sequence: StandardKey.SelectAll
+                    onActivated: topic_controller.selectAll()
+                }
                 MouseArea {
                     enabled: app.focusItem != topicListView
                     anchors.fill: parent

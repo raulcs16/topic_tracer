@@ -382,3 +382,9 @@ void TopicGraphController::copySelection() {
     }
     clipboard->setText(list.join("\n"));
 }
+void TopicGraphController::selectAll() {
+    for (const auto &topic : m_graph->topics()) {
+        m_tgstore->setTopicState(topic->id, StateFlag::Selected, true);
+        m_selectedIds.push_back(topic->id);
+    }
+}
