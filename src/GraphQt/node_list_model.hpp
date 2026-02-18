@@ -1,8 +1,8 @@
 #pragma once
 
 
+#include "graph_store.hpp"
 #include "layout_types.hpp"
-#include "topic_graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -34,7 +34,7 @@ public:
         HeatRole,
     };
 
-    explicit NodeListModel(TGStore *store, QObject *parent = nullptr);
+    explicit NodeListModel(GraphStore *store, QObject *parent = nullptr);
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -77,5 +77,5 @@ protected:
 private:
     std::vector<NodeItem> m_nodes;
     QMap<uint32_t, int> m_idToRow;
-    TGStore *m_tgstore;
+    GraphStore *m_tgstore;
 };

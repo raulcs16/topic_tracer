@@ -3,17 +3,17 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
-import TopicGraph
+import GraphQt
 import Styles
 
 Item {
     id: root
-    required property TopicListModel model
+    required property LabelListModel model
 
     required property int index
 
-    required property int topicId
-    required property string topicName
+    required property int id
+    required property string label
     required property int flags
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
@@ -38,8 +38,8 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        onEntered: root.model.hoverRequested(root.topicId, true)
-        onExited: root.model.hoverRequested(root.topicId, false)
+        onEntered: root.model.hoverRequested(root.id, true)
+        onExited: root.model.hoverRequested(root.id, false)
 
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: mouse => {
@@ -50,11 +50,11 @@ Item {
                 const meta = mods & Qt.MetaModifier || mods & Qt.ControlModifier;
 
                 if (meta) {
-                    root.model.toggleSelectionRequest(root.topicId);
+                    root.model.toggleSelectionRequest(root.id);
                 } else if (mods & Qt.ShiftModifier) {
-                    root.model.rangeSelectionRequest(root.topicId);
+                    root.model.rangeSelectionRequest(root.id);
                 } else {
-                    root.model.selectRequested(root.topicId);
+                    root.model.selectRequested(root.id);
                 }
             }
         }
@@ -90,7 +90,7 @@ Item {
     ]
     Text {
         id: textLabel
-        text: root.topicName
+        text: root.label
         font.pointSize: 16
         font.weight: Font.DemiBold
         color: Colors.text_secondary
@@ -107,7 +107,7 @@ Item {
         anchors.fill: parent
         focus: root.editMode
         anchors.leftMargin: 20
-        placeholderText: root.topicName
+        placeholderText: root.label
         font.pointSize: 16
         color: Colors.text_secondary
 
@@ -126,7 +126,7 @@ Item {
         }
         Keys.onEscapePressed: {
             //root.model.removeFlags(root.index, ENUMS.StateFlag.EditMode);
-            text = root.topicName; // revert
+            text = root.label; // revert
         }
     }
     Component.onCompleted: {}

@@ -1,8 +1,8 @@
 #pragma once
 
 
+#include "graph_store.hpp"
 #include "layout_types.hpp"
-#include "topic_graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -38,7 +38,7 @@ public:
         FlagsRole,
     };
 
-    explicit EdgeListModel(TGStore *store, QObject *parent = nullptr);
+    explicit EdgeListModel(GraphStore *store, QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -76,5 +76,5 @@ private:
 
 private:
     std::vector<EdgeItem> m_edges;
-    TGStore *m_tgstore;
+    GraphStore *m_store;
 };

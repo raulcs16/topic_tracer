@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 
-import TopicGraph
+import GraphQt
 
 Item {
     id: root

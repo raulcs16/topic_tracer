@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
 import Styles
-import TopicGraph
+import GraphQt
 
 ApplicationWindow {
     id: app
@@ -207,9 +207,9 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 border.width: 2
                 border.color: app.focusItem == topicListView ? Colors.accent : "transparent"
-                TopicListView {
+                LabelListView {
                     id: topicListView
-                    model: app_controller.topicListModel
+                    model: app_controller.labelListModel
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }

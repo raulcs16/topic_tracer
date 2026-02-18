@@ -1,24 +1,24 @@
 #include "graph_keys.hpp"
-#include "topic_list_model.hpp"
+#include "label_list_model.hpp"
 
 
-TopicListModel::TopicListModel(TGStore *store, QObject *parent)
-    : QAbstractListModel{parent}, m_tgstore(store) {}
+LabelListModel::LabelListModel(GraphStore *store, QObject *parent)
+    : QAbstractListModel{parent}, m_store(store) {}
 
-QHash<int, QByteArray> TopicListModel::roleNames() const {
+QHash<int, QByteArray> LabelListModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[IdRole] = "topicId";
-    roles[LabelRole] = "topicName";
+    roles[IdRole] = "id";
+    roles[LabelRole] = "label";
     roles[FlagsRole] = "flags";
     return roles;
 }
-int TopicListModel::rowCount(const QModelIndex &parent) const {
+int LabelListModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid()) {
         return 0;
     }
     return m_ids.size();
 }
-QVariant TopicListModel::data(const QModelIndex &index, int role) const {
+QVariant LabelListModel::data(const QModelIndex &index, int role) const {
     if (!checkIndex(index, CheckIndexOption::IndexIsValid))
         return QVariant();
     if (!index.isValid())
@@ -30,14 +30,14 @@ QVariant TopicListModel::data(const QModelIndex &index, int role) const {
     switch (role) {
     case IdRole: return id;
     case LabelRole: {
-        if (m_tgstore) {
-            return m_tgstore->label(id);
+        if (m_store) {
+            return m_store->label(id);
         }
         return QVariant();
     }
     case FlagsRole: {
-        if (m_tgstore) {
-            return static_cast<int>(m_tgstore->flags(id));
+        if (m_store) {
+            return static_cast<int>(m_store->flags(id));
         }
         return 0;
     }
@@ -45,7 +45,7 @@ QVariant TopicListModel::data(const QModelIndex &index, int role) const {
     }
 }
 
-Qt::ItemFlags TopicListModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags LabelListModel::flags(const QModelIndex &index) const {
     if (!index.isValid()) {
         return Qt::NoItemFlags;
     }
@@ -59,7 +59,7 @@ Qt::ItemFlags TopicListModel::flags(const QModelIndex &index) const {
     }
     return baseFlags;
 }
-int TopicListModel::getIndex(uint32_t id) {
+int LabelListModel::getIndex(uint32_t id) {
     auto it = m_idToRow.find(id);
     if (it == m_idToRow.end()) {
         return -1;
@@ -67,7 +67,7 @@ int TopicListModel::getIndex(uint32_t id) {
     return it.value();
 }
 
-void TopicListModel::onLabelUpdated(uint32_t id) {
+void LabelListModel::onLabelUpdated(uint32_t id) {
     int index = getIndex(id);
     if (index >= 0) {
         const QModelIndex modelIndex = this->index(index);
@@ -80,7 +80,7 @@ void TopicListModel::onLabelUpdated(uint32_t id) {
     endInsertRows();
     m_idToRow.insert(id, newRow);
 }
-void TopicListModel::onFlagUpdated(uint32_t id) {
+void LabelListModel::onFlagUpdated(uint32_t id) {
     int index = getIndex(id);
     if (index < 0) {
         return;
@@ -90,10 +90,10 @@ void TopicListModel::onFlagUpdated(uint32_t id) {
 }
 
 
-void TopicListModel::setIsAddingNewTopic(bool value) { m_isAddingNewTopic = value; }
+void LabelListModel::setIsAddingNewTopic(bool value) { m_isAddingNewTopic = value; }
 
 
-std::vector<uint32_t> TopicListModel::getIdInRange(uint32_t start, uint32_t end) {
+std::vector<uint32_t> LabelListModel::getIdInRange(uint32_t start, uint32_t end) {
     auto startIt = std::find(m_ids.begin(), m_ids.end(), start);
     auto endIt = std::find(m_ids.begin(), m_ids.end(), end);
     if (startIt == m_ids.end() || endIt == m_ids.end()) {
@@ -107,9 +107,9 @@ std::vector<uint32_t> TopicListModel::getIdInRange(uint32_t start, uint32_t end)
     }
     return ids;
 }
-void TopicListModel::onClear() { clear(); }
+void LabelListModel::onClear() { clear(); }
 
-void TopicListModel::clear() {
+void LabelListModel::clear() {
     if (m_ids.isEmpty())
         return;
 

@@ -1,58 +1,58 @@
-#include "topic_graph_store.hpp"
+#include "graph_store.hpp"
 
-void TGStore::onTopicAdded(const Topic &topic) {
-    m_labels.emplace(topic.id, QString::fromStdString(topic.name));
-    emit labelUpdated(topic.id);
-    m_topicFlags.emplace(topic.id, StateFlag::None);
+void GraphStore::onNodeAdded(const Node &node) {
+    m_labels.emplace(node.id, QString::fromStdString(node.label));
+    emit labelUpdated(node.id);
+    m_nodeFlags.emplace(node.id, StateFlag::None);
 }
-void TGStore::onTopicRemoved(uint32_t id) {
+void GraphStore::onNodeRemoved(uint32_t id) {
     auto it = m_labels.find(id);
     if (it == m_labels.end())
         return;
     m_labels.erase(it);
-    auto tt = m_topicFlags.find(id);
-    if (tt == m_topicFlags.end())
+    auto tt = m_nodeFlags.find(id);
+    if (tt == m_nodeFlags.end())
         return;
-    m_topicFlags.erase(tt);
+    m_nodeFlags.erase(tt);
 }
-void TGStore::onTopicRenamed(const Topic &topic) {
-    auto it = m_labels.find(topic.id);
+void GraphStore::onNodeRenamed(const Node &node) {
+    auto it = m_labels.find(node.id);
     if (it == m_labels.end())
         return;
-    it->second = QString::fromStdString(topic.name);
-    emit labelUpdated(topic.id);
+    it->second = QString::fromStdString(node.label);
+    emit labelUpdated(node.id);
 }
-void TGStore::onEdgeAdded(const Edge &edge) {
+void GraphStore::onEdgeAdded(const Edge &edge) {
     m_edgeFlags.emplace(edge.key, StateFlag::None);
 }
-void TGStore::onEdgeRemoved(const std::string &key) {
+void GraphStore::onEdgeRemoved(const std::string &key) {
     auto it = m_edgeFlags.find(key);
     if (it == m_edgeFlags.end())
         return;
     m_edgeFlags.erase(it);
 }
-void TGStore::onClear() {
+void GraphStore::onClear() {
     m_labels.clear();
-    m_topicFlags.clear();
+    m_nodeFlags.clear();
     m_edgeFlags.clear();
     emit clear();
 }
 
-QString TGStore::label(uint32_t id) {
+QString GraphStore::label(uint32_t id) {
     auto it = m_labels.find(id);
     if (it == m_labels.end()) {
         return "";
     }
     return it->second;
 }
-StateFlags TGStore::flags(uint32_t id) {
-    auto it = m_topicFlags.find(id);
-    if (it == m_topicFlags.end()) {
+StateFlags GraphStore::flags(uint32_t id) {
+    auto it = m_nodeFlags.find(id);
+    if (it == m_nodeFlags.end()) {
         return {};
     }
     return it->second.flags;
 }
-StateFlags TGStore::flags(const std::string &key) {
+StateFlags GraphStore::flags(const std::string &key) {
     auto it = m_edgeFlags.find(key);
     if (it == m_edgeFlags.end()) {
         return {};
@@ -60,9 +60,9 @@ StateFlags TGStore::flags(const std::string &key) {
     return it->second.flags;
 }
 
-void TGStore::setTopicState(uint32_t id, StateFlag flag, bool state) {
-    auto it = m_topicFlags.find(id);
-    if (it == m_topicFlags.end()) {
+void GraphStore::setNodeState(uint32_t id, StateFlag flag, bool state) {
+    auto it = m_nodeFlags.find(id);
+    if (it == m_nodeFlags.end()) {
         return;
     }
     if (state) {
@@ -71,9 +71,9 @@ void TGStore::setTopicState(uint32_t id, StateFlag flag, bool state) {
         if (it->second.has(flag))
             it->second.remove(flag);
     }
-    emit topicFlagUpdated(id);
+    emit nodeFlagUpdated(id);
 }
-void TGStore::setEdgeState(const std::string &key, StateFlag flag, bool state) {
+void GraphStore::setEdgeState(const std::string &key, StateFlag flag, bool state) {
     auto it = m_edgeFlags.find(key);
     if (it == m_edgeFlags.end()) {
         return;
@@ -86,22 +86,22 @@ void TGStore::setEdgeState(const std::string &key, StateFlag flag, bool state) {
     }
     emit edgeFlagUpdated(key);
 }
-void TGStore::onGraphBluePrint(GraphBlueprint blueprint) {
+void GraphStore::onGraphBluePrint(GraphBlueprint blueprint) {
     clear();
-    for (const auto &topic : blueprint.isoTopics) {
-        onTopicAdded(topic);
+    for (const auto node : blueprint.isoNodes) {
+        onNodeAdded(node);
     }
     size_t i = 1;
     for (const auto &cluster : blueprint.clusters) {
-        for (const auto &topic : cluster.topics) {
-            onTopicAdded(topic);
+        for (const auto node : cluster.nodes) {
+            onNodeAdded(node);
         }
         for (const auto &edge : cluster.edges) {
             onEdgeAdded(edge);
         }
     }
 }
-QString TGStore::findMatch(QString pattern) {
+QString GraphStore::findMatch(QString pattern) {
     QString match{};
 
     for (const auto &[_, label] : m_labels) {

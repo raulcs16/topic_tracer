@@ -1,8 +1,8 @@
 #include "edge_list_model.hpp"
 #include "graph_keys.hpp"
 
-EdgeListModel::EdgeListModel(TGStore *store, QObject *parent)
-    : QAbstractListModel{parent}, m_tgstore(store) {}
+EdgeListModel::EdgeListModel(GraphStore *store, QObject *parent)
+    : QAbstractListModel{parent}, m_store(store) {}
 
 QHash<int, QByteArray> EdgeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -50,8 +50,8 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
         return points;
     }
     case FlagsRole: {
-        if (m_tgstore) {
-            return static_cast<int>(m_tgstore->flags(edge.key));
+        if (m_store) {
+            return static_cast<int>(m_store->flags(edge.key));
         }
         return 0;
     }

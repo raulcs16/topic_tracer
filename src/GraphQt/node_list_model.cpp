@@ -1,7 +1,7 @@
 #include "graph_keys.hpp"
 #include "node_list_model.hpp"
 
-NodeListModel::NodeListModel(TGStore *store, QObject *parent)
+NodeListModel::NodeListModel(GraphStore *store, QObject *parent)
     : QAbstractListModel{parent}, m_tgstore(store) {}
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {

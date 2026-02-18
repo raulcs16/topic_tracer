@@ -2,13 +2,13 @@
 
 #include "edge_list_model.hpp"
 #include "evidence.hpp"
+#include "graph.hpp"
+#include "graph_repo.hpp"
 #include "heat_score.hpp"
+#include "label_list_model.hpp"
 #include "layout_engine.hpp"
 #include "node_list_model.hpp"
 #include "rect_list_model.hpp"
-#include "topic_graph.hpp"
-#include "topic_graph_repo.hpp"
-#include "topic_list_model.hpp"
 #include "ui_states.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -17,7 +17,7 @@
 class AppController : public QObject {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(TopicListModel *topicListModel READ topicListModel CONSTANT)
+    Q_PROPERTY(LabelListModel *labelListModel READ labelListModel CONSTANT)
     Q_PROPERTY(EdgeListModel *edgeListModel READ edgeListModel CONSTANT)
     Q_PROPERTY(NodeListModel *nodeListModel READ nodeListModel CONSTANT)
     Q_PROPERTY(RectListModel *rectListModel READ rectListModel CONSTANT)
@@ -25,7 +25,7 @@ class AppController : public QObject {
 public:
     explicit AppController(QObject *parent = nullptr);
     ~AppController();
-    TopicListModel *topicListModel() const { return m_topicList; }
+    LabelListModel *labelListModel() const { return m_labelList; }
     NodeListModel *nodeListModel() const { return m_nodeList; }
     EdgeListModel *edgeListModel() const { return m_edgeList; }
     RectListModel *rectListModel() const { return m_rectList; }
@@ -67,11 +67,11 @@ private:
 
 
 private:
-    TopicGraph *m_graph;
+    Graph *m_graph;
     LayoutEngine *m_layout;
-    TGStore *m_tgstore;
-    TopicGraphRepository *m_repo;
-    TopicListModel *m_topicList;
+    GraphStore *m_store;
+    GraphRepository *m_repo;
+    LabelListModel *m_labelList;
     NodeListModel *m_nodeList;
     EdgeListModel *m_edgeList;
     RectListModel *m_rectList;

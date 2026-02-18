@@ -59,7 +59,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 add_subdirectory(configured)
 add_subdirectory(src)
 if (NOT TESTING)
-    # add_subdirectory(app)
+     add_subdirectory(app)
 endif( )
 
 if(TESTING)

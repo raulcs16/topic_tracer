@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "topic_graph.hpp"
-#include "topic_graph_store.hpp"
+#include "graph.hpp"
+#include "graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -10,7 +10,7 @@
 #include <unordered_map>
 
 
-class TopicListModel : public QAbstractListModel {
+class LabelListModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Must be created by owner")
@@ -23,7 +23,7 @@ public:
         LabelRole,
         FlagsRole,
     };
-    explicit TopicListModel(TGStore *store, QObject *parent = nullptr);
+    explicit LabelListModel(GraphStore *store, QObject *parent = nullptr);
     //list interface override
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -61,5 +61,5 @@ private:
     bool m_isAddingNewTopic = false;
     QVector<uint32_t> m_ids;
     QMap<uint32_t, int> m_idToRow;
-    TGStore *m_tgstore;
+    GraphStore *m_store;
 };

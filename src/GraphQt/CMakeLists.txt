@@ -1,31 +1,31 @@
-qt_add_library(TopicGraphQt STATIC)
+qt_add_library(GraphQt STATIC)
 
 
-set_target_properties(TopicGraphQt PROPERTIES AUTOMOC ON)
-target_link_libraries(TopicGraphQt PRIVATE Qt6::Quick)
+set_target_properties(GraphQt PROPERTIES AUTOMOC ON)
+target_link_libraries(GraphQt PRIVATE Qt6::Quick)
 
-target_link_libraries(TopicGraphQt
+target_link_libraries(GraphQt
     PRIVATE Qt6::Core
     PRIVATE Qt6::Quick
-    PUBLIC TopicGraphCore
+    PUBLIC GraphCore
     PUBLIC Evidence
     PUBLIC LayoutEngine
     PUBLIC OGDF
     PUBLIC Persistence
 )
 
-qt_add_qml_module(TopicGraphQt
-    URI TopicGraph
+qt_add_qml_module(GraphQt
+    URI GraphQt
     VERSION 1.0
     SOURCES
         app_controller.hpp
         app_controller.cpp
 
-        topic_graph_store.hpp
-        topic_graph_store.cpp
+        graph_store.hpp
+        graph_store.cpp
 
-        topic_list_model.hpp
-        topic_list_model.cpp
+        label_list_model.hpp
+        label_list_model.cpp
 
         edge_list_model.hpp
         edge_list_model.cpp
@@ -45,8 +45,8 @@ qt_add_qml_module(TopicGraphQt
         enums.cpp
 
     QML_FILES
-        TopicListView.qml
-        TopicDelegate.qml
+        LabelListView.qml
+        LabelDelegate.qml
         GraphView.qml
         CanvasView.qml
         EdgeSpline.qml
@@ -58,7 +58,7 @@ qt_add_qml_module(TopicGraphQt
         ${QT_QML_OUTPUT_DIRECTORY}
 )
 
-target_include_directories(TopicGraphQt PUBLIC
+target_include_directories(GraphQt PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}  
         "${CMAKE_BINARY_DIR}/configured_files/include"
 )

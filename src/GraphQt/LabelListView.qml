@@ -4,7 +4,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic // Keep Basic for compatibility if necessary
 
 import Styles
-import TopicGraph
+import GraphQt
 
 Item {
     id: root
@@ -12,7 +12,7 @@ Item {
     height: parent.height
     width: parent.width
 
-    required property TopicListModel model
+    required property LabelListModel model
 
     Menu {
         id: listMenu
@@ -50,7 +50,7 @@ Item {
         anchors.fill: parent
         bottomMargin: 30
         model: root.model
-        delegate: TopicDelegate {
+        delegate: LabelDelegate {
             model: root.model
             onContextMenuRequested: (i, pos) => {
                 delegateMenu.clickedIndex = i;

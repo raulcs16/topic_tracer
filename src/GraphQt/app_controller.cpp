@@ -1,108 +1,105 @@
+#include "app_controller.hpp"
 #include "fermatspiral_strategy.hpp"
 #include "fmmm_strategy.hpp"
 #include "graph_keys.hpp"
 #include "orthogonal_strategy.hpp"
 #include "path_analyzer.hpp"
 #include "sugiyama_strategy.hpp"
-#include "topic_graph_controller.hpp"
 #include <QClipboard>
 #include <QTimer>
 #include <QtGui/qguiapplication.h>
 
-TopicGraphController::TopicGraphController(QObject *parent)
-    : QObject{parent}, m_graph{new TopicGraph()},
-      m_repo{new TopicGraphRepository("./data")}, m_layout{new LayoutEngine()},
-      m_tgstore{new TGStore()}, m_topicList{new TopicListModel(m_tgstore, this)},
-      m_nodeList{new NodeListModel(m_tgstore, this)},
-      m_edgeList(new EdgeListModel(m_tgstore, this)), m_rectList(new RectListModel(this)),
+AppController::AppController(QObject *parent)
+    : QObject{parent}, m_graph{new Graph()}, m_repo{new GraphRepository("./data")},
+      m_layout{new LayoutEngine()}, m_store{new GraphStore()},
+      m_labelList{new LabelListModel(m_store, this)},
+      m_nodeList{new NodeListModel(m_store, this)},
+      m_edgeList(new EdgeListModel(m_store, this)), m_rectList(new RectListModel(this)),
       m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)) {
 
-    if (!m_graph || !m_repo || !m_layout || !m_tgstore || !m_topicList || !m_nodeList ||
+    if (!m_graph || !m_repo || !m_layout || !m_store || !m_labelList || !m_nodeList ||
         !m_edgeList)
         return;
-    m_graph->addObserver(m_tgstore);
+    m_graph->addObserver(m_store);
     m_graph->addObserver(m_layout);
     m_layout->addObserver(m_nodeList);
     m_layout->addObserver(m_edgeList);
     m_layout->addObserver(m_rectList);
     //----TG Store Singals BEGIN----
-    connect(m_tgstore,
-            &TGStore::labelUpdated,
+    connect(m_store,
+            &GraphStore::labelUpdated,
             m_nodeList,
             &NodeListModel::onLabelUpdated);
-    connect(m_tgstore,
-            &TGStore::labelUpdated,
-            m_topicList,
-            &TopicListModel::onLabelUpdated);
-    connect(m_tgstore,
-            &TGStore::topicFlagUpdated,
-            m_topicList,
-            &TopicListModel::onFlagUpdated);
-    connect(m_tgstore,
-            &TGStore::topicFlagUpdated,
+    connect(m_store,
+            &GraphStore::labelUpdated,
+            m_labelList,
+            &LabelListModel::onLabelUpdated);
+    connect(m_store,
+            &GraphStore::nodeFlagUpdated,
+            m_labelList,
+            &LabelListModel::onFlagUpdated);
+    connect(m_store,
+            &GraphStore::nodeFlagUpdated,
             m_nodeList,
             &NodeListModel::onFlagsUpdated);
-    connect(m_tgstore,
-            &TGStore::edgeFlagUpdated,
+    connect(m_store,
+            &GraphStore::edgeFlagUpdated,
             m_edgeList,
             &EdgeListModel::onFlagUpdated);
-    connect(m_tgstore, &TGStore::clear, m_topicList, &TopicListModel::onClear);
+    connect(m_store, &GraphStore::clear, m_labelList, &LabelListModel::onClear);
 
     //----TG Store Singals END----
-    //----TopicListModel Singals Begin----
-    connect(m_topicList,
-            &TopicListModel::hoverRequested,
+    //----LabelListModel Singals Begin----
+    connect(m_labelList,
+            &LabelListModel::hoverRequested,
             this,
-            &TopicGraphController::onTopicHoverRequested);
+            &AppController::onTopicHoverRequested);
 
-    connect(m_topicList,
-            &TopicListModel::selectRequested,
+    connect(m_labelList,
+            &LabelListModel::selectRequested,
             this,
-            &TopicGraphController::onTopicSelectedRequested);
+            &AppController::onTopicSelectedRequested);
 
-    connect(m_topicList,
-            &TopicListModel::toggleSelectionRequest,
+    connect(m_labelList,
+            &LabelListModel::toggleSelectionRequest,
             this,
-            &TopicGraphController::onTopicToggleSelectionRequest);
-    connect(m_topicList,
-            &TopicListModel::rangeSelectionRequest,
+            &AppController::onTopicToggleSelectionRequest);
+    connect(m_labelList,
+            &LabelListModel::rangeSelectionRequest,
             this,
-            &TopicGraphController::onTopicRangeSelectionRequest);
+            &AppController::onTopicRangeSelectionRequest);
 
-    //----TopicListModel Singals End----
+    //----LabelListModel Singals End----
     //----NodeListModel Singals Begin----
     connect(m_nodeList,
             &NodeListModel::selectRequested,
             this,
-            &TopicGraphController::onTopicSelectedRequested);
+            &AppController::onTopicSelectedRequested);
 
     connect(m_nodeList,
             &NodeListModel::toggleSelectionRequest,
             this,
-            &TopicGraphController::onTopicToggleSelectionRequest);
+            &AppController::onTopicToggleSelectionRequest);
 }
-TopicGraphController::~TopicGraphController() {
+AppController::~AppController() {
     clearAll();
 
-    m_graph->removeObserver(m_tgstore);
+    m_graph->removeObserver(m_store);
     m_graph->removeObserver(m_layout);
     delete m_repo;
-    delete m_tgstore;
+    delete m_store;
     delete m_graph;
     delete m_layout;
     delete m_evidenceDb;
     delete m_heatScore;
 }
 
-void TopicGraphController::createTopic(const QString &name) {
-    if (m_graph) {
-        m_graph->addTopic(name.toStdString());
-    }
+void AppController::createTopic(const QString &name) {
+    m_graph->addNode(name.toStdString());
 }
-void TopicGraphController::onTopicHoverRequested(uint32_t id, bool isHovered) {
-
-    m_tgstore->setTopicState(id, StateFlag::Hovered, isHovered);
+void AppController::onTopicHoverRequested(uint32_t id, bool isHovered) {
+    m_store->setNodeState(id, StateFlag::Hovered, isHovered);
 
     if (isHovered) {
         m_hoveredId = id;
@@ -115,80 +112,78 @@ void TopicGraphController::onTopicHoverRequested(uint32_t id, bool isHovered) {
                                            : m_layout->getGlobalBoundingBox();
     m_rectList->setSceneBounds(boundingBoxId);
 }
-void TopicGraphController::clearSelection() {
-    if (!m_tgstore)
+void AppController::clearSelection() {
+    if (!m_store)
         return;
     for (auto i : m_selectedIds) {
-        m_tgstore->setTopicState(i, StateFlag::Selected, false);
+        m_store->setNodeState(i, StateFlag::Selected, false);
     }
     m_selectedIds.clear();
     m_lastSelectedId = -1;
     m_rangeSelectedId = -1;
 }
 //left click
-void TopicGraphController::onTopicSelectedRequested(uint32_t id) {
+void AppController::onTopicSelectedRequested(uint32_t id) {
     bool isTogglingOff = m_lastSelectedId == id;
     clearSelection();
     if (!isTogglingOff) {
-        m_tgstore->setTopicState(id, StateFlag::Selected, true);
+        m_store->setNodeState(id, StateFlag::Selected, true);
         m_selectedIds.push_back(id);
         m_lastSelectedId = id;
     }
 }
 //cmd click
-void TopicGraphController::onTopicToggleSelectionRequest(uint32_t id) {
+void AppController::onTopicToggleSelectionRequest(uint32_t id) {
     auto it = std::find(m_selectedIds.begin(), m_selectedIds.end(), id);
     if (it == m_selectedIds.end()) {
-        m_tgstore->setTopicState(id, StateFlag::Selected, true);
+        m_store->setNodeState(id, StateFlag::Selected, true);
         m_selectedIds.push_back(id);
         m_lastSelectedId = id;
     } else {
-        m_tgstore->setTopicState(id, StateFlag::Selected, false);
+        m_store->setNodeState(id, StateFlag::Selected, false);
         m_selectedIds.erase(it);
     }
 }
-void TopicGraphController::onTopicRangeSelectionRequest(uint32_t id) {
-    if (!m_tgstore || !m_topicList)
+void AppController::onTopicRangeSelectionRequest(uint32_t id) {
+    if (!m_store || !m_labelList)
         return;
     if (m_lastSelectedId < 0)
         return;
-    auto ids = m_topicList->getIdInRange(m_lastSelectedId, id);
+    auto ids = m_labelList->getIdInRange(m_lastSelectedId, id);
     clearSelection();
     for (const auto id : ids) {
-        m_tgstore->setTopicState(id, StateFlag::Selected, true);
+        m_store->setNodeState(id, StateFlag::Selected, true);
         m_selectedIds.push_back(id);
     }
     m_lastSelectedId = id;
 }
-void TopicGraphController::onTopicRequested(const QString &name) {
+void AppController::onTopicRequested(const QString &name) {
     if (m_graph)
-        m_graph->addTopic(name.toStdString());
+        m_graph->addNode(name.toStdString());
 }
-void TopicGraphController::deleteTopic(const QString &topic) {
+void AppController::deleteTopic(const QString &topic) {
     if (m_graph)
-        m_graph->deleteTopic(topic.toStdString());
+        m_graph->deleteNode(topic.toStdString());
 }
-void TopicGraphController::rename(const QString &topic, const QString &new_name) {
-    m_graph->renameTopic(topic.toStdString(), new_name.toStdString());
+void AppController::rename(const QString &topic, const QString &new_name) {
+    m_graph->renameNode(topic.toStdString(), new_name.toStdString());
 }
 
-void TopicGraphController::join(const QString &topicA,
-                                const QString &topicB,
-                                EdgeType type) {
+void AppController::join(const QString &topicA, const QString &topicB, EdgeType type) {
     if (m_graph)
         m_graph->addEdge(topicA.toStdString(), topicB.toStdString(), type);
 }
-void TopicGraphController::noJoin(const QString &topicA, const QString &topicB) {
+void AppController::noJoin(const QString &topicA, const QString &topicB) {
     if (m_graph)
         m_graph->removeEdge(topicA.toStdString(), topicB.toStdString());
 }
 
 
-void TopicGraphController::path(const QString &topicA, const QString &topicB) {
+void AppController::path(const QString &topicA, const QString &topicB) {
     if (!m_graph)
         return;
-    auto ta = m_graph->getTopic(topicA.toStdString());
-    auto tb = m_graph->getTopic(topicB.toStdString());
+    auto ta = m_graph->getNode(topicA.toStdString());
+    auto tb = m_graph->getNode(topicB.toStdString());
     if (ta == nullptr || tb == nullptr) {
         return;
     }
@@ -196,13 +191,13 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     auto topicIds = TG::PathAnalyzer::topicPath(parents, tb->id);
 
     std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
-    for (const auto &topic : m_graph->topics()) {
+    for (const auto &topic : m_graph->nodes()) {
         if (topicSet.contains(topic->id)) {
-            m_tgstore->setTopicState(topic->id, StateFlag::InPath, true);
-            m_tgstore->setTopicState(topic->id, StateFlag::Hidden, false);
+            m_store->setNodeState(topic->id, StateFlag::InPath, true);
+            m_store->setNodeState(topic->id, StateFlag::Hidden, false);
         } else {
-            m_tgstore->setTopicState(topic->id, StateFlag::InPath, false);
-            m_tgstore->setTopicState(topic->id, StateFlag::Hidden, true);
+            m_store->setNodeState(topic->id, StateFlag::InPath, false);
+            m_store->setNodeState(topic->id, StateFlag::Hidden, true);
         }
     }
 
@@ -211,27 +206,27 @@ void TopicGraphController::path(const QString &topicA, const QString &topicB) {
     std::unordered_set<std::string> edgeSet(edgeKeys.begin(), edgeKeys.end());
     for (const auto &edge : m_graph->edges()) {
         if (edgeSet.contains(edge->key)) {
-            m_tgstore->setEdgeState(edge->key, StateFlag::InPath, true);
-            m_tgstore->setEdgeState(edge->key, StateFlag::Hidden, false);
+            m_store->setEdgeState(edge->key, StateFlag::InPath, true);
+            m_store->setEdgeState(edge->key, StateFlag::Hidden, false);
         } else {
-            m_tgstore->setEdgeState(edge->key, StateFlag::InPath, false);
-            m_tgstore->setEdgeState(edge->key, StateFlag::Hidden, true);
+            m_store->setEdgeState(edge->key, StateFlag::InPath, false);
+            m_store->setEdgeState(edge->key, StateFlag::Hidden, true);
         }
     }
 }
-void TopicGraphController::noPath() {
-    if (!m_graph || !m_tgstore)
+void AppController::noPath() {
+    if (!m_graph || !m_store)
         return;
-    for (const auto topics : m_graph->topics()) {
-        m_tgstore->setTopicState(topics->id, StateFlag::Hidden, false);
-        m_tgstore->setTopicState(topics->id, StateFlag::InPath, false);
+    for (const auto topics : m_graph->nodes()) {
+        m_store->setNodeState(topics->id, StateFlag::Hidden, false);
+        m_store->setNodeState(topics->id, StateFlag::InPath, false);
     }
     for (const auto edges : m_graph->edges()) {
-        m_tgstore->setEdgeState(edges->key, StateFlag::Hidden, false);
-        m_tgstore->setEdgeState(edges->key, StateFlag::InPath, false);
+        m_store->setEdgeState(edges->key, StateFlag::Hidden, false);
+        m_store->setEdgeState(edges->key, StateFlag::InPath, false);
     }
 }
-void TopicGraphController::calculateHeatScores() {
+void AppController::calculateHeatScores() {
     auto map = m_heatScore->computeAllHeatScores();
     for (const auto [topic, score] : map) {
         if (!score)
@@ -239,12 +234,12 @@ void TopicGraphController::calculateHeatScores() {
         m_nodeList->updateHeatScore(topic->id, score);
     }
 }
-void TopicGraphController::save(QString fileName) {
+void AppController::save(QString fileName) {
     if (!m_repo)
         return;
     bool saved = m_repo->save(*m_graph, fileName);
 }
-void TopicGraphController::load(QString fileName) {
+void AppController::load(QString fileName) {
     if (!m_repo || !m_graph)
         return;
     m_graph->clear();
@@ -254,10 +249,10 @@ void TopicGraphController::load(QString fileName) {
     calculateHeatScores();
     m_rectList->setSceneBounds(m_layout->getGlobalBoundingBox());
 }
-void TopicGraphController::clearAll() { m_graph->clear(); }
+void AppController::clearAll() { m_graph->clear(); }
 
 
-void TopicGraphController::executeCommand(QString raw_cmd) {
+void AppController::executeCommand(QString raw_cmd) {
     raw_cmd = raw_cmd.trimmed();
     QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
     if (parts.empty())
@@ -278,7 +273,7 @@ void TopicGraphController::executeCommand(QString raw_cmd) {
         } else if (cmd == "touch") {
             createTopic(arg);
         } else if (cmd == "focus") {
-            auto topic = m_graph->getTopic(arg.toStdString());
+            auto topic = m_graph->getNode(arg.toStdString());
             if (topic != nullptr) {
                 auto clusterId = m_layout->getNodeBoundingBox(topic->id);
                 m_rectList->setSceneBounds(clusterId);
@@ -332,7 +327,7 @@ void TopicGraphController::executeCommand(QString raw_cmd) {
     }
 }
 
-QString TopicGraphController::getAutoComplete(QString raw_cmd) {
+QString AppController::getAutoComplete(QString raw_cmd) {
     raw_cmd = raw_cmd.trimmed();
     QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
     static QStringList commands =
@@ -348,7 +343,7 @@ QString TopicGraphController::getAutoComplete(QString raw_cmd) {
         return raw_cmd;
     }
     QString partial = parts.takeLast();
-    QString match = m_tgstore->findMatch(partial);
+    QString match = m_store->findMatch(partial);
     if (!match.isEmpty()) {
         parts.append(match);
         return parts.join(" ");
@@ -357,20 +352,20 @@ QString TopicGraphController::getAutoComplete(QString raw_cmd) {
     return raw_cmd;
 }
 
-void TopicGraphController::copySelection() {
+void AppController::copySelection() {
     QClipboard *clipboard = QGuiApplication::clipboard();
     QStringList list;
     for (const auto id : m_selectedIds) {
-        auto label = m_tgstore->label(id);
+        auto label = m_store->label(id);
         if (!label.isEmpty()) {
             list.push_back(label);
         }
     }
     clipboard->setText(list.join("\n"));
 }
-void TopicGraphController::selectAll() {
-    for (const auto &topic : m_graph->topics()) {
-        m_tgstore->setTopicState(topic->id, StateFlag::Selected, true);
+void AppController::selectAll() {
+    for (const auto &topic : m_graph->nodes()) {
+        m_store->setNodeState(topic->id, StateFlag::Selected, true);
         m_selectedIds.push_back(topic->id);
     }
 }

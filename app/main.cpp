@@ -1,7 +1,6 @@
 #include "app_controller.hpp"
 #include "config.hpp"
 #include "graph.hpp"
-#include "topic_list_model.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
