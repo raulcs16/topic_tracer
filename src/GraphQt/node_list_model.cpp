@@ -6,7 +6,7 @@ NodeListModel::NodeListModel(GraphStore *store, QObject *parent)
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[IdRole] = "topicId";
+    roles[IdRole] = "nodeId";
     roles[LabelRole] = "label";
     roles[XRole] = "posx";
     roles[YRole] = "posy";
@@ -63,10 +63,13 @@ int NodeListModel::getIndex(uint32_t id) {
 }
 
 
-void NodeListModel::updateHeatScore(uint32_t id, int score) {
+void NodeListModel::updateHeatScore(uint32_t id, float score) {
     int index = getIndex(id);
     if (index < 0)
         return;
+    if (m_nodes[index].heat == score) {
+        return;
+    }
     m_nodes[index].heat = score;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {HeatRole});

@@ -14,7 +14,7 @@
 
 struct NodeItem {
     uint32_t id;
-    int heat = 0;
+    float heat = 0.0f;
     double x;
     double y;
 };
@@ -41,7 +41,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     //Incremental API
 
-    void updateHeatScore(uint32_t id, int score);
+    void updateHeatScore(uint32_t id, float score);
 
     void onNodeAdded(const GraphNode &node) override;
     void onNodeRemoved(uint32_t id) override;

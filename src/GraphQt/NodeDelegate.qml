@@ -9,12 +9,12 @@ Item {
     required property NodeListModel model
 
     required property int index
-    required property int topicId
+    required property int nodeId
     required property string label
     required property double posx
     required property double posy
     required property int flags
-    required property int heatScore
+    required property real heatScore
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
     readonly property bool selected: (flags & ENUMS.StateFlag.Selected) !== 0
@@ -22,13 +22,34 @@ Item {
     readonly property bool hidden: (flags & ENUMS.StateFlag.Hidden) !== 0
 
     function heatColor(heat) {
-        if (heat <= 0)
-            return Qt.rgba(0.9, 0.9, 0.9, 1.0);
-        let t = Math.min(heat / 100, 1);
-        t = Math.sqrt(t);
-        let r = 0.8 * t + 0.2;
-        let g = 0.5 * (1 - t);
-        let b = 0.2 * (1 - t);
+        if (heat <= 0.001)
+            return Qt.rgba(0.9, 0.9, 0.9, 1.0); // Dark grey pops better on black
+
+        let t = Math.pow(Math.max(0, Math.min(heat, 1.0)), 0.8);
+        let r = 0, g = 0, b = 0;
+
+        if (t <= 0.25) {
+            // Blue → Cyan
+            r = 0;
+            g = Math.round(255 * (t / 0.25));
+            b = 255;
+        } else if (t <= 0.5) {
+            // Cyan → Green
+            r = 0;
+            g = 255;
+            b = Math.round(255 * (1 - (t - 0.25) / 0.25));
+        } else if (t <= 0.75) {
+            // Green → Yellow
+            r = Math.round(255 * ((t - 0.5) / 0.25));
+            g = 255;
+            b = 0;
+        } else {
+            // Yellow → Red
+            r = 255;
+            g = Math.round(255 * (1 - (t - 0.75) / 0.25));
+            b = 0;
+        }
+
         return Qt.rgba(r, g, b, 1.0);
     }
     function borderColor() {
@@ -62,8 +83,8 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onEntered: root.model.hoverRequested(root.topicId, true)
-        onExited: root.model.hoverRequested(root.topicId, false)
+        onEntered: root.model.hoverRequested(root.nodeId, true)
+        onExited: root.model.hoverRequested(root.nodeId, false)
         onClicked: mouse => {
             if (mouse.button == Qt.RightButton)
             //root.contextMenuRequested(root.index, Qt.point(mouse.x, mouse.y));
@@ -72,9 +93,9 @@ Item {
                 const meta = mods & Qt.MetaModifier || mods & Qt.ControlModifier;
 
                 if (meta) {
-                    root.model.toggleSelectionRequest(root.topicId);
+                    root.model.toggleSelectionRequest(root.nodeId);
                 } else {
-                    root.model.selectRequested(root.topicId);
+                    root.model.selectRequested(root.nodeId);
                 }
             }
         }

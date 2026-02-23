@@ -125,6 +125,17 @@ ApplicationWindow {
                         }
                     }
                 }
+                Text {
+                    text: `Mode: ${app_controller.appMode == AppController.Progress ? "Progress" : "Stress"}`
+                    font.bold: true
+                    font.pointSize: 18
+                    color: "#F5F5F5"
+                    padding: 10
+                    anchors {
+                        bottom: parent.bottom
+                        left: parent.left
+                    }
+                }
             }
 
             Rectangle {

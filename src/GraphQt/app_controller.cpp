@@ -17,7 +17,7 @@ AppController::AppController(QObject *parent)
       m_edgeList(new EdgeListModel(m_store, this)), m_rectList(new RectListModel(this)),
       m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)) {
-
+    m_mode = AppMode::Progress;
     if (!m_graph || !m_repo || !m_layout || !m_store || !m_labelList || !m_nodeList ||
         !m_edgeList)
         return;
@@ -227,11 +227,32 @@ void AppController::noPath() {
     }
 }
 void AppController::calculateHeatScores() {
-    auto map = m_heatScore->computeAllHeatScores();
-    for (const auto [topic, score] : map) {
-        if (!score)
-            continue;
-        m_nodeList->updateHeatScore(topic->id, score);
+    if (m_mode == AppMode::Progress) {
+        auto map = m_heatScore->computeAllHeatScores();
+        for (const auto [topic, score] : map) {
+            if (!score)
+                continue;
+            m_nodeList->updateHeatScore(topic->id, score);
+        }
+    } else {
+        //manually calculate heat score based off edges for each node:
+        for (const auto node : m_graph->nodes()) {
+            float score = 0;
+            auto outEdges = m_graph->getOutEdges(node->id);
+            for (const auto edge : outEdges) {
+                switch (edge->type) {
+                case EdgeType::AlternativeTo:
+                case EdgeType::ComposedOf:
+                case EdgeType::DependsOn: score += 2.0f; break;
+                case EdgeType::Implements: score += 1.0f; break;
+                case EdgeType::Import: score += 3.0f; break;
+                case EdgeType::Inject: score += 1.0f; break;
+                case EdgeType::RelatedTo: score += -0.5f; break;
+                }
+            }
+            float normalized = std::clamp(score / 15.0f, 0.0f, 1.0f);
+            m_nodeList->updateHeatScore(node->id, normalized);
+        }
     }
 }
 void AppController::save(QString fileName) {
@@ -283,6 +304,12 @@ void AppController::executeCommand(QString raw_cmd) {
                 noPath();
             } else if (arg == "focus") {
                 m_rectList->setSceneBounds(m_layout->getGlobalBoundingBox());
+            }
+        } else if (cmd == "mode") {
+            if (arg.toLower() == "progress") {
+                setMode(AppMode::Progress);
+            } else if (arg.toLower() == "stress") {
+                setMode(AppMode::Stress);
             }
         }
     } else if (parts.length() == 2) {
@@ -368,4 +395,12 @@ void AppController::selectAll() {
         m_store->setNodeState(topic->id, StateFlag::Selected, true);
         m_selectedIds.push_back(topic->id);
     }
+}
+
+void AppController::setMode(AppMode mode) {
+    if (m_mode == mode)
+        return;
+    m_mode = mode;
+    calculateHeatScores();
+    emit appModeChanged();
 }

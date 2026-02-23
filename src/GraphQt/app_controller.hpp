@@ -21,16 +21,24 @@ class AppController : public QObject {
     Q_PROPERTY(EdgeListModel *edgeListModel READ edgeListModel CONSTANT)
     Q_PROPERTY(NodeListModel *nodeListModel READ nodeListModel CONSTANT)
     Q_PROPERTY(RectListModel *rectListModel READ rectListModel CONSTANT)
+    Q_PROPERTY(AppMode appMode READ appMode NOTIFY appModeChanged)
 
 public:
+    enum class AppMode {
+        Progress,
+        Stress
+    };
+    Q_ENUM(AppMode)
     explicit AppController(QObject *parent = nullptr);
     ~AppController();
     LabelListModel *labelListModel() const { return m_labelList; }
     NodeListModel *nodeListModel() const { return m_nodeList; }
     EdgeListModel *edgeListModel() const { return m_edgeList; }
     RectListModel *rectListModel() const { return m_rectList; }
+    AppMode appMode() const { return m_mode; }
 
     void calculateHeatScores();
+
     //QML API
 
     Q_INVOKABLE void createTopic(const QString &name);
@@ -61,10 +69,12 @@ public slots:
     void onTopicSelectedRequested(uint32_t id);
     void onTopicToggleSelectionRequest(uint32_t id);
     void onTopicRangeSelectionRequest(uint32_t id);
+signals:
+    void appModeChanged();
 
 private:
     void clearSelection();
-
+    void setMode(AppMode mode);
 
 private:
     Graph *m_graph;
@@ -85,4 +95,5 @@ private:
     int m_lastSelectedId = -1;
     int m_rangeSelectedId = -1;
     int m_hoveredId = -1;
+    AppMode m_mode;
 };
