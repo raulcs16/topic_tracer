@@ -1,6 +1,6 @@
 #pragma once
 
-#include "disjoint_set.hpp"
+
 #include "graph.hpp"
 #include "icluster_layout.hpp"
 #include "layout_strategy.hpp"

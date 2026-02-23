@@ -10,8 +10,8 @@ SugiyamaStrategy::SugiyamaStrategy() {
     sl->setCrossMin(new ogdf::MedianHeuristic);
 
     auto *ohl = new ogdf::OptimalHierarchyLayout;
-    ohl->layerDistance(30.0);
-    ohl->nodeDistance(25.0);
+    ohl->layerDistance(40.0);
+    ohl->nodeDistance(75.0);
     ohl->weightBalancing(0.7);
     sl->setLayout(ohl);
 

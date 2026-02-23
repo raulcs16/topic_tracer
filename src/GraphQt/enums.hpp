@@ -12,7 +12,10 @@ public:
         ComposedOf,
         DependsOn,
         AlternativeTo,
-        RelatedTo
+        RelatedTo,
+        Import,
+        Inject,
+        Implements,
     };
     enum class TopicType {
         Concept,

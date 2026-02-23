@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include "graph.hpp"
 #include "graph_store.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>

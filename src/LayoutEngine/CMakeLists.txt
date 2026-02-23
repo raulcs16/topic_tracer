@@ -18,8 +18,8 @@ add_library(LayoutEngine STATIC
     #ogdf strats
     fmmm_strategy.hpp
     fmmm_strategy.cpp
-    # sugiyama_strategy.hpp
-    # sugiyama_strategy.cpp
+    sugiyama_strategy.hpp
+    sugiyama_strategy.cpp
     orthogonal_strategy.hpp
     orthogonal_strategy.cpp
     # procedural strats

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "layout_types.hpp"
-#include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QPointF>

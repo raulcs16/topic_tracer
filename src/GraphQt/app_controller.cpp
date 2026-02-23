@@ -319,7 +319,7 @@ void AppController::executeCommand(QString raw_cmd) {
             path(arg1, arg2);
         } else if (cmd == "mv") {
             rename(arg1, arg2);
-        } else if (cmd == "join") {
+        } else if (cmd == "link") {
             join(arg1, arg2);
         } else if (cmd == "touch") {
             createTopic(arg1);
@@ -343,13 +343,28 @@ void AppController::executeCommand(QString raw_cmd) {
             }
         } else if (cmd == "no") {
             QString nextCmd = parts.takeFirst();
-            if (nextCmd == "join") {
+            if (nextCmd == "link") {
                 if (parts.length() != 2)
                     return;
                 QString arg1 = parts.takeFirst();
                 QString arg2 = parts.takeFirst();
                 noJoin(arg1, arg2);
             }
+        } else if (cmd == "link") {
+            if (parts.length() != 4)
+                return;
+            //link topicA topicB -t  [Import,Inject,Implements]
+            QString arg1 = parts.takeFirst();
+            QString arg2 = parts.takeFirst();
+            QString arg3 = parts.takeLast();
+            EdgeType type = EdgeType::ComposedOf;
+            if (arg3.toLower() == "import")
+                type = EdgeType::Import;
+            else if (arg3.toLower() == "injects")
+                type = EdgeType::Inject;
+            else if (arg3.toLower() == "implements")
+                type = EdgeType::Implements;
+            join(arg1, arg2, type);
         }
     }
 }
@@ -358,7 +373,7 @@ QString AppController::getAutoComplete(QString raw_cmd) {
     raw_cmd = raw_cmd.trimmed();
     QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
     static QStringList commands =
-        {"clear", "save", "load", "touch", "join", "rm", "path", "mv", "focus"};
+        {"clear", "save", "load", "touch", "link", "rm", "path", "mv", "focus", "mode"};
     if (parts.empty())
         return raw_cmd;
     //autocomplete suggests a cmd

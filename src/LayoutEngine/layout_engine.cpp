@@ -3,11 +3,12 @@
 #include "graph_keys.hpp"
 #include "layout_engine.hpp"
 #include "ogdf_cluster.hpp"
+#include "sugiyama_strategy.hpp"
 
 
 LayoutEngine::LayoutEngine() {
     m_poolStrat = std::make_shared<FermatSpiralStrategy>();
-    m_ogdfStrat = std::make_shared<FMMMStrategy>();
+    m_ogdfStrat = std::make_shared<SugiyamaStrategy>();
     initPool();
 }
 void LayoutEngine::initPool() {
@@ -66,8 +67,10 @@ void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
         } else { //both not in pool but same cluster
             merger = std::make_shared<OGDFCluster>(nextId(), m_ogdfStrat);
             bool success = migrate(fromIt->second, merger);
-            if (!success)
+            if (!success) {
+                std::cout << "unsuccesfull migration";
                 return;
+            }
             merger->addEdge(from, to);
             eraseCluster(fromIt);
         }
@@ -420,11 +423,12 @@ bool LayoutEngine::migrate(std::shared_ptr<IClusterLayout> source,
 
     for (auto node : source->nodes()) {
         target->addNode(node.id);
-        m_clusterMap[node.id] = target;
+        m_nodeToCluster[node.id] = target->id();
     }
     for (auto edge : source->edges()) {
         target->addEdge(edge.from, edge.to);
     }
+    m_clusterMap[target->id()] = target;
     return true;
 }
 void LayoutEngine::notifyClusterUpdates(std::shared_ptr<IClusterLayout> cluster) {

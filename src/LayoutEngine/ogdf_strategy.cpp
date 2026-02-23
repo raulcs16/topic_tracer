@@ -40,6 +40,10 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                 edge.bends.clear();
                 for (ogdf::DPoint &p : ctx->attributes.bends(e->second)) {
                     edge.bends.push_back(p);
+                    bbox.max_x = std::max(bbox.max_x, p.m_x);
+                    bbox.min_x = std::min(bbox.min_x, p.m_x);
+                    bbox.max_y = std::max(bbox.max_y, p.m_y);
+                    bbox.min_y = std::min(bbox.min_y, p.m_y);
                 }
             }
         }

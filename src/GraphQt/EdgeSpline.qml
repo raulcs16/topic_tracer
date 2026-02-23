@@ -21,50 +21,87 @@ Canvas {
     property real sY: sourceY
     property real tX: targetX
     property real tY: targetY
-
+    property int nodeRadius: 10
     // Compute bounding box (so the Canvas knows what to paint)
-    property real minX: Math.min(sX, tX)
-    property real minY: Math.min(sY, tY)
-    property real maxX: Math.max(sX, tX)
-    property real maxY: Math.max(sY, tY)
+    // Compute bounding box including all bend points
+    property real minX: {
+        let val = Math.min(sX, tX);
+        for (let p of bends)
+            val = Math.min(val, p.x);
+        return val - headSize - nodeRadius; // Add padding for arrowhead
+    }
+    property real minY: {
+        let val = Math.min(sY, tY);
+        for (let p of bends)
+            val = Math.min(val, p.y);
+        return val - headSize - nodeRadius;
+    }
+    property real maxX: {
+        let val = Math.max(sX, tX);
+        for (let p of bends)
+            val = Math.max(val, p.x);
+        return val + headSize + nodeRadius;
+    }
+    property real maxY: {
+        let val = Math.max(sY, tY);
+        for (let p of bends)
+            val = Math.max(val, p.y);
+        return val + headSize + nodeRadius;
+    }
     x: minX
     y: minY
-    width: maxX - minX
-    height: maxY - minY
+    width: Math.max(1, maxX - minX) // Ensure at least 1px width
+    height: Math.max(1, maxY - minY)
     antialiasing: true
     onColorChanged: requestPaint()
     onFlagsChanged: requestPaint()
     onPaint: {
         var context = getContext('2d');
-        // Push.
         context.save();
         context.clearRect(0, 0, width, height);
+
         context.globalAlpha = opacityFactor;
         context.strokeStyle = color;
         context.lineWidth = hover ? 2 : 1;
         context.beginPath();
-        // Draw line.
-        for (var i = 0; i < bends.length; ++i) {
-            const px = bends[i].x - x;
-            const py = bends[i].y - y;
-            if (i === 0)
-                context.moveTo(px, py);
-            else
-                context.lineTo(px, py);
-        }
-        // Draw head.
-        var fromX = bends.length > 0 ? (bends[bends.length - 2].x - x) : (sX - x);
-        var fromY = bends.length > 0 ? (bends[bends.length - 2].y - y) : (sY - y);
-        var toX = bends.length > 0 ? (bends[bends.length - 1].x - x) : (tX - x);
-        var toY = bends.length > 0 ? (bends[bends.length - 1].y - y) : (tY - y);
 
-        // Draw arrowhead like the original style
-        var angle = Math.atan2(toY - fromY, toX - fromX);
-        context.lineTo(toX - headSize * Math.cos(angle - Math.PI / 8), toY - headSize * Math.sin(angle - Math.PI / 8));
-        context.moveTo(toX, toY);
-        context.lineTo(toX - headSize * Math.cos(angle + Math.PI / 8), toY - headSize * Math.sin(angle + Math.PI / 8));
-        //pop
+        // 1. Start at Source (Ideally offset by nodeRadius here too)
+        context.moveTo(sX - x, sY - y);
+
+        // 2. Draw through intermediate bends
+        for (var i = 0; i < bends.length; ++i) {
+            context.lineTo(bends[i].x - x, bends[i].y - y);
+        }
+
+        // 3. Calculate the "Gap" for the target node
+        var lastX = bends.length > 0 ? bends[bends.length - 1].x : sX;
+        var lastY = bends.length > 0 ? bends[bends.length - 1].y : sY;
+
+        var dx = tX - lastX;
+        var dy = tY - lastY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+
+        // The logic: NewTarget = Target - (UnitVector * nodeRadius)
+        // We stop the line 'nodeRadius' pixels before the actual center
+        var stopX = tX - (dx / dist) * nodeRadius;
+        var stopY = tY - (dy / dist) * nodeRadius;
+
+        // 4. Draw the line to the shortened point
+        context.lineTo(stopX - x, stopY - y);
         context.stroke();
+
+        // 5. Draw the Arrowhead at the shortened point
+        var angle = Math.atan2(dy, dx);
+        var headX = stopX - x;
+        var headY = stopY - y;
+
+        context.beginPath();
+        context.moveTo(headX, headY);
+        context.lineTo(headX - headSize * Math.cos(angle - Math.PI / 8), headY - headSize * Math.sin(angle - Math.PI / 8));
+        context.moveTo(headX, headY);
+        context.lineTo(headX - headSize * Math.cos(angle + Math.PI / 8), headY - headSize * Math.sin(angle + Math.PI / 8));
+        context.stroke();
+
         context.restore();
     }
 }
