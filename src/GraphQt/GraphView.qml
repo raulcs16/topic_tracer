@@ -29,9 +29,6 @@ Item {
     }
     Repeater {
         model: root.rectModel
-        delegate: RectDelegate {
-            paddingX: 15
-            paddingY: 25
-        }
+        delegate: RectDelegate {}
     }
 }

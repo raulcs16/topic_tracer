@@ -11,6 +11,7 @@
 #include <vector>
 
 struct EdgeItem {
+    EdgeType type;
     std::string key;
     uint32_t from;
     uint32_t to;
@@ -36,6 +37,7 @@ public:
         TargetYRole,
         BendsRole,
         FlagsRole,
+        EdgeTypeRole,
     };
 
     explicit EdgeListModel(GraphStore *store, QObject *parent = nullptr);
@@ -68,6 +70,7 @@ protected:
 
 public slots:
     void onFlagUpdated(const std::string &key);
+    void onEdgeTypeUpdated(const std::string &key);
 
 private:
     size_t getIndex(const std::string &key);

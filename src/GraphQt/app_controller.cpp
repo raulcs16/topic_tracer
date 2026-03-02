@@ -44,6 +44,10 @@ AppController::AppController(QObject *parent)
             m_nodeList,
             &NodeListModel::onFlagsUpdated);
     connect(m_store,
+            &GraphStore::edgeTypeUpdated,
+            m_edgeList,
+            &EdgeListModel::onEdgeTypeUpdated);
+    connect(m_store,
             &GraphStore::edgeFlagUpdated,
             m_edgeList,
             &EdgeListModel::onFlagUpdated);
@@ -241,13 +245,12 @@ void AppController::calculateHeatScores() {
             auto outEdges = m_graph->getOutEdges(node->id);
             for (const auto edge : outEdges) {
                 switch (edge->type) {
-                case EdgeType::AlternativeTo:
-                case EdgeType::ComposedOf:
-                case EdgeType::DependsOn: score += 2.0f; break;
-                case EdgeType::Implements: score += 1.0f; break;
-                case EdgeType::Import: score += 3.0f; break;
-                case EdgeType::Inject: score += 1.0f; break;
-                case EdgeType::RelatedTo: score += -0.5f; break;
+                case EdgeType::Null: score += 5.0f; break;
+                case EdgeType::Composes: score += 2.0f; break;
+                case EdgeType::Associates: score += 1.0f; break;
+                case EdgeType::Aggregates: score += 1.5f; break;
+                case EdgeType::Injects: score += 0.5f; break;
+                case EdgeType::Implements: score += 0.0f; break;
                 }
             }
             float normalized = std::clamp(score / 15.0f, 0.0f, 1.0f);
@@ -357,11 +360,13 @@ void AppController::executeCommand(QString raw_cmd) {
             QString arg1 = parts.takeFirst();
             QString arg2 = parts.takeFirst();
             QString arg3 = parts.takeLast();
-            EdgeType type = EdgeType::ComposedOf;
-            if (arg3.toLower() == "import")
-                type = EdgeType::Import;
+            EdgeType type = EdgeType::Composes;
+            if (arg3.toLower() == "associates")
+                type = EdgeType::Associates;
+            else if (arg3.toLower() == "aggregates")
+                type = EdgeType::Aggregates;
             else if (arg3.toLower() == "injects")
-                type = EdgeType::Inject;
+                type = EdgeType::Injects;
             else if (arg3.toLower() == "implements")
                 type = EdgeType::Implements;
             join(arg1, arg2, type);
@@ -383,6 +388,21 @@ QString AppController::getAutoComplete(QString raw_cmd) {
             if (cmd.startsWith(partial))
                 return cmd; //TODO: return all matches
         return raw_cmd;
+    }
+    if (parts[0] == "link") {
+        if (parts.size() == 5) {
+            QString partial = parts.takeLast();
+            QStringList type = {"composes",
+                                "aggregates",
+                                "associates",
+                                "injects",
+                                "implements"};
+            for (auto &t : type)
+                if (t.startsWith(partial)) {
+                    parts.append(t);
+                    return parts.join(" ");
+                }
+        }
     }
     QString partial = parts.takeLast();
     QString match = m_store->findMatch(partial);

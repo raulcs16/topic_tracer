@@ -15,6 +15,7 @@ QHash<int, QByteArray> EdgeListModel::roleNames() const {
     roles[TargetYRole] = "targetY";
     roles[BendsRole] = "bends";
     roles[FlagsRole] = "flags";
+    roles[EdgeTypeRole] = "edgeType";
     return roles;
 }
 
@@ -54,6 +55,12 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
             return static_cast<int>(m_store->flags(edge.key));
         }
         return 0;
+    }
+    case EdgeTypeRole: {
+        if (m_store) {
+            return static_cast<int>(m_store->edgeType(edge.key));
+        }
+        return static_cast<int>(EdgeType::Null);
     }
     default: return QVariant();
     }
@@ -164,4 +171,11 @@ void EdgeListModel::onFlagUpdated(const std::string &key) {
         return;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+void EdgeListModel::onEdgeTypeUpdated(const std::string &key) {
+    int index = getIndex(key);
+    if (index >= m_edges.size())
+        return;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {EdgeTypeRole});
 }

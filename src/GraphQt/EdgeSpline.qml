@@ -9,6 +9,7 @@ Canvas {
     required property double targetY
     required property var bends
     required property int flags
+    required property int edgeType
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
     readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
@@ -48,13 +49,23 @@ Canvas {
             val = Math.max(val, p.y);
         return val + headSize + nodeRadius;
     }
+    function lineWidth() {
+        let lw = 1;
+        if (edgeType === ENUMS.EdgeType.Composes)
+            lw = 3;
+        if (hover)
+            lw *= 2;
+        return lw;
+    }
     x: minX
     y: minY
     width: Math.max(1, maxX - minX) // Ensure at least 1px width
     height: Math.max(1, maxY - minY)
     antialiasing: true
+
     onColorChanged: requestPaint()
     onFlagsChanged: requestPaint()
+
     onPaint: {
         var context = getContext('2d');
         context.save();
@@ -62,7 +73,12 @@ Canvas {
 
         context.globalAlpha = opacityFactor;
         context.strokeStyle = color;
-        context.lineWidth = hover ? 2 : 1;
+        context.lineWidth = lineWidth();
+
+        if (edgeType === ENUMS.EdgeType.Implements) {
+            context.setLineDash([5, 5]); // Dashed line for Implementation
+        }
+
         context.beginPath();
 
         // 1. Start at Source (Ideally offset by nodeRadius here too)
@@ -91,17 +107,50 @@ Canvas {
         context.stroke();
 
         // 5. Draw the Arrowhead at the shortened point
+        context.setLineDash([]);
         var angle = Math.atan2(dy, dx);
         var headX = stopX - x;
         var headY = stopY - y;
+        let flareSize = headSize * 1.2;
 
         context.beginPath();
-        context.moveTo(headX, headY);
-        context.lineTo(headX - headSize * Math.cos(angle - Math.PI / 8), headY - headSize * Math.sin(angle - Math.PI / 8));
-        context.moveTo(headX, headY);
-        context.lineTo(headX - headSize * Math.cos(angle + Math.PI / 8), headY - headSize * Math.sin(angle + Math.PI / 8));
-        context.stroke();
+        if (edgeType === ENUMS.EdgeType.Aggregates) {
+            context.moveTo(headX, headY);
+            context.lineTo(headX - flareSize * Math.cos(angle - 0.5), headY - flareSize * Math.sin(angle - 0.5));
+            context.lineTo(headX - (flareSize * 2) * Math.cos(angle), headY - (flareSize * 2) * Math.sin(angle));
+            context.lineTo(headX - flareSize * Math.cos(angle + 0.5), headY - flareSize * Math.sin(angle + 0.5));
+            context.closePath();
+            context.fillStyle = "#1a1a1a"; // Hollow background
+            context.fill();
+            context.stroke();
+        } else {
+            let sharpnessAngle = Math.PI / 6; // Wider corners (30 degrees)
+            context.moveTo(headX, headY);
 
+            // Point 1: Left back corner (flared wider)
+            let x1 = headX - flareSize * Math.cos(angle - sharpnessAngle);
+            let y1 = headY - flareSize * Math.sin(angle - sharpnessAngle);
+            context.lineTo(x1, y1);
+
+            // Point 2: Right back corner (flared wider)
+            let x2 = headX - flareSize * Math.cos(angle + sharpnessAngle);
+            let y2 = headY - flareSize * Math.sin(angle + sharpnessAngle);
+            context.lineTo(x2, y2);
+
+            // Connect back to the tip
+            context.closePath();
+
+            if (edgeType === ENUMS.EdgeType.Implements || edgeType == ENUMS.EdgeType.Injects) {
+                // Hollow Triangle for Interfaces
+                context.fillStyle = "#1a1a1a"; // Background color
+                context.fill();
+                context.stroke();
+            } else {
+                // Solid Arrowhead for Concrete/Composed
+                context.fillStyle = color;
+                context.fill();
+            }
+        }
         context.restore();
     }
 }

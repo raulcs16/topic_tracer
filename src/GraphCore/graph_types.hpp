@@ -4,13 +4,11 @@
 #include <vector>
 
 enum class EdgeType {
-    ComposedOf,
-    DependsOn,
-    AlternativeTo,
-    RelatedTo,
-
-    Import,
-    Inject,
+    Null,
+    Composes,
+    Associates,
+    Aggregates,
+    Injects,
     Implements,
 };
 

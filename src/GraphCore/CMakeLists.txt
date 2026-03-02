@@ -2,7 +2,6 @@ add_library(GraphCore STATIC
     graph_types.hpp
     graph.cpp
     graph.hpp
-    edge_semantic.hpp
     path_analyzer.hpp
     path_analyzer.cpp
 )

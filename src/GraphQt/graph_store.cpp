@@ -24,17 +24,21 @@ void GraphStore::onNodeRenamed(const Node &node) {
 }
 void GraphStore::onEdgeAdded(const Edge &edge) {
     m_edgeFlags.emplace(edge.key, StateFlag::None);
+    m_edgeTypes.emplace(edge.key, edge.type);
 }
 void GraphStore::onEdgeRemoved(const std::string &key) {
     auto it = m_edgeFlags.find(key);
-    if (it == m_edgeFlags.end())
-        return;
-    m_edgeFlags.erase(it);
+    if (it != m_edgeFlags.end())
+        m_edgeFlags.erase(it);
+    auto itt = m_edgeTypes.find(key);
+    if (itt != m_edgeTypes.end())
+        m_edgeTypes.erase(itt);
 }
 void GraphStore::onClear() {
     m_labels.clear();
     m_nodeFlags.clear();
     m_edgeFlags.clear();
+    m_edgeTypes.clear();
     emit clear();
 }
 
@@ -59,7 +63,13 @@ StateFlags GraphStore::flags(const std::string &key) {
     }
     return it->second.flags;
 }
-
+EdgeType GraphStore::edgeType(const std::string &key) {
+    auto it = m_edgeTypes.find(key);
+    if (it == m_edgeTypes.end()) {
+        return EdgeType::Null;
+    }
+    return it->second;
+}
 void GraphStore::setNodeState(uint32_t id, StateFlag flag, bool state) {
     auto it = m_nodeFlags.find(id);
     if (it == m_nodeFlags.end()) {

@@ -11,6 +11,11 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
         if (auto ctx = m_ctx.lock()) {
             m_layout->call(ctx->attributes);
             ctx->attributes.addNodeCenter2Bends();
+            bbox.min_x = std::numeric_limits<double>::max();
+            bbox.min_y = std::numeric_limits<double>::max();
+
+            bbox.max_x -= std::numeric_limits<double>::max();
+            bbox.max_y -= std::numeric_limits<double>::max();
             for (auto &node : nodes) {
                 auto it = ctx->idToNode.find(node.id);
                 if (it == ctx->idToNode.end())
@@ -19,10 +24,10 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                 double y = ctx->attributes.y(it->second);
                 node.x = x;
                 node.y = y;
-                bbox.max_x = x > bbox.max_x ? x : bbox.max_x;
-                bbox.min_x = x < bbox.min_x ? x : bbox.min_x;
-                bbox.max_y = y > bbox.max_y ? y : bbox.max_y;
-                bbox.min_y = y < bbox.min_y ? y : bbox.min_y;
+                bbox.max_x = std::max(x, bbox.max_x);
+                bbox.min_x = std::min(x, bbox.min_x);
+                bbox.max_y = std::max(y, bbox.max_y);
+                bbox.min_y = std::min(y, bbox.min_y);
             }
             for (auto &edge : edges) {
                 auto src = ctx->idToNode.find(edge.from);
@@ -46,6 +51,11 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                     bbox.min_y = std::min(bbox.min_y, p.m_y);
                 }
             }
+            double padding = 30;
+            bbox.max_x += padding;
+            bbox.min_x -= padding;
+            bbox.max_y += padding;
+            bbox.min_y -= padding;
         }
     } catch (ogdf::AlgorithmFailureException &e) {
         std::cerr << "Algorithmn Failure: " << (int)(e.exceptionCode()) << "\n";

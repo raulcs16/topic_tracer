@@ -1,4 +1,4 @@
-#include "edge_semantic.hpp"
+
 #include "graph_keys.hpp"
 #include "path_analyzer.hpp"
 #include <iostream>
@@ -26,7 +26,7 @@ BFSResult bfs(const Graph &g, uint32_t start) {
         result.order.push_back(u);
         //traverse hirarichal edges
         for (auto &edge : g.getOutEdges(u)) {
-            if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
+            if (edge->type != EdgeType::Composes) {
                 continue;
             }
             uint32_t v = edge->to;
@@ -52,7 +52,7 @@ void dfsVist(const Graph &g,
     entry[u] = time++;
     order.push_back(u);
     for (auto &edge : g.getOutEdges(u)) {
-        if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
+        if (edge->type != EdgeType::Composes) {
             continue;
         }
         uint32_t v = edge->to;
@@ -96,7 +96,7 @@ std::vector<uint32_t> topologicalSort(const Graph &g) {
     for (auto &node : g.nodes()) {
         uint32_t u = node->id;
         for (auto &edge : g.getOutEdges(u)) {
-            if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
+            if (edge->type != EdgeType::Composes) {
                 continue;
             }
             inDegree[edge->to]++;
@@ -115,7 +115,7 @@ std::vector<uint32_t> topologicalSort(const Graph &g) {
         sorted.push_back(u);
 
         for (auto &edge : g.getOutEdges(u)) {
-            if (TG::Semantic::of(edge->type) != TG::Semantic::EdgeSemantic::RoadMap) {
+            if (edge->type != EdgeType::Composes) {
                 continue;
             }
 

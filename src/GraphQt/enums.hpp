@@ -9,12 +9,11 @@ class ENUMS : public QObject {
     QML_UNCREATABLE("EXPOSE ENUMS TO QML")
 public:
     enum class EdgeType {
-        ComposedOf,
-        DependsOn,
-        AlternativeTo,
-        RelatedTo,
-        Import,
-        Inject,
+        Null,
+        Composes,
+        Associates,
+        Aggregates,
+        Injects,
         Implements,
     };
     enum class TopicType {
