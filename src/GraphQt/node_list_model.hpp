@@ -77,5 +77,5 @@ protected:
 private:
     std::vector<NodeItem> m_nodes;
     QMap<uint32_t, int> m_idToRow;
-    GraphStore *m_tgstore;
+    GraphStore *m_store;
 };

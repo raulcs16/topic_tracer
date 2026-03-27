@@ -2,7 +2,11 @@
 #include "node_list_model.hpp"
 
 NodeListModel::NodeListModel(GraphStore *store, QObject *parent)
-    : QAbstractListModel{parent}, m_tgstore(store) {}
+    : QAbstractListModel{parent}, m_store(store) {
+
+    connect(m_store, &GraphStore::labelUpdated, this, &NodeListModel::onLabelUpdated);
+    connect(m_store, &GraphStore::nodeFlagUpdated, this, &NodeListModel::onFlagsUpdated);
+}
 
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
@@ -36,16 +40,16 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     switch (role) {
     case IdRole: return QVariant::fromValue(nodeInfo.id);
     case LabelRole: {
-        if (m_tgstore) {
-            return m_tgstore->label(nodeInfo.id);
+        if (m_store) {
+            return m_store->label(nodeInfo.id);
         }
         return QVariant();
     }
     case XRole: return nodeInfo.x;
     case YRole: return nodeInfo.y;
     case FlagsRole: {
-        if (m_tgstore) {
-            return static_cast<int>(m_tgstore->flags(nodeInfo.id));
+        if (m_store) {
+            return static_cast<int>(m_store->flags(nodeInfo.id));
         }
         return 0;
     }

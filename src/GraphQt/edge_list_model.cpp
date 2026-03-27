@@ -2,7 +2,13 @@
 #include "graph_keys.hpp"
 
 EdgeListModel::EdgeListModel(GraphStore *store, QObject *parent)
-    : QAbstractListModel{parent}, m_store(store) {}
+    : QAbstractListModel{parent}, m_store(store) {
+    connect(m_store,
+            &GraphStore::edgeTypeUpdated,
+            this,
+            &EdgeListModel::onEdgeTypeUpdated);
+    connect(m_store, &GraphStore::edgeFlagUpdated, this, &EdgeListModel::onFlagUpdated);
+}
 
 QHash<int, QByteArray> EdgeListModel::roleNames() const {
     QHash<int, QByteArray> roles;

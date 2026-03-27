@@ -39,6 +39,19 @@ qt_add_qml_module(GraphQt
         ui_states.hpp
         ui_states.cpp
 
+        ui_context.hpp
+        ui_context.cpp
+
+        icommand.hpp
+        command_context.hpp
+
+        command_factory.hpp
+        command_factory.cpp
+
+        clear_command.hpp
+        load_command.hpp
+
+
 
 
         enums.hpp

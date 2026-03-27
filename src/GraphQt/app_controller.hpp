@@ -1,5 +1,6 @@
 #pragma once
 
+#include "command_factory.hpp"
 #include "edge_list_model.hpp"
 #include "evidence.hpp"
 #include "graph.hpp"
@@ -12,7 +13,6 @@
 #include "ui_states.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>
-
 
 class AppController : public QObject {
     Q_OBJECT
@@ -86,6 +86,7 @@ private:
     EdgeListModel *m_edgeList;
     RectListModel *m_rectList;
 
+    CommandFactory *m_commandFactory;
 
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;

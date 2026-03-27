@@ -1,7 +1,9 @@
 #include "app_controller.hpp"
+
 #include "fermatspiral_strategy.hpp"
 #include "fmmm_strategy.hpp"
 #include "graph_keys.hpp"
+
 #include "orthogonal_strategy.hpp"
 #include "path_analyzer.hpp"
 #include "sugiyama_strategy.hpp"
@@ -16,7 +18,11 @@ AppController::AppController(QObject *parent)
       m_nodeList{new NodeListModel(m_store, this)},
       m_edgeList(new EdgeListModel(m_store, this)), m_rectList(new RectListModel(this)),
       m_evidenceDb{new EvidenceDB()},
-      m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)) {
+      m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
+      m_commandFactory(new CommandFactory(
+          new CommandContext{m_graph, m_repo, m_layout, m_rectList, m_store}))
+
+{
     m_mode = AppMode::Progress;
     if (!m_graph || !m_repo || !m_layout || !m_store || !m_labelList || !m_nodeList ||
         !m_edgeList)
@@ -26,34 +32,6 @@ AppController::AppController(QObject *parent)
     m_layout->addObserver(m_nodeList);
     m_layout->addObserver(m_edgeList);
     m_layout->addObserver(m_rectList);
-    //----TG Store Singals BEGIN----
-    connect(m_store,
-            &GraphStore::labelUpdated,
-            m_nodeList,
-            &NodeListModel::onLabelUpdated);
-    connect(m_store,
-            &GraphStore::labelUpdated,
-            m_labelList,
-            &LabelListModel::onLabelUpdated);
-    connect(m_store,
-            &GraphStore::nodeFlagUpdated,
-            m_labelList,
-            &LabelListModel::onFlagUpdated);
-    connect(m_store,
-            &GraphStore::nodeFlagUpdated,
-            m_nodeList,
-            &NodeListModel::onFlagsUpdated);
-    connect(m_store,
-            &GraphStore::edgeTypeUpdated,
-            m_edgeList,
-            &EdgeListModel::onEdgeTypeUpdated);
-    connect(m_store,
-            &GraphStore::edgeFlagUpdated,
-            m_edgeList,
-            &EdgeListModel::onFlagUpdated);
-    connect(m_store, &GraphStore::clear, m_labelList, &LabelListModel::onClear);
-
-    //----TG Store Singals END----
     //----LabelListModel Singals Begin----
     connect(m_labelList,
             &LabelListModel::hoverRequested,
@@ -279,99 +257,103 @@ void AppController::clearAll() { m_graph->clear(); }
 void AppController::executeCommand(QString raw_cmd) {
     raw_cmd = raw_cmd.trimmed();
     QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
-    if (parts.empty())
-        return;
-    QString cmd = parts.takeFirst().toLower();
-    if (cmd == "clear") {
-        clearAll();
+    auto command = m_commandFactory->create(parts);
+    if (command) {
+        command->execute();
     }
-    //if remaining parts
-    if (parts.length() == 1) {
-        QString arg = parts.takeFirst();
-        if (cmd == "save") {
-            save(arg);
-        } else if (cmd == "load") {
-            load(arg);
-        } else if (cmd == "rm") {
-            deleteTopic(arg);
-        } else if (cmd == "touch") {
-            createTopic(arg);
-        } else if (cmd == "focus") {
-            auto topic = m_graph->getNode(arg.toStdString());
-            if (topic != nullptr) {
-                auto clusterId = m_layout->getNodeBoundingBox(topic->id);
-                m_rectList->setSceneBounds(clusterId);
-            }
-        } else if (cmd == "no") {
-            if (arg == "path") {
-                noPath();
-            } else if (arg == "focus") {
-                m_rectList->setSceneBounds(m_layout->getGlobalBoundingBox());
-            }
-        } else if (cmd == "mode") {
-            if (arg.toLower() == "progress") {
-                setMode(AppMode::Progress);
-            } else if (arg.toLower() == "stress") {
-                setMode(AppMode::Stress);
-            }
-        }
-    } else if (parts.length() == 2) {
-        QString arg1 = parts.takeFirst();
-        QString arg2 = parts.takeFirst();
-        if (cmd == "path") {
-            path(arg1, arg2);
-        } else if (cmd == "mv") {
-            rename(arg1, arg2);
-        } else if (cmd == "link") {
-            join(arg1, arg2);
-        } else if (cmd == "touch") {
-            createTopic(arg1);
-            createTopic(arg2);
-        }
-    } else if (parts.length() > 2) {
-        if (cmd == "touch") {
-            QString last = parts.takeLast();
-            QString preLast = parts.takeLast();
-            bool joinLast = preLast == ">";
-            if (!joinLast) {
-                parts.append(preLast);
-                parts.append(last);
-            }
-            while (parts.length()) {
-                auto arg = parts.takeFirst();
-                createTopic(arg);
-                if (joinLast) {
-                    join(last, arg);
-                }
-            }
-        } else if (cmd == "no") {
-            QString nextCmd = parts.takeFirst();
-            if (nextCmd == "link") {
-                if (parts.length() != 2)
-                    return;
-                QString arg1 = parts.takeFirst();
-                QString arg2 = parts.takeFirst();
-                noJoin(arg1, arg2);
-            }
-        } else if (cmd == "link") {
-            if (parts.length() != 4)
-                return;
-            //link topicA topicB -t  [Import,Inject,Implements]
-            QString arg1 = parts.takeFirst();
-            QString arg2 = parts.takeFirst();
-            QString arg3 = parts.takeLast();
-            EdgeType type = EdgeType::Composes;
-            if (arg3.toLower() == "associates")
-                type = EdgeType::Associates;
-            else if (arg3.toLower() == "aggregates")
-                type = EdgeType::Aggregates;
-            else if (arg3.toLower() == "injects")
-                type = EdgeType::Injects;
-            else if (arg3.toLower() == "implements")
-                type = EdgeType::Implements;
-            join(arg1, arg2, type);
-        }
-    }
+    // if (parts.empty())
+    //     return;
+    // QString cmd = parts.takeFirst().toLower();
+    // if (cmd == "clear") {
+    //     clearAll();
+    // }
+    // //if remaining parts
+    // if (parts.length() == 1) {
+    //     QString arg = parts.takeFirst();
+    //     if (cmd == "save") {
+    //         save(arg);
+    //     } else if (cmd == "load") {
+    //         load(arg);
+    //     } else if (cmd == "rm") {
+    //         deleteTopic(arg);
+    //     } else if (cmd == "touch") {
+    //         createTopic(arg);
+    //     } else if (cmd == "focus") {
+    //         auto topic = m_graph->getNode(arg.toStdString());
+    //         if (topic != nullptr) {
+    //             auto clusterId = m_layout->getNodeBoundingBox(topic->id);
+    //             m_rectList->setSceneBounds(clusterId);
+    //         }
+    //     } else if (cmd == "no") {
+    //         if (arg == "path") {
+    //             noPath();
+    //         } else if (arg == "focus") {
+    //             m_rectList->setSceneBounds(m_layout->getGlobalBoundingBox());
+    //         }
+    //     } else if (cmd == "mode") {
+    //         if (arg.toLower() == "progress") {
+    //             setMode(AppMode::Progress);
+    //         } else if (arg.toLower() == "stress") {
+    //             setMode(AppMode::Stress);
+    //         }
+    //     }
+    // } else if (parts.length() == 2) {
+    //     QString arg1 = parts.takeFirst();
+    //     QString arg2 = parts.takeFirst();
+    //     if (cmd == "path") {
+    //         path(arg1, arg2);
+    //     } else if (cmd == "mv") {
+    //         rename(arg1, arg2);
+    //     } else if (cmd == "link") {
+    //         join(arg1, arg2);
+    //     } else if (cmd == "touch") {
+    //         createTopic(arg1);
+    //         createTopic(arg2);
+    //     }
+    // } else if (parts.length() > 2) {
+    //     if (cmd == "touch") {
+    //         QString last = parts.takeLast();
+    //         QString preLast = parts.takeLast();
+    //         bool joinLast = preLast == ">";
+    //         if (!joinLast) {
+    //             parts.append(preLast);
+    //             parts.append(last);
+    //         }
+    //         while (parts.length()) {
+    //             auto arg = parts.takeFirst();
+    //             createTopic(arg);
+    //             if (joinLast) {
+    //                 join(last, arg);
+    //             }
+    //         }
+    //     } else if (cmd == "no") {
+    //         QString nextCmd = parts.takeFirst();
+    //         if (nextCmd == "link") {
+    //             if (parts.length() != 2)
+    //                 return;
+    //             QString arg1 = parts.takeFirst();
+    //             QString arg2 = parts.takeFirst();
+    //             noJoin(arg1, arg2);
+    //         }
+    //     } else if (cmd == "link") {
+    //         if (parts.length() != 4)
+    //             return;
+    //         //link topicA topicB -t  [Import,Inject,Implements]
+    //         QString arg1 = parts.takeFirst();
+    //         QString arg2 = parts.takeFirst();
+    //         QString arg3 = parts.takeLast();
+    //         EdgeType type = EdgeType::Composes;
+    //         if (arg3.toLower() == "associates")
+    //             type = EdgeType::Associates;
+    //         else if (arg3.toLower() == "aggregates")
+    //             type = EdgeType::Aggregates;
+    //         else if (arg3.toLower() == "injects")
+    //             type = EdgeType::Injects;
+    //         else if (arg3.toLower() == "implements")
+    //             type = EdgeType::Implements;
+    //         join(arg1, arg2, type);
+    //     }
+    // }
 }
 
 QString AppController::getAutoComplete(QString raw_cmd) {

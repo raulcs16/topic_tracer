@@ -3,7 +3,11 @@
 
 
 LabelListModel::LabelListModel(GraphStore *store, QObject *parent)
-    : QAbstractListModel{parent}, m_store(store) {}
+    : QAbstractListModel{parent}, m_store(store) {
+    connect(m_store, &GraphStore::labelUpdated, this, &LabelListModel::onLabelUpdated);
+    connect(m_store, &GraphStore::nodeFlagUpdated, this, &LabelListModel::onFlagUpdated);
+    connect(m_store, &GraphStore::clear, this, &LabelListModel::onClear);
+}
 
 QHash<int, QByteArray> LabelListModel::roleNames() const {
     QHash<int, QByteArray> roles;

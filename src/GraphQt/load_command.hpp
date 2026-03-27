@@ -1,0 +1,25 @@
+#pragma once
+
+#include "command_context.hpp"
+#include "icommand.hpp"
+
+
+class LoadCommand : public ICommand {
+public:
+    explicit LoadCommand(CommandContext *ctx, QString file) : m_ctx(ctx), m_file(file) {}
+    void execute() override {
+        m_ctx->graph->clear();
+        m_ctx->graph->beginBatchLoad();
+        bool success = m_ctx->repo->load(*m_ctx->graph, m_file);
+        m_ctx->graph->endBatchLoad();
+        if (success) {
+            auto globalBox = m_ctx->layout->getGlobalBoundingBox();
+            m_ctx->rects->setSceneBounds(globalBox);
+        }
+    }
+    void undo() override {}
+
+private:
+    CommandContext *m_ctx;
+    QString m_file;
+};
