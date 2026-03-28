@@ -53,6 +53,7 @@ qt_add_qml_module(GraphQt
         save_command.hpp
         touch_command.hpp
         rm_command.hpp
+        mv_command.hpp
 
 
 
