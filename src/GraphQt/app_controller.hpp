@@ -40,19 +40,20 @@ public:
     void calculateHeatScores();
 
     //QML API
-    Q_INVOKABLE void join(const QString &topicA,
-                          const QString &topicB,
-                          EdgeType type = EdgeType::Composes);
+
     Q_INVOKABLE void noJoin(const QString &topicA, const QString &topicB);
-    Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
-    Q_INVOKABLE void path(const QString &topicA, const QString &topicB);
     Q_INVOKABLE void noPath();
 
     //ICommand
+    Q_INVOKABLE void path(const QString &topicA, const QString &topicB);
+    Q_INVOKABLE void join(const QString &topicA,
+                          const QString &topicB,
+                          EdgeType type = EdgeType::Composes);
     Q_INVOKABLE void deleteTopic(const QString &name);
     Q_INVOKABLE void createTopic(const QString &name);
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString fileName);
+    Q_INVOKABLE void rename(const QString &topic, const QString &new_name);
     Q_INVOKABLE void clearAll();
 
     Q_INVOKABLE void executeCommand(QString raw_cmd);

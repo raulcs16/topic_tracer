@@ -124,3 +124,19 @@ QString GraphStore::findMatch(QString pattern) {
 
     return match;
 }
+void GraphStore::clearPath() {
+    for (auto &[id, state] : m_nodeFlags) {
+        if (state.has(StateFlag::InPath)) {
+            m_nodeFlags[id].remove(StateFlag::InPath);
+        }
+        m_nodeFlags[id].remove(StateFlag::Hidden);
+        emit nodeFlagUpdated(id);
+    }
+    for (auto &[id, state] : m_edgeFlags) {
+        if (state.has(StateFlag::InPath)) {
+            m_edgeFlags[id].remove(StateFlag::InPath);
+        }
+        m_edgeFlags[id].remove(StateFlag::Hidden);
+        emit edgeFlagUpdated(id);
+    }
+}

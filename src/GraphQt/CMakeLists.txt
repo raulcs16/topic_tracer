@@ -54,6 +54,12 @@ qt_add_qml_module(GraphQt
         touch_command.hpp
         rm_command.hpp
         mv_command.hpp
+        link_command.hpp
+        unlink_command.hpp
+        path_command.hpp
+        clearpath_command.hpp
+    
+        #mode_command.hpp
 
 
 

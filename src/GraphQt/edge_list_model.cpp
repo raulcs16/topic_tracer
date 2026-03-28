@@ -125,10 +125,8 @@ void EdgeListModel::onEdgeAdded(const GraphEdge &edge) {
 }
 void EdgeListModel::onEdgeRemoved(const std::string &key) {
     int index = getIndex(key);
-    qDebug() << "ELM:onEdgeRemoved:" << index;
     if (index >= m_edges.size())
         return;
-    qDebug() << "ELM:onEdgeRemoved:" << key;
     beginRemoveRows(QModelIndex(), index, index);
     m_edges.erase(m_edges.begin() + index);
     endRemoveRows();

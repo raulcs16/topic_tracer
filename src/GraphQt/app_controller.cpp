@@ -295,8 +295,7 @@ void AppController::executeCommand(QString raw_cmd) {
     //             setMode(AppMode::Progress);
     //         } else if (arg.toLower() == "stress") {
     //             setMode(AppMode::Stress);
-    //         }
-    //     }
+    //         }   //     }
     // } else if (parts.length() == 2) {
     //     QString arg1 = parts.takeFirst();
     //     QString arg2 = parts.takeFirst();

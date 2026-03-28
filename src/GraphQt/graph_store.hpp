@@ -28,6 +28,8 @@ public:
     QString findMatch(QString pattern);
     EdgeType edgeType(const std::string &key);
 
+    void clearPath();
+
 
 signals:
     void labelUpdated(uint32_t id);
