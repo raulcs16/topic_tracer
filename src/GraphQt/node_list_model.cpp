@@ -59,11 +59,13 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
 }
 
 int NodeListModel::getIndex(uint32_t id) {
-    auto it = m_idToRow.find(id);
-    if (it == m_idToRow.end()) {
-        return -1;
+    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [id](const NodeItem &node) {
+        return node.id == id;
+    });
+    if (it == m_nodes.end()) {
+        return -1; // Standard "not found" signal
     }
-    return it.value();
+    return static_cast<int>(std::distance(m_nodes.begin(), it));
 }
 
 
@@ -105,7 +107,6 @@ void NodeListModel::onNodeAdded(const GraphNode &node) {
     index = m_nodes.size();
     beginInsertRows(QModelIndex(), index, index);
     m_nodes.push_back(NodeItem{.x = node.x, .y = node.y, .id = node.id, .heat = 0});
-    m_idToRow.insert(node.id, index);
     endInsertRows();
 }
 void NodeListModel::onNodeRemoved(uint32_t id) {
@@ -114,17 +115,12 @@ void NodeListModel::onNodeRemoved(uint32_t id) {
         return;
     beginRemoveRows(QModelIndex(), index, index);
     m_nodes.erase(m_nodes.begin() + index);
-    auto it = m_idToRow.find(id);
-    if (it != m_idToRow.end()) {
-        m_idToRow.erase(it);
-    }
     endRemoveRows();
 }
 
 void NodeListModel::onClear() {
     beginResetModel();
     m_nodes.clear();
-    m_idToRow.clear();
     endResetModel();
 }
 

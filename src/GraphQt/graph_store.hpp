@@ -32,6 +32,7 @@ public:
 signals:
     void labelUpdated(uint32_t id);
     void nodeFlagUpdated(uint32_t id);
+    void nodeDeleted(uint32_t id);
     void edgeFlagUpdated(const std::string &key);
     void edgeTypeUpdated(const std::string &key);
     void clear();

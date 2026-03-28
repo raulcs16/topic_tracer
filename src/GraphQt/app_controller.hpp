@@ -40,9 +40,6 @@ public:
     void calculateHeatScores();
 
     //QML API
-
-    Q_INVOKABLE void createTopic(const QString &name);
-
     Q_INVOKABLE void deleteTopic(const QString &name);
     Q_INVOKABLE void join(const QString &topicA,
                           const QString &topicB,
@@ -52,6 +49,8 @@ public:
     Q_INVOKABLE void path(const QString &topicA, const QString &topicB);
     Q_INVOKABLE void noPath();
 
+    //ICommand
+    Q_INVOKABLE void createTopic(const QString &name);
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString fileName);
     Q_INVOKABLE void clearAll();

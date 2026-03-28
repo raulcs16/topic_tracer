@@ -47,6 +47,7 @@ public slots:
     //add or update a label
     void onLabelUpdated(uint32_t id);
     void onFlagUpdated(uint32_t id);
+    void onNodeDeleted(uint32_t id);
     void onClear();
 
 
@@ -59,6 +60,5 @@ private:
 private:
     bool m_isAddingNewTopic = false;
     QVector<uint32_t> m_ids;
-    QMap<uint32_t, int> m_idToRow;
     GraphStore *m_store;
 };

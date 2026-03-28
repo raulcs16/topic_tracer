@@ -73,7 +73,7 @@ public slots:
     void onEdgeTypeUpdated(const std::string &key);
 
 private:
-    size_t getIndex(const std::string &key);
+    int getIndex(const std::string &key);
     void updatePos(int index, const GraphEdge &edge);
     EdgeItem extract(const GraphEdge &edge);
 

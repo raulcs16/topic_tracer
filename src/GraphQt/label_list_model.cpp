@@ -7,6 +7,7 @@ LabelListModel::LabelListModel(GraphStore *store, QObject *parent)
     connect(m_store, &GraphStore::labelUpdated, this, &LabelListModel::onLabelUpdated);
     connect(m_store, &GraphStore::nodeFlagUpdated, this, &LabelListModel::onFlagUpdated);
     connect(m_store, &GraphStore::clear, this, &LabelListModel::onClear);
+    connect(m_store, &GraphStore::nodeDeleted, this, &LabelListModel::onNodeDeleted);
 }
 
 QHash<int, QByteArray> LabelListModel::roleNames() const {
@@ -64,11 +65,11 @@ Qt::ItemFlags LabelListModel::flags(const QModelIndex &index) const {
     return baseFlags;
 }
 int LabelListModel::getIndex(uint32_t id) {
-    auto it = m_idToRow.find(id);
-    if (it == m_idToRow.end()) {
+    auto it = std::find(m_ids.begin(), m_ids.end(), id);
+    if (it == m_ids.end()) {
         return -1;
     }
-    return it.value();
+    return static_cast<int>(std::distance(m_ids.begin(), it));
 }
 
 void LabelListModel::onLabelUpdated(uint32_t id) {
@@ -82,7 +83,6 @@ void LabelListModel::onLabelUpdated(uint32_t id) {
     beginInsertRows(QModelIndex(), newRow, newRow);
     m_ids.push_back(id);
     endInsertRows();
-    m_idToRow.insert(id, newRow);
 }
 void LabelListModel::onFlagUpdated(uint32_t id) {
     int index = getIndex(id);
@@ -119,6 +119,13 @@ void LabelListModel::clear() {
 
     beginResetModel();
     m_ids.clear();
-    m_idToRow.clear();
     endResetModel();
+}
+void LabelListModel::onNodeDeleted(uint32_t id) {
+    int index = getIndex(id);
+    if (index < 0)
+        return;
+    beginRemoveRows(QModelIndex(), index, index);
+    m_ids.erase(m_ids.begin() + index);
+    endRemoveRows();
 }

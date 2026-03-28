@@ -72,15 +72,14 @@ QVariant EdgeListModel::data(const QModelIndex &index, int role) const {
     }
 }
 
-size_t EdgeListModel::getIndex(const std::string &key) {
-    size_t index = 0;
-    while (index < m_edges.size()) {
-        if (m_edges[index].key == key)
-            break;
-        index++;
+int EdgeListModel::getIndex(const std::string &key) {
+    auto it = std::find_if(m_edges.begin(), m_edges.end(), [key](const EdgeItem &edge) {
+        return edge.key == key;
+    });
+    if (it == m_edges.end()) {
+        return -1;
     }
-
-    return index;
+    return static_cast<int>(std::distance(m_edges.begin(), it));
 }
 
 

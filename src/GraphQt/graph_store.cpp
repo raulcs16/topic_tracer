@@ -9,11 +9,12 @@ void GraphStore::onNodeRemoved(uint32_t id) {
     auto it = m_labels.find(id);
     if (it == m_labels.end())
         return;
-    m_labels.erase(it);
     auto tt = m_nodeFlags.find(id);
     if (tt == m_nodeFlags.end())
         return;
+    emit nodeDeleted(it->first);
     m_nodeFlags.erase(tt);
+    m_labels.erase(it);
 }
 void GraphStore::onNodeRenamed(const Node &node) {
     auto it = m_labels.find(node.id);

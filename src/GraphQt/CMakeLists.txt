@@ -50,6 +50,10 @@ qt_add_qml_module(GraphQt
 
         clear_command.hpp
         load_command.hpp
+        save_command.hpp
+        touch_command.hpp
+        rm_command.hpp
+
 
 
 
