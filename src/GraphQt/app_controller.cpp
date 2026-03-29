@@ -140,31 +140,11 @@ void AppController::onTopicRequested(const QString &name) {
 }
 
 void AppController::calculateHeatScores() {
-    if (m_mode == AppMode::Progress) {
-        auto map = m_heatScore->computeAllHeatScores();
-        for (const auto [topic, score] : map) {
-            if (!score)
-                continue;
-            m_nodeList->updateHeatScore(topic->id, score);
-        }
-    } else {
-        //manually calculate heat score based off edges for each node:
-        for (const auto node : m_graph->nodes()) {
-            float score = 0;
-            auto outEdges = m_graph->getOutEdges(node->id);
-            for (const auto edge : outEdges) {
-                switch (edge->type) {
-                case EdgeType::Null: score += 5.0f; break;
-                case EdgeType::Composes: score += 2.0f; break;
-                case EdgeType::Associates: score += 1.0f; break;
-                case EdgeType::Aggregates: score += 1.5f; break;
-                case EdgeType::Injects: score += 0.5f; break;
-                case EdgeType::Implements: score += 0.0f; break;
-                }
-            }
-            float normalized = std::clamp(score / 15.0f, 0.0f, 1.0f);
-            m_nodeList->updateHeatScore(node->id, normalized);
-        }
+    auto map = m_mode == AppMode::Progress ? m_heatScore->computeProgressScores()
+                                           : m_heatScore->computeStressScores();
+
+    for (const auto [id, score] : map) {
+        m_nodeList->updateHeatScore(id, score);
     }
 }
 
