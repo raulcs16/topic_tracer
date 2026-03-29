@@ -11,6 +11,7 @@ class GraphStore : public QObject, public IGraphObserver {
     QML_UNCREATABLE("Created by controller,used in QtListModels")
 
 public:
+    GraphStore(QObject *parent = nullptr) : QObject(parent) {}
     void onNodeAdded(const Node &node) override;
     void onNodeRemoved(uint32_t id) override;
     void onNodeRenamed(const Node &node) override;

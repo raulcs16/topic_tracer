@@ -1,6 +1,7 @@
 #include "clear_command.hpp"
 #include "clearpath_command.hpp"
 #include "command_factory.hpp"
+#include "focus_command.hpp"
 #include "link_command.hpp"
 #include "load_command.hpp"
 #include "mv_command.hpp"
@@ -39,6 +40,9 @@ std::unique_ptr<ICommand> CommandFactory::create(const QStringList &parts) {
         }
         if (cmd == "path") {
             return std::make_unique<PathCommand>(m_ctx, parts);
+        }
+        if (cmd == "focus") {
+            return std::make_unique<FocusCommand>(m_ctx, parts);
         }
         if (cmd == "no") {
             if (parts.at(1) == "link")

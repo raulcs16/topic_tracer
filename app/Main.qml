@@ -15,11 +15,11 @@ ApplicationWindow {
     required property int major
     required property int minor
     required property int patch
-    property Item focusItem: null
 
-    AppController {
-        id: app_controller
-    }
+    required property CommandAutoCompleter auto_completer
+    required property AppController controller
+
+    property Item focusItem: null
 
     Shortcut {
         sequence: [":"]
@@ -57,9 +57,9 @@ ApplicationWindow {
                     anchors.fill: parent
                     clip: true
                     GraphView {
-                        edgeModel: app_controller.edgeListModel
-                        nodeModel: app_controller.nodeListModel
-                        rectModel: app_controller.rectListModel
+                        edgeModel: app.controller.edgeListModel
+                        nodeModel: app.controller.nodeListModel
+                        rectModel: app.controller.rectListModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
@@ -67,9 +67,9 @@ ApplicationWindow {
                         viewHeight: main_content.height
                     }
                     Connections {
-                        target: app_controller.rectListModel
+                        target: app.controller.rectListModel
                         function onSceneBoundsChanged() {
-                            let rect = app_controller.rectListModel.sceneBounds;
+                            let rect = app.controller.rectListModel.sceneBounds;
                             viewport.fitArea(rect.x, rect.y, rect.width, rect.height);
                         }
                     }
@@ -126,7 +126,7 @@ ApplicationWindow {
                     }
                 }
                 Text {
-                    text: `Mode: ${app_controller.appMode == AppController.Progress ? "Progress" : "Stress"}`
+                    text: `Mode: ${app.controller.appMode == AppController.Progress ? "Progress" : "Stress"}`
                     font.bold: true
                     font.pointSize: 18
                     color: "#F5F5F5"
@@ -174,11 +174,11 @@ ApplicationWindow {
                             }
                         }
                         Keys.onReturnPressed: {
-                            app_controller.executeCommand(commandInput.text.trim());
+                            app.controller.executeCommand(commandInput.text.trim());
                             commandInput.text = "";
                         }
                         Keys.onTabPressed: {
-                            commandInput.text = app_controller.getAutoComplete(commandInput.text.trim());
+                            commandInput.text = app.auto_completer.complete(commandInput.text.trim());
                         }
                         Keys.onEscapePressed: {
                             app.focusItem = viewport;
@@ -220,17 +220,17 @@ ApplicationWindow {
                 border.color: app.focusItem == topicListView ? Colors.accent : "transparent"
                 LabelListView {
                     id: topicListView
-                    model: app_controller.labelListModel
+                    model: app.controller.labelListModel
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }
                 Shortcut {
                     sequence: StandardKey.Copy
-                    onActivated: app_controller.copySelection()
+                    onActivated: app.controller.copySelection()
                 }
                 Shortcut {
                     sequence: StandardKey.SelectAll
-                    onActivated: app_controller.selectAll()
+                    onActivated: app.controller.selectAll()
                 }
                 MouseArea {
                     enabled: app.focusItem != topicListView

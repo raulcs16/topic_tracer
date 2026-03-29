@@ -1,6 +1,8 @@
 #include "app_controller.hpp"
+#include "command_autocompleter.hpp"
 #include "config.hpp"
 #include "graph.hpp"
+#include "graph_store.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
@@ -19,10 +21,17 @@ int main(int argc, char *argv[]) {
         Qt::QueuedConnection);
 
 
+    GraphStore *store = new GraphStore(&engine);
+    CommandAutoCompleter *autoCompleter = new CommandAutoCompleter(store, &engine);
+    AppController *appController = new AppController(store, &engine);
+
+
     engine.setInitialProperties({
         {"major", project_version_major},
         {"minor", project_version_minor},
         {"patch", project_version_patch},
+        {"auto_completer", QVariant::fromValue(autoCompleter)},
+        {"controller", QVariant::fromValue(appController)},
     });
 
 

@@ -58,6 +58,10 @@ qt_add_qml_module(GraphQt
         unlink_command.hpp
         path_command.hpp
         clearpath_command.hpp
+        focus_command.hpp
+
+        command_autocompleter.hpp
+        command_autocompleter.cpp
     
         #mode_command.hpp
 
