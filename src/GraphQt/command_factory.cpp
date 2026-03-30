@@ -4,6 +4,7 @@
 #include "focus_command.hpp"
 #include "link_command.hpp"
 #include "load_command.hpp"
+#include "mode_command.hpp"
 #include "mv_command.hpp"
 #include "path_command.hpp"
 #include "rm_command.hpp"
@@ -43,6 +44,9 @@ std::unique_ptr<ICommand> CommandFactory::create(const QStringList &parts) {
         }
         if (cmd == "focus") {
             return std::make_unique<FocusCommand>(m_ctx, parts);
+        }
+        if (cmd == "mode") {
+            return std::make_unique<ModeCommand>(m_ctx->uiContext, parts.at(1));
         }
         if (cmd == "no") {
             if (parts.at(1) == "link")

@@ -7,3 +7,9 @@ UIContext::UIContext(GraphStore *store, QObject *parent) {
     m_nodes = new NodeListModel(store, this);
     m_rects = new RectListModel(this);
 }
+void UIContext::setMode(ViewMode mode) {
+    if (mode == m_mode)
+        return;
+    m_mode = mode;
+    emit modeChanged();
+}

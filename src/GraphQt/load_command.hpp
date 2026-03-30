@@ -14,7 +14,7 @@ public:
         m_ctx->graph->endBatchLoad();
         if (success) {
             auto globalBox = m_ctx->layout->getGlobalBoundingBox();
-            m_ctx->rects->setSceneBounds(globalBox);
+            m_ctx->uiContext->rectListModel()->setSceneBounds(globalBox);
         }
     }
     void undo() override {}

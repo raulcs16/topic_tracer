@@ -14,7 +14,7 @@ public:
         auto topic = m_ctx->graph->getNode(m_parts.at(1).toStdString());
         if (topic != nullptr) {
             auto clusterId = m_ctx->layout->getNodeBoundingBox(topic->id);
-            m_ctx->rects->setSceneBounds(clusterId);
+            m_ctx->uiContext->rectListModel()->setSceneBounds(clusterId);
         }
     }
     void undo() override {}

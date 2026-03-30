@@ -2,12 +2,12 @@
 #include "graph_repo.hpp"
 #include "graph_store.hpp"
 #include "layout_engine.hpp"
-#include "rect_list_model.hpp"
+#include "ui_context.hpp"
 
 struct CommandContext {
     Graph *graph;
     GraphRepository *repo;
     LayoutEngine *layout;
-    RectListModel *rects;
+    UIContext *uiContext;
     GraphStore *store;
 };

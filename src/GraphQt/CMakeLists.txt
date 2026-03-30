@@ -18,6 +18,8 @@ qt_add_qml_module(GraphQt
     URI GraphQt
     VERSION 1.0
     SOURCES
+
+
         app_controller.hpp
         app_controller.cpp
 
@@ -59,7 +61,7 @@ qt_add_qml_module(GraphQt
         path_command.hpp
         clearpath_command.hpp
         focus_command.hpp
-        #mode_command.hpp
+        mode_command.hpp
 
         command_autocompleter.hpp
         command_autocompleter.cpp

@@ -16,14 +16,10 @@ AppController::AppController(GraphStore *store, UIContext *ui, QObject *parent)
       m_repo{new GraphRepository("./data")}, m_layout{new LayoutEngine()},
       m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
-      m_commandFactory(new CommandFactory(new CommandContext{m_graph,
-                                                             m_repo,
-                                                             m_layout,
-                                                             m_uiContext->rectListModel(),
-                                                             m_store}))
+      m_commandFactory(new CommandFactory(
+          new CommandContext{m_graph, m_repo, m_layout, m_uiContext, m_store}))
 
 {
-    m_mode = AppMode::Progress;
     if (!m_graph || !m_repo || !m_layout || !m_store || !m_uiContext)
         return;
     m_graph->addObserver(m_store);
@@ -31,6 +27,11 @@ AppController::AppController(GraphStore *store, UIContext *ui, QObject *parent)
     m_layout->addObserver(m_uiContext->nodeListModel());
     m_layout->addObserver(m_uiContext->edgeListModel());
     m_layout->addObserver(m_uiContext->rectListModel());
+
+    connect(m_uiContext,
+            &UIContext::modeChanged,
+            this,
+            &AppController::calculateHeatScores);
 }
 AppController::~AppController() {
     m_graph->removeObserver(m_store);
@@ -63,8 +64,9 @@ void AppController::onTopicRequested(const QString &name) {
 }
 
 void AppController::calculateHeatScores() {
-    auto map = m_mode == AppMode::Progress ? m_heatScore->computeProgressScores()
-                                           : m_heatScore->computeStressScores();
+    auto map = m_uiContext->mode() == UIContext::ViewMode::Progress
+                   ? m_heatScore->computeProgressScores()
+                   : m_heatScore->computeStressScores();
 
     for (const auto [id, score] : map) {
         m_uiContext->nodeListModel()->updateHeatScore(id, score);
@@ -79,12 +81,6 @@ void AppController::executeCommand(QString raw_cmd) {
     if (command) {
         command->execute();
     }
-    //     } else if (cmd == "mode") {
-    //         if (arg.toLower() == "progress") {
-    //             setMode(AppMode::Progress);
-    //         } else if (arg.toLower() == "stress") {
-    //             setMode(AppMode::Stress);
-    //         }   //     }
 }
 
 
@@ -100,11 +96,3 @@ void AppController::copySelection() {
     clipboard->setText(list.join("\n"));
 }
 void AppController::selectAll() { m_uiContext->selectionManager()->selectAll(); }
-
-void AppController::setMode(AppMode mode) {
-    if (m_mode == mode)
-        return;
-    m_mode = mode;
-    calculateHeatScores();
-    emit appModeChanged();
-}
