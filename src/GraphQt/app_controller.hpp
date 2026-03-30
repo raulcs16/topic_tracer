@@ -21,11 +21,7 @@ public:
     explicit AppController(GraphStore *store, UIContext *ui, QObject *parent = nullptr);
     ~AppController();
     UIContext *uiContext() const { return m_uiContext; }
-
     Q_INVOKABLE void executeCommand(QString raw_cmd);
-
-    Q_INVOKABLE void copySelection();
-    Q_INVOKABLE void selectAll();
 
 
 public slots:
@@ -44,6 +40,4 @@ private:
 
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;
-
-    int m_hoveredId = -1;
 };

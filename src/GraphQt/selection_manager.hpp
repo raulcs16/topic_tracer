@@ -8,12 +8,15 @@
 
 class SelectionManager : public QObject {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("Managed by cpp")
 
 public:
     explicit SelectionManager(GraphStore *store, QObject *parent = nullptr);
 
     void select(uint32_t id);
-    void selectAll();
+    Q_INVOKABLE void selectAll();
+    Q_INVOKABLE void copySelection();
     void toggle(uint32_t id);
     void selectRange(const std::vector<uint32_t> ids);
     void clear();

@@ -3,6 +3,7 @@
 #include "ui_states.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>
+#include <vector>
 
 
 class GraphStore : public QObject, public IGraphObserver {
@@ -26,7 +27,7 @@ public:
 
     void setNodeState(uint32_t id, StateFlag flag, bool state);
     void setEdgeState(const std::string &key, StateFlag flag, bool state);
-    void setAllNodes(StateFlag flag, bool state);
+    std::vector<uint32_t> setAllNodes(StateFlag flag, bool state);
     QString findMatch(QString pattern);
     EdgeType edgeType(const std::string &key);
 

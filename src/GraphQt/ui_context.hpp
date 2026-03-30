@@ -32,6 +32,7 @@ public:
     SelectionManager *selectionManager() const { return m_selectionManager; }
     ViewMode mode() const { return m_mode; }
     void setMode(ViewMode mode);
+    void setHoveredNode(uint32_t id, bool isHovered, uint32_t bbid);
 
 signals:
     void modeChanged();
@@ -44,4 +45,5 @@ private:
     NodeListModel *m_nodes;
     RectListModel *m_rects;
     ViewMode m_mode = ViewMode::Progress;
+    int m_hoveredId = -1;
 };

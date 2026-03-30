@@ -226,11 +226,11 @@ ApplicationWindow {
                 }
                 Shortcut {
                     sequence: StandardKey.Copy
-                    onActivated: app.controller.copySelection()
+                    onActivated: app.controller.uiContext.selectionManager.copySelection()
                 }
                 Shortcut {
                     sequence: StandardKey.SelectAll
-                    onActivated: app.controller.selectAll()
+                    onActivated: app.controller.uiContext.selectionManager.selectAll()
                 }
                 MouseArea {
                     enabled: app.focusItem != topicListView

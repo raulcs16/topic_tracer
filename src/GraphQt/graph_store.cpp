@@ -140,8 +140,11 @@ void GraphStore::clearPath() {
         emit edgeFlagUpdated(id);
     }
 }
-void GraphStore::setAllNodes(StateFlag flag, bool state) {
+std::vector<uint32_t> GraphStore::setAllNodes(StateFlag flag, bool state) {
+    std::vector<uint32_t> ids;
     for (auto &[id, _] : m_nodeFlags) {
+        ids.push_back(id);
         setNodeState(id, flag, state);
     }
+    return ids;
 }

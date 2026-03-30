@@ -1,5 +1,6 @@
 #include "selection_manager.hpp"
-
+#include <QClipboard>
+#include <QtGui/qguiapplication.h>
 
 SelectionManager::SelectionManager(GraphStore *store, QObject *parent)
     : QObject(parent), m_store(store) {}
@@ -42,5 +43,17 @@ void SelectionManager::selectRange(const std::vector<uint32_t> ids) {
 }
 void SelectionManager::selectAll() {
     clear();
-    m_store->setAllNodes(StateFlag::Selected, true);
+    m_selectedIds = m_store->setAllNodes(StateFlag::Selected, true);
+}
+void SelectionManager::copySelection() {
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    QStringList list;
+    for (const auto id : m_selectedIds) {
+        auto label = m_store->label(id);
+        if (!label.isEmpty()) {
+            list.push_back(label);
+        }
+    }
+    QString text = list.join("\n");
+    clipboard->setText(text);
 }

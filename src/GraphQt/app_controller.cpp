@@ -1,15 +1,7 @@
 #include "app_controller.hpp"
-
-#include "fermatspiral_strategy.hpp"
-#include "fmmm_strategy.hpp"
 #include "graph_keys.hpp"
-
-#include "orthogonal_strategy.hpp"
-#include "path_analyzer.hpp"
-#include "sugiyama_strategy.hpp"
-#include <QClipboard>
 #include <QTimer>
-#include <QtGui/qguiapplication.h>
+
 
 AppController::AppController(GraphStore *store, UIContext *ui, QObject *parent)
     : QObject{parent}, m_store(store), m_uiContext{ui}, m_graph{new Graph()},
@@ -32,6 +24,10 @@ AppController::AppController(GraphStore *store, UIContext *ui, QObject *parent)
             &UIContext::modeChanged,
             this,
             &AppController::calculateHeatScores);
+    connect(m_uiContext->labelListModel(),
+            &LabelListModel::hoverRequested,
+            this,
+            &AppController::onTopicHoverRequested);
 }
 AppController::~AppController() {
     m_graph->removeObserver(m_store);
@@ -44,18 +40,9 @@ AppController::~AppController() {
 }
 
 void AppController::onTopicHoverRequested(uint32_t id, bool isHovered) {
-    m_store->setNodeState(id, StateFlag::Hovered, isHovered);
-
-    if (isHovered) {
-        m_hoveredId = id;
-    } else if (m_hoveredId == id) {
-        m_hoveredId = -1;
-    } else {
-        return;
-    }
-    auto boundingBoxId = m_hoveredId == id ? m_layout->getNodeBoundingBox(id)
-                                           : m_layout->getGlobalBoundingBox();
-    m_uiContext->rectListModel()->setSceneBounds(boundingBoxId);
+    auto boundingBoxId =
+        isHovered ? m_layout->getNodeBoundingBox(id) : m_layout->getGlobalBoundingBox();
+    m_uiContext->setHoveredNode(id, isHovered, boundingBoxId);
 }
 
 void AppController::onTopicRequested(const QString &name) {
@@ -82,17 +69,3 @@ void AppController::executeCommand(QString raw_cmd) {
         command->execute();
     }
 }
-
-
-void AppController::copySelection() {
-    QClipboard *clipboard = QGuiApplication::clipboard();
-    QStringList list;
-    for (const auto id : m_uiContext->selectionManager()->selectedIds()) {
-        auto label = m_store->label(id);
-        if (!label.isEmpty()) {
-            list.push_back(label);
-        }
-    }
-    clipboard->setText(list.join("\n"));
-}
-void AppController::selectAll() { m_uiContext->selectionManager()->selectAll(); }
