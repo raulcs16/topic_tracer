@@ -65,7 +65,6 @@ AppController::AppController(GraphStore *store, QObject *parent)
             &AppController::onTopicToggleSelectionRequest);
 }
 AppController::~AppController() {
-    m_graph->clear();
     m_graph->removeObserver(m_store);
     m_graph->removeObserver(m_layout);
     delete m_repo;
