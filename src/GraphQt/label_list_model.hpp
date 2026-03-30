@@ -2,6 +2,7 @@
 
 
 #include "graph_store.hpp"
+#include "selection_manager.hpp"
 #include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
@@ -22,7 +23,9 @@ public:
         LabelRole,
         FlagsRole,
     };
-    explicit LabelListModel(GraphStore *store, QObject *parent = nullptr);
+    explicit LabelListModel(GraphStore *store,
+                            SelectionManager *selMgr,
+                            QObject *parent = nullptr);
     //list interface override
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -33,15 +36,15 @@ public:
 
     bool isAddingNewTopic() const { return m_isAddingNewTopic; }
     void setIsAddingNewTopic(bool value);
-
     void clear();
+
+    Q_INVOKABLE void selectRequested(uint32_t id);
+    Q_INVOKABLE void toggleSelectionRequest(uint32_t id);
+    Q_INVOKABLE void rangeSelectionRequest(uint32_t id);
 
 signals:
     void isAddingNewTopicChanged();
     void hoverRequested(uint32_t id, bool isHovered);
-    void selectRequested(uint32_t id);
-    void toggleSelectionRequest(uint32_t id);
-    void rangeSelectionRequest(uint32_t id);
 
 public slots:
     //add or update a label
@@ -61,4 +64,5 @@ private:
     bool m_isAddingNewTopic = false;
     QVector<uint32_t> m_ids;
     GraphStore *m_store;
+    SelectionManager *m_selectionManager;
 };

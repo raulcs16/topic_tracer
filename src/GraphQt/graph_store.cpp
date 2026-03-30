@@ -140,3 +140,8 @@ void GraphStore::clearPath() {
         emit edgeFlagUpdated(id);
     }
 }
+void GraphStore::setAllNodes(StateFlag flag, bool state) {
+    for (auto &[id, _] : m_nodeFlags) {
+        setNodeState(id, flag, state);
+    }
+}

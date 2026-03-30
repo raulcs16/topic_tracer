@@ -26,6 +26,7 @@ public:
 
     void setNodeState(uint32_t id, StateFlag flag, bool state);
     void setEdgeState(const std::string &key, StateFlag flag, bool state);
+    void setAllNodes(StateFlag flag, bool state);
     QString findMatch(QString pattern);
     EdgeType edgeType(const std::string &key);
 

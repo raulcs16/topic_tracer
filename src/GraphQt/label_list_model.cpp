@@ -2,8 +2,10 @@
 #include "label_list_model.hpp"
 
 
-LabelListModel::LabelListModel(GraphStore *store, QObject *parent)
-    : QAbstractListModel{parent}, m_store(store) {
+LabelListModel::LabelListModel(GraphStore *store,
+                               SelectionManager *selMgr,
+                               QObject *parent)
+    : QAbstractListModel{parent}, m_store(store), m_selectionManager{selMgr} {
     connect(m_store, &GraphStore::labelUpdated, this, &LabelListModel::onLabelUpdated);
     connect(m_store, &GraphStore::nodeFlagUpdated, this, &LabelListModel::onFlagUpdated);
     connect(m_store, &GraphStore::clear, this, &LabelListModel::onClear);
@@ -128,4 +130,12 @@ void LabelListModel::onNodeDeleted(uint32_t id) {
     beginRemoveRows(QModelIndex(), index, index);
     m_ids.erase(m_ids.begin() + index);
     endRemoveRows();
+}
+void LabelListModel::selectRequested(uint32_t id) { m_selectionManager->select(id); }
+void LabelListModel::toggleSelectionRequest(uint32_t id) {
+    m_selectionManager->toggle(id);
+}
+void LabelListModel::rangeSelectionRequest(uint32_t id) {
+    auto ids = getIdInRange(m_selectionManager->lastSelectedId(), id);
+    m_selectionManager->selectRange(ids);
 }

@@ -57,9 +57,9 @@ ApplicationWindow {
                     anchors.fill: parent
                     clip: true
                     GraphView {
-                        edgeModel: app.controller.edgeListModel
-                        nodeModel: app.controller.nodeListModel
-                        rectModel: app.controller.rectListModel
+                        edgeModel: app.controller.uiContext.edgeListModel
+                        nodeModel: app.controller.uiContext.nodeListModel
+                        rectModel: app.controller.uiContext.rectListModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
@@ -67,9 +67,9 @@ ApplicationWindow {
                         viewHeight: main_content.height
                     }
                     Connections {
-                        target: app.controller.rectListModel
+                        target: app.controller.uiContext.rectListModel
                         function onSceneBoundsChanged() {
-                            let rect = app.controller.rectListModel.sceneBounds;
+                            let rect = app.controller.uiContext.rectListModel.sceneBounds;
                             viewport.fitArea(rect.x, rect.y, rect.width, rect.height);
                         }
                     }
@@ -220,7 +220,7 @@ ApplicationWindow {
                 border.color: app.focusItem == topicListView ? Colors.accent : "transparent"
                 LabelListView {
                     id: topicListView
-                    model: app.controller.labelListModel
+                    model: app.controller.uiContext.labelListModel
                     anchors.fill: parent
                     anchors.topMargin: 15
                 }

@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "graph.hpp"
 #include "graph_store.hpp"
+#include "ui_context.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
@@ -22,8 +23,10 @@ int main(int argc, char *argv[]) {
 
 
     GraphStore *store = new GraphStore(&engine);
+    UIContext *uiContext = new UIContext(store, &engine);
+    AppController *appController = new AppController(store, uiContext, &engine);
+
     CommandAutoCompleter *autoCompleter = new CommandAutoCompleter(store, &engine);
-    AppController *appController = new AppController(store, &engine);
 
 
     engine.setInitialProperties({

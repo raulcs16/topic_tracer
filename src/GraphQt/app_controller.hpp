@@ -1,15 +1,13 @@
 #pragma once
 
 #include "command_factory.hpp"
-#include "edge_list_model.hpp"
 #include "evidence.hpp"
 #include "graph.hpp"
 #include "graph_repo.hpp"
 #include "heat_score.hpp"
-#include "label_list_model.hpp"
 #include "layout_engine.hpp"
-#include "node_list_model.hpp"
-#include "rect_list_model.hpp"
+#include "selection_manager.hpp"
+#include "ui_context.hpp"
 #include "ui_states.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -18,29 +16,20 @@ class AppController : public QObject {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Created in main.cpp")
-    Q_PROPERTY(LabelListModel *labelListModel READ labelListModel CONSTANT)
-    Q_PROPERTY(EdgeListModel *edgeListModel READ edgeListModel CONSTANT)
-    Q_PROPERTY(NodeListModel *nodeListModel READ nodeListModel CONSTANT)
-    Q_PROPERTY(RectListModel *rectListModel READ rectListModel CONSTANT)
+    Q_PROPERTY(UIContext *uiContext READ uiContext CONSTANT)
     Q_PROPERTY(AppMode appMode READ appMode NOTIFY appModeChanged)
-
 public:
     enum class AppMode {
         Progress,
         Stress
     };
     Q_ENUM(AppMode)
-    explicit AppController(GraphStore *store, QObject *parent = nullptr);
+    explicit AppController(GraphStore *store, UIContext *ui, QObject *parent = nullptr);
     ~AppController();
-    LabelListModel *labelListModel() const { return m_labelList; }
-    NodeListModel *nodeListModel() const { return m_nodeList; }
-    EdgeListModel *edgeListModel() const { return m_edgeList; }
-    RectListModel *rectListModel() const { return m_rectList; }
     AppMode appMode() const { return m_mode; }
+    UIContext *uiContext() const { return m_uiContext; }
 
     void calculateHeatScores();
-
-
     Q_INVOKABLE void executeCommand(QString raw_cmd);
 
     Q_INVOKABLE void copySelection();
@@ -50,14 +39,10 @@ public:
 public slots:
     void onTopicRequested(const QString &topic);
     void onTopicHoverRequested(uint32_t id, bool isHovered);
-    void onTopicSelectedRequested(uint32_t id);
-    void onTopicToggleSelectionRequest(uint32_t id);
-    void onTopicRangeSelectionRequest(uint32_t id);
 signals:
     void appModeChanged();
 
 private:
-    void clearSelection();
     void setMode(AppMode mode);
 
 private:
@@ -65,20 +50,13 @@ private:
     LayoutEngine *m_layout;
     GraphStore *m_store;
     GraphRepository *m_repo;
-    LabelListModel *m_labelList;
-    NodeListModel *m_nodeList;
-    EdgeListModel *m_edgeList;
-    RectListModel *m_rectList;
-
+    UIContext *m_uiContext;
     CommandFactory *m_commandFactory;
 
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;
 
     int m_cycleIndex = -1;
-    std::vector<uint32_t> m_selectedIds;
-    int m_lastSelectedId = -1;
-    int m_rangeSelectedId = -1;
     int m_hoveredId = -1;
     AppMode m_mode;
 };
