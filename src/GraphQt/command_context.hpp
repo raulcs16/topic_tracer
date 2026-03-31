@@ -9,5 +9,4 @@ struct CommandContext {
     GraphRepository *repo;
     LayoutEngine *layout;
     UIContext *uiContext;
-    GraphStore *store;
 };

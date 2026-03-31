@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 
     GraphStore *store = new GraphStore(&engine);
     UIContext *uiContext = new UIContext(store, &engine);
-    AppController *appController = new AppController(store, uiContext, &engine);
+    AppController *appController = new AppController(uiContext, &engine);
 
     CommandAutoCompleter *autoCompleter = new CommandAutoCompleter(store, &engine);
 

@@ -18,7 +18,7 @@ std::unique_ptr<ICommand> CommandFactory::create(const QStringList &parts) {
         return nullptr;
     QString cmd = parts.first().toLower();
     if (cmd == "clear") {
-        return std::make_unique<ClearCommand>(m_ctx->store);
+        return std::make_unique<ClearCommand>(m_ctx->uiContext->store());
     }
     if (parts.size() >= 2) {
         if (cmd == "load") {
@@ -52,7 +52,7 @@ std::unique_ptr<ICommand> CommandFactory::create(const QStringList &parts) {
             if (parts.at(1) == "link")
                 return std::make_unique<UnLinkCommand>(m_ctx->graph, parts);
             if (parts.at(1) == "path") {
-                return std::make_unique<ClearPathCommand>(m_ctx->store);
+                return std::make_unique<ClearPathCommand>(m_ctx->uiContext->store());
             }
         }
     }

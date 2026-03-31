@@ -4,10 +4,7 @@
 
 
 //Node API
-Graph::~Graph() {
-    clear();
-    m_observers.clear();
-}
+Graph::~Graph() { m_observers.clear(); }
 bool Graph::addNode(const std::string &label) {
     if (getNode(label) != nullptr)
         return false;

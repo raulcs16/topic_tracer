@@ -17,10 +17,7 @@ void LayoutEngine::initPool() {
     pool->transform().x = -1300 / 4; // screenW //TODO: get rid of magic number
     m_clusterMap.emplace(M_POOL_ID, pool);
 }
-LayoutEngine::~LayoutEngine() {
-    clear();
-    m_observers.clear();
-}
+LayoutEngine::~LayoutEngine() { m_observers.clear(); }
 
 void LayoutEngine::clear() {
     m_clusterMap.clear();

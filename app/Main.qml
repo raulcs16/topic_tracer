@@ -126,7 +126,7 @@ ApplicationWindow {
                     }
                 }
                 Text {
-                    text: `Mode: ${app.controller.uiContext.mode == UIContext.Progress ? "Progress" : "Stress"}`
+                    text: `Mode: ${app.controller.uiContext.modeName}`
                     font.bold: true
                     font.pointSize: 18
                     color: "#F5F5F5"

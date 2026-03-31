@@ -23,11 +23,19 @@ public:
         std::unordered_set<int> topicSet(topicIds.begin(), topicIds.end());
         for (const auto &topic : m_ctx->graph->nodes()) {
             if (topicSet.contains(topic->id)) {
-                m_ctx->store->setNodeState(topic->id, StateFlag::InPath, true);
-                m_ctx->store->setNodeState(topic->id, StateFlag::Hidden, false);
+                m_ctx->uiContext->store()->setNodeState(topic->id,
+                                                        StateFlag::InPath,
+                                                        true);
+                m_ctx->uiContext->store()->setNodeState(topic->id,
+                                                        StateFlag::Hidden,
+                                                        false);
             } else {
-                m_ctx->store->setNodeState(topic->id, StateFlag::InPath, false);
-                m_ctx->store->setNodeState(topic->id, StateFlag::Hidden, true);
+                m_ctx->uiContext->store()->setNodeState(topic->id,
+                                                        StateFlag::InPath,
+                                                        false);
+                m_ctx->uiContext->store()->setNodeState(topic->id,
+                                                        StateFlag::Hidden,
+                                                        true);
             }
         }
 
@@ -36,11 +44,19 @@ public:
         std::unordered_set<std::string> edgeSet(edgeKeys.begin(), edgeKeys.end());
         for (const auto &edge : m_ctx->graph->edges()) {
             if (edgeSet.contains(edge->key)) {
-                m_ctx->store->setEdgeState(edge->key, StateFlag::InPath, true);
-                m_ctx->store->setEdgeState(edge->key, StateFlag::Hidden, false);
+                m_ctx->uiContext->store()->setEdgeState(edge->key,
+                                                        StateFlag::InPath,
+                                                        true);
+                m_ctx->uiContext->store()->setEdgeState(edge->key,
+                                                        StateFlag::Hidden,
+                                                        false);
             } else {
-                m_ctx->store->setEdgeState(edge->key, StateFlag::InPath, false);
-                m_ctx->store->setEdgeState(edge->key, StateFlag::Hidden, true);
+                m_ctx->uiContext->store()->setEdgeState(edge->key,
+                                                        StateFlag::InPath,
+                                                        false);
+                m_ctx->uiContext->store()->setEdgeState(edge->key,
+                                                        StateFlag::Hidden,
+                                                        true);
             }
         }
     }

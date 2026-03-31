@@ -1,6 +1,7 @@
 #pragma once
 #include "command_context.hpp"
 #include "icommand.hpp"
+
 class CommandFactory {
 public:
     CommandFactory(CommandContext *ctx) : m_ctx(ctx) {}

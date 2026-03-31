@@ -13,6 +13,7 @@ void UIContext::setMode(ViewMode mode) {
         return;
     m_mode = mode;
     emit modeChanged();
+    emit modeNameChanged();
 }
 void UIContext::setHoveredNode(uint32_t id, bool isHovered, uint32_t bbId) {
     m_store->setNodeState(id, StateFlag::Hovered, isHovered);
@@ -24,4 +25,7 @@ void UIContext::setHoveredNode(uint32_t id, bool isHovered, uint32_t bbId) {
         return;
     }
     m_rects->setSceneBounds(bbId);
+}
+QString UIContext::modeName() const {
+    return m_mode == ViewMode::Progress ? "Progress" : "Stress";
 }

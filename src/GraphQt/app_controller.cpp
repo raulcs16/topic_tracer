@@ -3,18 +3,18 @@
 #include <QTimer>
 
 
-AppController::AppController(GraphStore *store, UIContext *ui, QObject *parent)
-    : QObject{parent}, m_store(store), m_uiContext{ui}, m_graph{new Graph()},
+AppController::AppController(UIContext *ui, QObject *parent)
+    : QObject{parent}, m_uiContext{ui}, m_graph{new Graph()},
       m_repo{new GraphRepository("./data")}, m_layout{new LayoutEngine()},
       m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
-      m_commandFactory(new CommandFactory(
-          new CommandContext{m_graph, m_repo, m_layout, m_uiContext, m_store}))
+      m_commandFactory(
+          new CommandFactory(new CommandContext{m_graph, m_repo, m_layout, m_uiContext}))
 
 {
-    if (!m_graph || !m_repo || !m_layout || !m_store || !m_uiContext)
+    if (!m_graph || !m_repo || !m_layout || !m_uiContext)
         return;
-    m_graph->addObserver(m_store);
+    m_graph->addObserver(m_uiContext->store());
     m_graph->addObserver(m_layout);
     m_layout->addObserver(m_uiContext->nodeListModel());
     m_layout->addObserver(m_uiContext->edgeListModel());
@@ -30,13 +30,12 @@ AppController::AppController(GraphStore *store, UIContext *ui, QObject *parent)
             &AppController::onTopicHoverRequested);
 }
 AppController::~AppController() {
-    m_graph->removeObserver(m_store);
-    m_graph->removeObserver(m_layout);
     delete m_repo;
-    delete m_graph;
     delete m_layout;
+    delete m_graph;
     delete m_evidenceDb;
     delete m_heatScore;
+    delete m_commandFactory;
 }
 
 void AppController::onTopicHoverRequested(uint32_t id, bool isHovered) {

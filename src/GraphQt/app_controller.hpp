@@ -18,7 +18,7 @@ class AppController : public QObject {
     QML_UNCREATABLE("Created in main.cpp")
     Q_PROPERTY(UIContext *uiContext READ uiContext CONSTANT)
 public:
-    explicit AppController(GraphStore *store, UIContext *ui, QObject *parent = nullptr);
+    explicit AppController(UIContext *ui, QObject *parent = nullptr);
     ~AppController();
     UIContext *uiContext() const { return m_uiContext; }
     Q_INVOKABLE void executeCommand(QString raw_cmd);
@@ -33,11 +33,9 @@ public slots:
 private:
     Graph *m_graph;
     LayoutEngine *m_layout;
-    GraphStore *m_store;
     GraphRepository *m_repo;
     UIContext *m_uiContext;
     CommandFactory *m_commandFactory;
-
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;
 };

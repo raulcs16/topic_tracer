@@ -18,6 +18,7 @@ class UIContext : public QObject {
     Q_PROPERTY(RectListModel *rectListModel READ rectListModel CONSTANT)
     Q_PROPERTY(SelectionManager *selectionManager READ selectionManager CONSTANT)
     Q_PROPERTY(ViewMode mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(QString modeName READ modeName NOTIFY modeNameChanged)
 public:
     enum class ViewMode {
         Progress,
@@ -30,12 +31,17 @@ public:
     NodeListModel *nodeListModel() const { return m_nodes; }
     RectListModel *rectListModel() const { return m_rects; }
     SelectionManager *selectionManager() const { return m_selectionManager; }
+    GraphStore *store() const { return m_store; }
     ViewMode mode() const { return m_mode; }
     void setMode(ViewMode mode);
     void setHoveredNode(uint32_t id, bool isHovered, uint32_t bbid);
 
+    QString modeName() const;
+
+
 signals:
     void modeChanged();
+    void modeNameChanged();
 
 private:
     GraphStore *m_store;
