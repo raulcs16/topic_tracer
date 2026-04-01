@@ -7,12 +7,10 @@ Item {
     id: root
 
     required property NodeListModel model
-
     required property int index
     required property int nodeId
     required property string label
-    required property double posx
-    required property double posy
+    required property pos position
     required property int flags
     required property real heatScore
 
@@ -20,6 +18,8 @@ Item {
     readonly property bool selected: (flags & ENUMS.StateFlag.Selected) !== 0
     readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
     readonly property bool hidden: (flags & ENUMS.StateFlag.Hidden) !== 0
+    readonly property double posx: position.x
+    readonly property double posy: position.y
 
     function heatColor(heat) {
         if (heat <= 0.001)

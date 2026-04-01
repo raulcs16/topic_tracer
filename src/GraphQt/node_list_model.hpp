@@ -2,24 +2,11 @@
 
 
 #include "graph_store.hpp"
-#include "layout_types.hpp"
-#include "ui_states.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
-#include <ogdf/basic/GraphAttributes.h>
-#include <ogdf/basic/GraphObserver.h>
-#include <vector>
 
-
-struct NodeItem {
-    uint32_t id;
-    float heat = 0.0f;
-    double x;
-    double y;
-};
-
-class NodeListModel : public QAbstractListModel, public ILayoutObserver {
+class NodeListModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Use TGC.nodes instead")
@@ -28,8 +15,7 @@ public:
     enum Roles {
         IdRole = Qt::UserRole + 1,
         LabelRole,
-        XRole,
-        YRole,
+        PosRole,
         FlagsRole,
         HeatRole,
     };
@@ -39,24 +25,6 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-    //Incremental API
-
-    void updateHeatScore(uint32_t id, float score);
-
-    void onNodeAdded(const GraphNode &node) override;
-    void onNodeRemoved(uint32_t id) override;
-    void onNodeUpdated(const GraphNode &node) override;
-    void onClear() override;
-
-    void onEdgeAdded(const GraphEdge &edge) override {}
-    void onEdgeRemoved(const std::string &edge) override {}
-    void onClusterRectUpdated(uint32_t clusterId,
-                              float x,
-                              float y,
-                              float w,
-                              float h) override {}
-    void onClusterRectDeleted(uint32_t) override {}
-
 
 signals:
     void hoverRequested(uint32_t id, bool isHovered);
@@ -64,17 +32,21 @@ signals:
     void toggleSelectionRequest(uint32_t id);
 
 public slots:
+    void onNodeAdded(uint32_t id);
     void onLabelUpdated(uint32_t id);
     void onFlagsUpdated(uint32_t id);
+    void onPosUpdated(uint32_t id);
+    void onHeatUpdated(uint32_t id);
+    void onNodeDeleted(uint32_t id);
+    void onClear();
 
 private:
     int getIndex(uint32_t id);
-    void updatePos(int index, double x, double y);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    std::vector<NodeItem> m_nodes;
+    QVector<uint32_t> m_ids;
     GraphStore *m_store;
 };

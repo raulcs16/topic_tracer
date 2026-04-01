@@ -8,7 +8,7 @@ Item {
 
     required property NodeListModel nodeModel
     required property EdgeListModel edgeModel
-    required property RectListModel rectModel
+    required property BoundingBoxListModel bboxModel
 
     property real viewWidth: 0
     property real viewHeight: 0
@@ -28,7 +28,7 @@ Item {
         }
     }
     Repeater {
-        model: root.rectModel
-        delegate: RectDelegate {}
+        model: root.bboxModel
+        delegate: BoundingBoxDelegate {}
     }
 }

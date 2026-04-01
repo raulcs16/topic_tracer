@@ -34,9 +34,13 @@ qt_add_qml_module(GraphQt
 
         node_list_model.hpp
         node_list_model.cpp
+
+        boundingbox_list_model.hpp
+        boundingbox_list_model.cpp
          
         rect_list_model.hpp
         rect_list_model.cpp
+
         
         ui_states.hpp
         ui_states.cpp
@@ -44,27 +48,24 @@ qt_add_qml_module(GraphQt
         ui_context.hpp
         ui_context.cpp
 
-        icommand.hpp
-        command_context.hpp
-
-        command_factory.hpp
-        command_factory.cpp
-
-        clear_command.hpp
-        load_command.hpp
-        save_command.hpp
-        touch_command.hpp
-        rm_command.hpp
-        mv_command.hpp
-        link_command.hpp
-        unlink_command.hpp
-        path_command.hpp
-        clearpath_command.hpp
-        focus_command.hpp
-        mode_command.hpp
-
-        command_autocompleter.hpp
-        command_autocompleter.cpp
+        commands/icommand.hpp
+        commands/command_context.hpp
+        commands/command_factory.hpp
+        commands/command_factory.cpp
+        commands/clear_command.hpp
+        commands/load_command.hpp
+        commands/save_command.hpp
+        commands/touch_command.hpp
+        commands/rm_command.hpp
+        commands/mv_command.hpp
+        commands/link_command.hpp
+        commands/unlink_command.hpp
+        commands/path_command.hpp
+        commands/clearpath_command.hpp
+        commands/focus_command.hpp
+        commands/mode_command.hpp
+        commands/command_autocompleter.hpp
+        commands/command_autocompleter.cpp
     
         selection_manager.hpp
         selection_manager.cpp
@@ -76,6 +77,13 @@ qt_add_qml_module(GraphQt
         enums.hpp
         enums.cpp
 
+        pos.hpp
+        pos.cpp
+
+        edge_pos.hpp
+        edge_pos.cpp
+
+
     QML_FILES
         LabelListView.qml
         LabelDelegate.qml
@@ -85,6 +93,7 @@ qt_add_qml_module(GraphQt
         NodeDelegate.qml
         RectDelegate.qml
         ViewPort.qml
+        BoundingBoxDelegate.qml
 
     IMPORT_PATH 
         ${QT_QML_OUTPUT_DIRECTORY}
@@ -92,5 +101,6 @@ qt_add_qml_module(GraphQt
 
 target_include_directories(GraphQt PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}  
+        ${CMAKE_CURRENT_SOURCE_DIR}/commands
         "${CMAKE_BINARY_DIR}/configured_files/include"
 )

@@ -1,29 +1,28 @@
-#include "graph_keys.hpp"
 #include "node_list_model.hpp"
 
 NodeListModel::NodeListModel(GraphStore *store, QObject *parent)
     : QAbstractListModel{parent}, m_store(store) {
-
+    connect(m_store, &GraphStore::nodeAdded, this, &NodeListModel::onNodeAdded);
     connect(m_store, &GraphStore::labelUpdated, this, &NodeListModel::onLabelUpdated);
     connect(m_store, &GraphStore::nodeFlagUpdated, this, &NodeListModel::onFlagsUpdated);
+    connect(m_store, &GraphStore::nodePosUpdated, this, &NodeListModel::onPosUpdated);
+    connect(m_store, &GraphStore::nodeHeatUpdated, this, &NodeListModel::onHeatUpdated);
+    connect(m_store, &GraphStore::nodeDeleted, this, &NodeListModel::onNodeDeleted);
+    connect(m_store, &GraphStore::clear, this, &NodeListModel::onClear);
 }
-
 QHash<int, QByteArray> NodeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "nodeId";
     roles[LabelRole] = "label";
-    roles[XRole] = "posx";
-    roles[YRole] = "posy";
+    roles[PosRole] = "position";
     roles[FlagsRole] = "flags";
     roles[HeatRole] = "heatScore";
     return roles;
 }
-
 int NodeListModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
-    return m_nodes.size();
+    return m_ids.size();
 }
-
 Qt::ItemFlags NodeListModel::flags(const QModelIndex &index) const {
     return QAbstractListModel::flags(index) | Qt::ItemIsEditable;
 }
@@ -32,102 +31,39 @@ QVariant NodeListModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid()) {
         return QVariant();
     }
-    if (index.row() >= m_nodes.size()) {
+    if (index.row() >= m_ids.size() || !m_store) {
         return QVariant();
     }
-    NodeItem nodeInfo = m_nodes[index.row()];
+    auto id = m_ids[index.row()];
 
     switch (role) {
-    case IdRole: return QVariant::fromValue(nodeInfo.id);
-    case LabelRole: {
-        if (m_store) {
-            return m_store->label(nodeInfo.id);
-        }
-        return QVariant();
-    }
-    case XRole: return nodeInfo.x;
-    case YRole: return nodeInfo.y;
-    case FlagsRole: {
-        if (m_store) {
-            return static_cast<int>(m_store->flags(nodeInfo.id));
-        }
-        return 0;
-    }
-    case HeatRole: return nodeInfo.heat;
+    case IdRole: return QVariant::fromValue(id);
+    case LabelRole: return m_store->label(id);
+    case PosRole: return QVariant::fromValue(m_store->pos(id));
+    case FlagsRole: return static_cast<int>(m_store->flags(id));
+    case HeatRole: return m_store->heat(id);
     default: return QVariant();
     }
 }
 
-int NodeListModel::getIndex(uint32_t id) {
-    auto it = std::find_if(m_nodes.begin(), m_nodes.end(), [id](const NodeItem &node) {
-        return node.id == id;
-    });
-    if (it == m_nodes.end()) {
-        return -1; // Standard "not found" signal
-    }
-    return static_cast<int>(std::distance(m_nodes.begin(), it));
-}
 
-
-void NodeListModel::updateHeatScore(uint32_t id, float score) {
-    int index = getIndex(id);
-    if (index < 0)
-        return;
-    if (m_nodes[index].heat == score) {
-        return;
-    }
-    m_nodes[index].heat = score;
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {HeatRole});
-}
-
-
-void NodeListModel::updatePos(int index, double x, double y) {
-    auto node = m_nodes[index];
-    if (node.x == x && node.y == y)
-        return;
-    m_nodes[index].x = x;
-    m_nodes[index].y = y;
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, {XRole, YRole});
-}
-
-void NodeListModel::onNodeUpdated(const GraphNode &node) {
-    int index = getIndex(node.id);
-    if (index < 0)
-        return;
-    return updatePos(index, node.x, node.y);
-}
-void NodeListModel::onNodeAdded(const GraphNode &node) {
-    int index = getIndex(node.id);
-    if (index >= 0) {
-        updatePos(index, node.x, node.y);
-        return;
-    }
-    index = m_nodes.size();
-    beginInsertRows(QModelIndex(), index, index);
-    m_nodes.push_back(NodeItem{.x = node.x, .y = node.y, .id = node.id, .heat = 0});
+void NodeListModel::onNodeAdded(uint32_t id) {
+    int row = m_ids.size();
+    beginInsertRows(QModelIndex(), row, row);
+    m_ids.push_back(id);
     endInsertRows();
 }
-void NodeListModel::onNodeRemoved(uint32_t id) {
-    int index = getIndex(id);
-    if (index < 0)
-        return;
-    beginRemoveRows(QModelIndex(), index, index);
-    m_nodes.erase(m_nodes.begin() + index);
-    endRemoveRows();
-}
+int NodeListModel::getIndex(uint32_t id) {
+    auto it = std::find(m_ids.begin(), m_ids.end(), id);
+    if (it == m_ids.end())
+        return -1;
 
-void NodeListModel::onClear() {
-    beginResetModel();
-    m_nodes.clear();
-    endResetModel();
+    return static_cast<int>(std::distance(m_ids.begin(), it));
 }
-
 void NodeListModel::onLabelUpdated(uint32_t id) {
     int row = getIndex(id);
     if (row < 0) {
-        return; // Node doesn't exist in our list yet
+        return;
     }
     const QModelIndex modelIndex = this->index(row);
     emit dataChanged(modelIndex, modelIndex, {LabelRole});
@@ -139,4 +75,36 @@ void NodeListModel::onFlagsUpdated(uint32_t id) {
     }
     const QModelIndex modelIndex = this->index(row);
     emit dataChanged(modelIndex, modelIndex, {FlagsRole});
+}
+void NodeListModel::onPosUpdated(uint32_t id) {
+    auto row = getIndex(id);
+    if (row < 0) {
+        return;
+    }
+    const QModelIndex modelIndex = this->index(row);
+    emit dataChanged(modelIndex, modelIndex, {PosRole});
+}
+
+void NodeListModel::onHeatUpdated(uint32_t id) {
+    auto row = getIndex(id);
+    if (row < 0) {
+        return;
+    }
+    const QModelIndex modelIndex = this->index(row);
+    emit dataChanged(modelIndex, modelIndex, {HeatRole});
+}
+void NodeListModel::onNodeDeleted(uint32_t id) {
+    auto row = getIndex(id);
+    if (row < 0) {
+        return;
+    }
+    const QModelIndex modelIndex = this->index(row);
+    beginRemoveRows(modelIndex, row, row);
+    m_ids.removeAt(row);
+    endRemoveRows();
+}
+void NodeListModel::onClear() {
+    beginResetModel();
+    m_ids.clear();
+    endResetModel();
 }

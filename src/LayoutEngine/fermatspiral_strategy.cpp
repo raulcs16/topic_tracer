@@ -12,7 +12,7 @@ void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
         double x = r * std::cos(theta);
         double y = r * std::sin(theta);
 
-        // double m = std::max(std::abs(x), std::abs(y));
+        // float m = std::max(std::abs(x), std::abs(y));
         // if (m > 0.0) {
         //     x /= m;
         //     y /= m;

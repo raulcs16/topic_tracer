@@ -54,6 +54,7 @@ struct ILayoutObserver {
     virtual void onNodeUpdated(const GraphNode &node) {}
     virtual void onNodeRemoved(uint32_t id) {}
     virtual void onEdgeAdded(const GraphEdge &edge) {}
+    virtual void onEdgeUpdated(const GraphEdge &edge) {}
     virtual void onEdgeRemoved(const std::string &key) {}
 
     virtual void onClusterRectUpdated(uint32_t clusterId,

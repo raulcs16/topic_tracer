@@ -16,9 +16,11 @@ AppController::AppController(UIContext *ui, QObject *parent)
         return;
     m_graph->addObserver(m_uiContext->store());
     m_graph->addObserver(m_layout);
-    m_layout->addObserver(m_uiContext->nodeListModel());
-    m_layout->addObserver(m_uiContext->edgeListModel());
-    m_layout->addObserver(m_uiContext->rectListModel());
+    m_layout->addObserver(m_uiContext->store());
+
+    // m_layout->addObserver(m_uiContext->nodeListModel());
+    // m_layout->addObserver(m_uiContext->edgeListModel());
+    // m_layout->addObserver(m_uiContext->rectListModel());
 
     connect(m_uiContext,
             &UIContext::modeChanged,
@@ -55,7 +57,7 @@ void AppController::calculateHeatScores() {
                    : m_heatScore->computeStressScores();
 
     for (const auto [id, score] : map) {
-        m_uiContext->nodeListModel()->updateHeatScore(id, score);
+        m_uiContext->store()->setNodeHeat(id, score);
     }
 }
 

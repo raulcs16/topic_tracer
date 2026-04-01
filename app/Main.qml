@@ -59,7 +59,7 @@ ApplicationWindow {
                     GraphView {
                         edgeModel: app.controller.uiContext.edgeListModel
                         nodeModel: app.controller.uiContext.nodeListModel
-                        rectModel: app.controller.uiContext.rectListModel
+                        bboxModel: app.controller.uiContext.bboxModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null

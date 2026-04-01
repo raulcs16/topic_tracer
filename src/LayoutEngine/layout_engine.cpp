@@ -23,7 +23,7 @@ void LayoutEngine::clear() {
     m_clusterMap.clear();
     initPool();
     updateGlobalBoundingBox();
-    notify(&ILayoutObserver::onClear);
+    // notify(&ILayoutObserver::onClear);
 }
 void LayoutEngine::addNode(uint32_t id) {
     auto pool = m_clusterMap[M_POOL_ID];
@@ -32,7 +32,7 @@ void LayoutEngine::addNode(uint32_t id) {
     if (gNode == nullptr)
         return;
     m_nodeToCluster[id] = pool->id();
-    notify(&ILayoutObserver::onNodeAdded, toScreenNode(*gNode, pool));
+    notify(&ILayoutObserver::onNodeUpdated, toScreenNode(*gNode, pool));
 }
 void LayoutEngine::removeNode(uint32_t id) {
     auto clusterId = m_nodeToCluster[id];
@@ -430,10 +430,10 @@ bool LayoutEngine::migrate(std::shared_ptr<IClusterLayout> source,
 }
 void LayoutEngine::notifyClusterUpdates(std::shared_ptr<IClusterLayout> cluster) {
     for (auto const &node : cluster->nodes()) {
-        notify(&ILayoutObserver::onNodeAdded, toScreenNode(node, cluster));
+        notify(&ILayoutObserver::onNodeUpdated, toScreenNode(node, cluster));
     }
     for (auto const &edge : cluster->edges()) {
-        notify(&ILayoutObserver::onEdgeAdded, toScreenEdge(edge, cluster));
+        notify(&ILayoutObserver::onEdgeUpdated, toScreenEdge(edge, cluster));
     }
 }
 void LayoutEngine::eraseCluster(

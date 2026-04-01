@@ -5,19 +5,18 @@
 #include <QtQml/qqml.h>
 
 
-class EdgeListModel : public QAbstractListModel {
+class BoundingBoxListModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("Use Graph.edges instead")
+    QML_UNCREATABLE("cpp Model")
 
 public:
     enum Roles {
-        EdgePosRole = Qt::UserRole + 1,
-        FlagsRole,
-        EdgeTypeRole,
+        IdRole = Qt::UserRole + 1,
+        RectRole,
     };
 
-    explicit EdgeListModel(GraphStore *store, QObject *parent = nullptr);
+    explicit BoundingBoxListModel(GraphStore *store, QObject *parent = nullptr);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -28,17 +27,15 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 public slots:
-    void onEdgeAdded(const std::string &key);
-    void onEdgeRemoved(const std::string &key);
-    void onFlagUpdated(const std::string &key);
-    void onEdgeTypeUpdated(const std::string &key);
-    void onPosUpdated(const std::string &key);
+    void onBoxAdded(uint32_t id);
+    void onBoxRemoved(uint32_t id);
+    void onBoxUpdated(uint32_t id);
     void onClear();
 
 private:
-    int getIndex(const std::string &key);
+    int getIndex(uint32_t);
 
 private:
-    QVector<std::string> m_ids;
+    QVector<uint32_t> m_ids;
     GraphStore *m_store;
 };
