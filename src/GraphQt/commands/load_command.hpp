@@ -13,7 +13,7 @@ public:
         bool success = m_ctx->repo->load(*m_ctx->graph, m_file);
         m_ctx->graph->endBatchLoad();
         if (success) {
-            auto globalBox = m_ctx->layout->getGlobalBoundingBox();
+            m_ctx->uiContext->store()->setGlobalActiveBox();
         }
     }
     void undo() override {}

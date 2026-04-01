@@ -46,6 +46,8 @@ private:
     template <typename Func, typename... Args>
     void notify(Func memberFunc, Args &&...args);
 
+    void mapNodeCluster(uint32_t nodeId, uint32_t clusterId);
+
 private:
     uint32_t nextId() { return m_cluster_id_ref++; }
     //both in pool

@@ -42,9 +42,10 @@ public:
     Q_INVOKABLE void toggleSelectionRequest(uint32_t id);
     Q_INVOKABLE void rangeSelectionRequest(uint32_t id);
 
+    Q_INVOKABLE void hoverRequest(uint32_t id, bool isHovered);
+
 signals:
     void isAddingNewTopicChanged();
-    void hoverRequested(uint32_t id, bool isHovered);
 
 public slots:
     //add or update a label

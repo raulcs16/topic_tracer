@@ -4,7 +4,6 @@
 #include "graph_store.hpp"
 #include "label_list_model.hpp"
 #include "node_list_model.hpp"
-#include "rect_list_model.hpp"
 #include "selection_manager.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>

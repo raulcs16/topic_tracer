@@ -37,11 +37,8 @@ qt_add_qml_module(GraphQt
 
         boundingbox_list_model.hpp
         boundingbox_list_model.cpp
-         
-        rect_list_model.hpp
-        rect_list_model.cpp
 
-        
+
         ui_states.hpp
         ui_states.cpp
 
@@ -91,7 +88,6 @@ qt_add_qml_module(GraphQt
         CanvasView.qml
         EdgeSpline.qml
         NodeDelegate.qml
-        RectDelegate.qml
         ViewPort.qml
         BoundingBoxDelegate.qml
 

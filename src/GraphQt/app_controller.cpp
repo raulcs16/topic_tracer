@@ -18,18 +18,10 @@ AppController::AppController(UIContext *ui, QObject *parent)
     m_graph->addObserver(m_layout);
     m_layout->addObserver(m_uiContext->store());
 
-    // m_layout->addObserver(m_uiContext->nodeListModel());
-    // m_layout->addObserver(m_uiContext->edgeListModel());
-    // m_layout->addObserver(m_uiContext->rectListModel());
-
     connect(m_uiContext,
             &UIContext::modeChanged,
             this,
             &AppController::calculateHeatScores);
-    connect(m_uiContext->labelListModel(),
-            &LabelListModel::hoverRequested,
-            this,
-            &AppController::onTopicHoverRequested);
 }
 AppController::~AppController() {
     delete m_repo;
@@ -40,11 +32,6 @@ AppController::~AppController() {
     delete m_commandFactory;
 }
 
-void AppController::onTopicHoverRequested(uint32_t id, bool isHovered) {
-    auto boundingBoxId =
-        isHovered ? m_layout->getNodeBoundingBox(id) : m_layout->getGlobalBoundingBox();
-    m_uiContext->setHoveredNode(id, isHovered, boundingBoxId);
-}
 
 void AppController::onTopicRequested(const QString &name) {
     if (m_graph)

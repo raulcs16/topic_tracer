@@ -56,6 +56,8 @@ void GraphStore::onClear() {
     m_edgeFlags.clear();
     m_edgeTypes.clear();
     m_edgePosData.clear();
+    m_rects.clear();
+    m_nodeRectMap.clear();
     emit clear();
 }
 
@@ -88,6 +90,7 @@ EdgeType GraphStore::edgeType(const std::string &key) {
     }
     return it->second;
 }
+void GraphStore::setGlobalActiveBox() { emit activeBoxChanged(m_globalRect); }
 void GraphStore::setNodeHeat(uint32_t id, float heat) {
     m_nodeheats[id] = heat;
     emit nodeHeatUpdated(id);
@@ -194,6 +197,9 @@ void GraphStore::onEdgeUpdated(const GraphEdge &edge) {
     emit edgePositionUpdated(edge.key);
 }
 EdgePos GraphStore::edgePos(const std::string &key) { return m_edgePosData[key]; }
+void GraphStore::onGlobalBoundsUpdated(float x, float y, float w, float h) {
+    m_globalRect = QRectF{x, y, w, h};
+}
 void GraphStore::onClusterRectUpdated(uint32_t clusterId,
                                       float x,
                                       float y,
@@ -206,11 +212,27 @@ void GraphStore::onClusterRectUpdated(uint32_t clusterId,
         emit boxAdded(clusterId);
     else
         emit boxUpdated(clusterId);
-    emit activeBoxChanged(box);
 }
 void GraphStore::onClusterRectDeleted(uint32_t clusterId) {
     emit boxDeleted(clusterId);
     auto it = m_rects.find(clusterId);
     if (it != m_rects.end())
         m_rects.erase(it);
+}
+void GraphStore::onNodeClusterChanged(uint32_t nodeId, uint32_t clusterId) {
+    m_nodeRectMap[nodeId] = clusterId;
+}
+void GraphStore::setHoveredState(uint32_t nodeId, bool state) {
+    setNodeState(nodeId, StateFlag::Hovered, state);
+    if (!m_nodeRectMap.contains(nodeId))
+        return;
+    if (state && m_hoverId != nodeId) {
+        m_hoverId = nodeId;
+    } else if (!state && m_hoverId == nodeId) {
+        m_hoverId = -1;
+    } else
+        return;
+    auto clusterId = m_nodeRectMap[nodeId];
+    auto box = (m_hoverId == nodeId) ? m_rects[clusterId] : m_globalRect;
+    emit activeBoxChanged(box);
 }

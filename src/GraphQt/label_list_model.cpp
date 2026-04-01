@@ -141,3 +141,8 @@ void LabelListModel::rangeSelectionRequest(uint32_t id) {
     auto ids = getIdInRange(m_selectionManager->lastSelectedId(), id);
     m_selectionManager->selectRange(ids);
 }
+void LabelListModel::hoverRequest(uint32_t id, bool isHovered) {
+    if (m_store) {
+        m_store->setHoveredState(id, isHovered);
+    }
+}

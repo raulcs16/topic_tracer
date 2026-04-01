@@ -31,7 +31,7 @@ void LayoutEngine::addNode(uint32_t id) {
     GraphNode *gNode = pool->getNode(id);
     if (gNode == nullptr)
         return;
-    m_nodeToCluster[id] = pool->id();
+    mapNodeCluster(id, pool->id());
     notify(&ILayoutObserver::onNodeUpdated, toScreenNode(*gNode, pool));
 }
 void LayoutEngine::removeNode(uint32_t id) {
@@ -130,8 +130,8 @@ std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
     newCluster->addNode(from);
     newCluster->addNode(to);
     newCluster->addEdge(from, to);
-    m_nodeToCluster[from] = newCluster->id();
-    m_nodeToCluster[to] = newCluster->id();
+    mapNodeCluster(from, newCluster->id());
+    mapNodeCluster(to, newCluster->id());
     return newCluster;
 }
 
@@ -152,11 +152,11 @@ std::shared_ptr<OGDFCluster> LayoutEngine::mergeClusters(uint32_t from, uint32_t
     auto cluster = toIt->second;
     for (auto node : fromCluster->nodes()) {
         newCluster->addNode(node.id);
-        m_nodeToCluster[node.id] = newCluster->id();
+        mapNodeCluster(node.id, newCluster->id());
     }
     for (auto node : cluster->nodes()) {
         newCluster->addNode(node.id);
-        m_nodeToCluster[node.id] = newCluster->id();
+        mapNodeCluster(node.id, newCluster->id());
     }
     for (auto edge : fromCluster->edges()) {
         newCluster->addEdge(edge.from, edge.to);
@@ -193,14 +193,14 @@ std::shared_ptr<OGDFCluster> LayoutEngine::extractFromPoolMergeNewCluster(
     m_clusterMap.emplace(newCluster->id(), newCluster);
     for (auto node : cluster->nodes()) {
         newCluster->addNode(node.id);
-        m_nodeToCluster[node.id] = newCluster->id();
+        mapNodeCluster(node.id, newCluster->id());
     }
     for (auto edge : cluster->edges()) {
         newCluster->addEdge(edge.from, edge.to);
     }
     pool->removeNode(nodeIdInPool);
     newCluster->addNode(nodeIdInPool);
-    m_nodeToCluster[nodeIdInPool] = newCluster->id();
+    mapNodeCluster(nodeIdInPool, newCluster->id());
     newCluster->addEdge(from, to);
     eraseCluster(it);
     return newCluster;
@@ -348,7 +348,7 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         m_clusterMap.emplace(newCluster->id(), newCluster);
         for (auto node : cluster.nodes) {
             newCluster->addNode(node.id);
-            m_nodeToCluster[node.id] = newCluster->id();
+            mapNodeCluster(node.id, newCluster->id());
         }
         for (auto edge : cluster.edges) {
             newCluster->addEdge(edge.from, edge.to);
@@ -409,7 +409,7 @@ void LayoutEngine::updateGlobalBoundingBox() {
     float wy = trans.worldX(m_global_bb.min_y);
     float ww = (m_global_bb.max_x - m_global_bb.min_x) * trans.scale;
     float wh = (m_global_bb.max_y - m_global_bb.min_y) * trans.scale;
-    notify(&ILayoutObserver::onClusterRectUpdated, M_BB_ID, wx, wy, ww, wh);
+    notify(&ILayoutObserver::onGlobalBoundsUpdated, wx, wy, ww, wh);
 }
 
 // Logic to move everything from source to target and update the map
@@ -420,7 +420,7 @@ bool LayoutEngine::migrate(std::shared_ptr<IClusterLayout> source,
 
     for (auto node : source->nodes()) {
         target->addNode(node.id);
-        m_nodeToCluster[node.id] = target->id();
+        mapNodeCluster(node.id, target->id());
     }
     for (auto edge : source->edges()) {
         target->addEdge(edge.from, edge.to);
@@ -431,6 +431,7 @@ bool LayoutEngine::migrate(std::shared_ptr<IClusterLayout> source,
 void LayoutEngine::notifyClusterUpdates(std::shared_ptr<IClusterLayout> cluster) {
     for (auto const &node : cluster->nodes()) {
         notify(&ILayoutObserver::onNodeUpdated, toScreenNode(node, cluster));
+        notify(&ILayoutObserver::onNodeClusterChanged, node.id, cluster->id());
     }
     for (auto const &edge : cluster->edges()) {
         notify(&ILayoutObserver::onEdgeUpdated, toScreenEdge(edge, cluster));
@@ -448,3 +449,8 @@ uint32_t LayoutEngine::getNodeBoundingBox(uint32_t nodeId) {
     return m_nodeToCluster[nodeId];
 }
 uint32_t LayoutEngine::getGlobalBoundingBox() { return M_BB_ID; }
+
+void LayoutEngine::mapNodeCluster(uint32_t nodeId, uint32_t clusterId) {
+    m_nodeToCluster[nodeId] = clusterId;
+    notify(&ILayoutObserver::onNodeClusterChanged, nodeId, clusterId);
+}

@@ -27,8 +27,6 @@ public:
 public slots:
     void calculateHeatScores();
     void onTopicRequested(const QString &topic);
-    void onTopicHoverRequested(uint32_t id, bool isHovered);
-
 
 private:
     Graph *m_graph;

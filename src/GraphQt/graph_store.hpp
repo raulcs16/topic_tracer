@@ -31,12 +31,14 @@ public:
     void onNodeUpdated(const GraphNode &node) override;
     void onEdgeAdded(const GraphEdge &edge) override;
     void onEdgeUpdated(const GraphEdge &edge) override;
+    void onGlobalBoundsUpdated(float x, float y, float w, float h) override;
     void onClusterRectUpdated(uint32_t clusterId,
                               float x,
                               float y,
                               float w,
                               float h) override;
     void onClusterRectDeleted(uint32_t) override;
+    void onNodeClusterChanged(uint32_t nodeId, uint32_t clusterId) override;
 
     //Getters::nodes
     QString label(uint32_t id);
@@ -50,10 +52,12 @@ public:
     //Getters::boxes
     QRectF rect(uint32_t clusterId);
     //setters
+    void setHoveredState(uint32_t nodeId, bool state);
     void setNodeState(uint32_t id, StateFlag flag, bool state);
     void setEdgeState(const std::string &key, StateFlag flag, bool state);
     std::vector<uint32_t> setAllNodes(StateFlag flag, bool state);
     void setNodeHeat(uint32_t id, float heat = 0.0f);
+    void setGlobalActiveBox();
     //find
     QString findMatch(QString pattern);
 
@@ -96,6 +100,8 @@ private:
     std::unordered_map<std::string, ItemState> m_edgeFlags;
     std::unordered_map<std::string, EdgePos> m_edgePosData;
     //boxes
-    int m_activeBox = -1;
+    int m_hoverId = -1;
+    QRectF m_globalRect;
     std::unordered_map<uint32_t, QRectF> m_rects;
+    std::unordered_map<uint32_t, uint32_t> m_nodeRectMap;
 };
