@@ -69,30 +69,58 @@ Item {
         gridOn = !gridOn;
     }
 
-    function fitArea(rectX, rectY, rectW, rectH) {
-        // 1. Calculate the center of the target cluster
-        centerX = rectX + (rectW / 2);
-        centerY = rectY + (rectH / 2);
-
-        const minWorldWidth = 500;
-        const minWorldHeight = 500;
-
-        // 2. Ensure we don't zoom in too far on tiny clusters
-        let effectiveW = Math.max(rectW, minWorldWidth);
-        let effectiveH = Math.max(rectH, minWorldHeight);
-
-        // 3. Define explicit padding in pixels (e.g., 40px on all sides)
+    function fitArea(rectX, rectY, rectW, rectH,nodeX,nodeY) {
+        const minZoom = 0.15; // Don't let clusters get smaller than this
+        const maxZoom = 1.2;  // Don't zoom in more than this
         const paddingBuffer = 60;
-        const usableWidth = width - (paddingBuffer * 2);
-        const usableHeight = height - (paddingBuffer * 2);
+    
+        const usableWidth = Math.max(width - (paddingBuffer * 2), 1);
+        const usableHeight = Math.max(height - (paddingBuffer * 2), 1);
 
-        // 4. Calculate zoom for both axes based on usable space
-        let zoomX = usableWidth / effectiveW;
-        let zoomY = usableHeight / effectiveH;
+        // Calculate zoom needed to see the whole cluster
+        let clusterZoomX = usableWidth / Math.max(rectW, 1);
+        let clusterZoomY = usableHeight / Math.max(rectH, 1);
+        let idealClusterZoom = Math.min(clusterZoomX, clusterZoomY);
 
-        // 5. Use Math.min to ensure the "most restrictive" dimension
-        // forces the other to stay within bounds.
-        zoom = Math.min(zoomX, zoomY);
+        // 2. Apply the "Focus" Logic
+        // If the cluster zoom is too small (meaning the cluster is huge), 
+        // we clamp the zoom and shift the center towards the specific node.
+        if (idealClusterZoom < minZoom) {
+            zoom = minZoom;
+            // When cluster is too big, center directly on the node
+            centerX = nodeX;
+            centerY = nodeY;
+        } else {
+            // Cluster fits reasonably well
+            zoom = Math.min(idealClusterZoom, maxZoom);
+
+            // Center on the cluster middle
+            centerX = rectX + (rectW / 2);
+            centerY = rectY + (rectH / 2);
+        }
+        // 1. Calculate the center of the target cluster
+        // centerX = rectX + (rectW / 2);
+        // centerY = rectY + (rectH / 2);
+
+        // const minWorldWidth = 500;
+        // const minWorldHeight = 500;
+
+        // // 2. Ensure we don't zoom in too far on tiny clusters
+        // let effectiveW = Math.max(rectW, minWorldWidth);
+        // let effectiveH = Math.max(rectH, minWorldHeight);
+
+        // // 3. Define explicit padding in pixels (e.g., 40px on all sides)
+        // const paddingBuffer = 60;
+        // const usableWidth = width - (paddingBuffer * 2);
+        // const usableHeight = height - (paddingBuffer * 2);
+
+        // // 4. Calculate zoom for both axes based on usable space
+        // let zoomX = usableWidth / effectiveW;
+        // let zoomY = usableHeight / effectiveH;
+
+        // // 5. Use Math.min to ensure the "most restrictive" dimension
+        // // forces the other to stay within bounds.
+        // zoom = Math.min(zoomX, zoomY);
     }
 
     // --- Grid Rendering ---
