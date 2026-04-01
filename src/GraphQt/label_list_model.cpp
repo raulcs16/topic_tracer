@@ -6,6 +6,7 @@ LabelListModel::LabelListModel(GraphStore *store,
                                SelectionManager *selMgr,
                                QObject *parent)
     : QAbstractListModel{parent}, m_store(store), m_selectionManager{selMgr} {
+    connect(m_store, &GraphStore::nodeAdded, this, &LabelListModel::onNodeAdded);
     connect(m_store, &GraphStore::labelUpdated, this, &LabelListModel::onLabelUpdated);
     connect(m_store, &GraphStore::nodeFlagUpdated, this, &LabelListModel::onFlagUpdated);
     connect(m_store, &GraphStore::clear, this, &LabelListModel::onClear);
@@ -76,15 +77,10 @@ int LabelListModel::getIndex(uint32_t id) {
 
 void LabelListModel::onLabelUpdated(uint32_t id) {
     int index = getIndex(id);
-    if (index >= 0) {
-        const QModelIndex modelIndex = this->index(index);
-        emit dataChanged(modelIndex, modelIndex, {LabelRole});
+    if (index < 0)
         return;
-    }
-    const int newRow = m_ids.size();
-    beginInsertRows(QModelIndex(), newRow, newRow);
-    m_ids.push_back(id);
-    endInsertRows();
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, {LabelRole});
 }
 void LabelListModel::onFlagUpdated(uint32_t id) {
     int index = getIndex(id);
@@ -122,6 +118,12 @@ void LabelListModel::clear() {
     beginResetModel();
     m_ids.clear();
     endResetModel();
+}
+void LabelListModel::onNodeAdded(uint32_t id) {
+    const int newRow = m_ids.size();
+    beginInsertRows(QModelIndex(), newRow, newRow);
+    m_ids.push_back(id);
+    endInsertRows();
 }
 void LabelListModel::onNodeDeleted(uint32_t id) {
     int index = getIndex(id);

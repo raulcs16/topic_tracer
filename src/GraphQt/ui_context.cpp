@@ -7,7 +7,6 @@ UIContext::UIContext(GraphStore *store, QObject *parent)
     m_edges = new EdgeListModel(store, this);
     m_nodes = new NodeListModel(store, this);
     m_bboxes = new BoundingBoxListModel(store, this);
-    m_rects = new RectListModel(this);
 }
 void UIContext::setMode(ViewMode mode) {
     if (mode == m_mode)
@@ -25,7 +24,6 @@ void UIContext::setHoveredNode(uint32_t id, bool isHovered, uint32_t bbId) {
     } else {
         return;
     }
-    m_rects->setSceneBounds(bbId);
 }
 QString UIContext::modeName() const {
     return m_mode == ViewMode::Progress ? "Progress" : "Stress";

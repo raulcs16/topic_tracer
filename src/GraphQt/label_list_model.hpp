@@ -48,6 +48,7 @@ signals:
 
 public slots:
     //add or update a label
+    void onNodeAdded(uint32_t id);
     void onLabelUpdated(uint32_t id);
     void onFlagUpdated(uint32_t id);
     void onNodeDeleted(uint32_t id);

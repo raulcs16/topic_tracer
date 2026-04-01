@@ -80,22 +80,22 @@ signals:
     void boxAdded(uint32_t id);
     void boxDeleted(uint32_t id);
     void boxUpdated(uint32_t id);
-
+    void activeBoxChanged(QRectF box);
     //all
     void clear();
 
 private:
     const QString m_notFound = "NotFound";
-    std::unordered_map<uint32_t, ItemState> m_nodeFlags;
-    std::unordered_map<std::string, ItemState> m_edgeFlags;
     //nodes
     std::unordered_map<uint32_t, QString> m_labels;
+    std::unordered_map<uint32_t, ItemState> m_nodeFlags;
     std::unordered_map<uint32_t, Pos> m_nodePosition;
     std::unordered_map<uint32_t, float> m_nodeheats;
     //edges
     std::unordered_map<std::string, EdgeType> m_edgeTypes;
+    std::unordered_map<std::string, ItemState> m_edgeFlags;
     std::unordered_map<std::string, EdgePos> m_edgePosData;
-
     //boxes
+    int m_activeBox = -1;
     std::unordered_map<uint32_t, QRectF> m_rects;
 };

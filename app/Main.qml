@@ -59,7 +59,7 @@ ApplicationWindow {
                     GraphView {
                         edgeModel: app.controller.uiContext.edgeListModel
                         nodeModel: app.controller.uiContext.nodeListModel
-                        bboxModel: app.controller.uiContext.bboxModel
+                        bboxModel: app.controller.uiContext.bboxListModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
@@ -67,10 +67,9 @@ ApplicationWindow {
                         viewHeight: main_content.height
                     }
                     Connections {
-                        target: app.controller.uiContext.rectListModel
-                        function onSceneBoundsChanged() {
-                            let rect = app.controller.uiContext.rectListModel.sceneBounds;
-                            viewport.fitArea(rect.x, rect.y, rect.width, rect.height);
+                        target: app.controller.uiContext.store
+                        function onActiveBoxChanged(box) {
+                            viewport.fitArea(box.x, box.y, box.width, box.height);
                         }
                     }
                     Keys.onPressed: event => {

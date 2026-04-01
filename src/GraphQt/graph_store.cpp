@@ -200,11 +200,13 @@ void GraphStore::onClusterRectUpdated(uint32_t clusterId,
                                       float w,
                                       float h) {
     bool isNew = (m_rects.find(clusterId) == m_rects.end());
-    m_rects[clusterId] = QRectF{x, y, w, h};
+    auto box = QRectF{x, y, w, h};
+    m_rects[clusterId] = box;
     if (isNew)
         emit boxAdded(clusterId);
     else
         emit boxUpdated(clusterId);
+    emit activeBoxChanged(box);
 }
 void GraphStore::onClusterRectDeleted(uint32_t clusterId) {
     emit boxDeleted(clusterId);
