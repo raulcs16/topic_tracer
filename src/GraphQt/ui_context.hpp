@@ -35,7 +35,6 @@ public:
     GraphStore *store() const { return m_store; }
     ViewMode mode() const { return m_mode; }
     void setMode(ViewMode mode);
-    void setHoveredNode(uint32_t id, bool isHovered, uint32_t bbid);
 
     QString modeName() const;
 
@@ -52,5 +51,4 @@ private:
     NodeListModel *m_nodes;
     BoundingBoxListModel *m_bboxes;
     ViewMode m_mode = ViewMode::Progress;
-    int m_hoveredId = -1;
 };

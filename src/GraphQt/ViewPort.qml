@@ -70,34 +70,33 @@ Item {
     }
 
     function fitArea(rectX, rectY, rectW, rectH,nodeX,nodeY) {
-        const minZoom = 0.15; // Don't let clusters get smaller than this
-        const maxZoom = 1.2;  // Don't zoom in more than this
-        const paddingBuffer = 60;
-    
-        const usableWidth = Math.max(width - (paddingBuffer * 2), 1);
-        const usableHeight = Math.max(height - (paddingBuffer * 2), 1);
+      const padding = 100;         // Keep some breathing room
+    const minReadableZoom = 0.7; // Hard floor: never zoom out more than this for a node
+    const maxZoom = 1.2;         // Ceiling: don't zoom in until pixels are huge
 
-        // Calculate zoom needed to see the whole cluster
-        let clusterZoomX = usableWidth / Math.max(rectW, 1);
-        let clusterZoomY = usableHeight / Math.max(rectH, 1);
-        let idealClusterZoom = Math.min(clusterZoomX, clusterZoomY);
+    // 1. Calculate the center of the cluster
+    const clusterCenterX = rectX + (rectW / 2);
+    const clusterCenterY = rectY + (rectH / 2);
 
-        // 2. Apply the "Focus" Logic
-        // If the cluster zoom is too small (meaning the cluster is huge), 
-        // we clamp the zoom and shift the center towards the specific node.
-        if (idealClusterZoom < minZoom) {
-            zoom = minZoom;
-            // When cluster is too big, center directly on the node
-            centerX = nodeX;
-            centerY = nodeY;
-        } else {
-            // Cluster fits reasonably well
-            zoom = Math.min(idealClusterZoom, maxZoom);
+    // 2. Calculate what the zoom WOULD be if we fit the whole cluster
+    let zoomX = (width - padding * 2) / Math.max(rectW, 1);
+    let zoomY = (height - padding * 2) / Math.max(rectH, 1);
+    let clusterZoom = Math.min(zoomX, zoomY);
 
-            // Center on the cluster middle
-            centerX = rectX + (rectW / 2);
-            centerY = rectY + (rectH / 2);
-        }
+    // 3. Apply the Logic
+    if (clusterZoom < minReadableZoom) {
+        // The cluster is massive (like in your screenshot). 
+        // Force the zoom to a readable level and center on the NODE, not the box.
+        zoom = minReadableZoom;
+        centerX = nodeX;
+        centerY = nodeY;
+    } else {
+        // The cluster is small enough to see comfortably.
+        // Center on the cluster and use the calculated zoom.
+        zoom = Math.min(clusterZoom, maxZoom);
+        centerX = clusterCenterX;
+        centerY = clusterCenterY;
+    }
         // 1. Calculate the center of the target cluster
         // centerX = rectX + (rectW / 2);
         // centerY = rectY + (rectH / 2);

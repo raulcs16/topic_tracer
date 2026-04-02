@@ -15,16 +15,6 @@ void UIContext::setMode(ViewMode mode) {
     emit modeChanged();
     emit modeNameChanged();
 }
-void UIContext::setHoveredNode(uint32_t id, bool isHovered, uint32_t bbId) {
-    m_store->setNodeState(id, StateFlag::Hovered, isHovered);
-    if (isHovered) {
-        m_hoveredId = id;
-    } else if (m_hoveredId == id) {
-        m_hoveredId = -1;
-    } else {
-        return;
-    }
-}
 QString UIContext::modeName() const {
     return m_mode == ViewMode::Progress ? "Progress" : "Stress";
 }
