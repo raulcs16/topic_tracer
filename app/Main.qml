@@ -68,8 +68,8 @@ ApplicationWindow {
                     }
                     Connections {
                         target: app.controller.uiContext.store
-                        function onActiveBoxChanged(box,node) {
-                            viewport.fitArea(box.x, box.y, box.width, box.height,node.x,node.y);
+                        function onActiveBoxChanged(box, xpos, ypos) {
+                            viewport.fitArea(box.x, box.y, box.width, box.height, xpos, ypos);
                         }
                     }
                     Keys.onPressed: event => {

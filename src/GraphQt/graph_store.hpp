@@ -84,7 +84,7 @@ signals:
     void boxAdded(uint32_t id);
     void boxDeleted(uint32_t id);
     void boxUpdated(uint32_t id);
-    void activeBoxChanged(QRectF box, Pos nodePos);
+    void activeBoxChanged(QRectF box, double x, double y);
     //all
     void clear();
 

@@ -90,7 +90,7 @@ EdgeType GraphStore::edgeType(const std::string &key) {
     }
     return it->second;
 }
-void GraphStore::setGlobalActiveBox() { emit activeBoxChanged(m_globalRect, Pos()); }
+void GraphStore::setGlobalActiveBox() { emit activeBoxChanged(m_globalRect, 0, 0); }
 void GraphStore::setNodeHeat(uint32_t id, float heat) {
     m_nodeheats[id] = heat;
     emit nodeHeatUpdated(id);
@@ -235,5 +235,5 @@ void GraphStore::setHoveredState(uint32_t nodeId, bool state) {
     auto clusterId = m_nodeRectMap[nodeId];
     auto pos = m_nodePosition[nodeId];
     auto box = (m_hoverId == nodeId) ? m_rects[clusterId] : m_globalRect;
-    emit activeBoxChanged(box, pos);
+    emit activeBoxChanged(box, pos.x, pos.y);
 }
