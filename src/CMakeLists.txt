@@ -7,5 +7,6 @@ add_subdirectory(Evidence)
 IF(NOT TESTING)
 add_subdirectory(Styles)
 add_subdirectory(GraphQt)
+add_subdirectory(Terminal)
 endif()
 

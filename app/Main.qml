@@ -4,6 +4,7 @@ import QtQuick.Controls.Basic
 
 import Styles
 import GraphQt
+import TerminalQt
 
 ApplicationWindow {
     id: app
@@ -21,173 +22,172 @@ ApplicationWindow {
 
     property Item focusItem: null
 
-    Shortcut {
-        sequence: [":"]
-        onActivated: commandInput.focus = true
-    }
+    // Shortcut {
+    //     sequence: [":"]
+    //     onActivated: commandInput.focus = true
+    // }
 
     RowLayout {
         anchors.fill: parent
         spacing: 0
 
         // Main content + status bar
-        ColumnLayout {
-            spacing: 0
+        // ColumnLayout {
+        //     spacing: 0
+        //     Layout.fillWidth: true
+        //     Layout.fillHeight: true
+
+        Rectangle {
+            id: main_content
+            color: Colors.primary
             Layout.fillWidth: true
             Layout.fillHeight: true
+            border.width: 2
+            border.color: app.focusItem == viewport ? Colors.accent : "transparent"
 
-            Rectangle {
-                id: main_content
-                color: Colors.primary
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                border.width: 2
-                border.color: app.focusItem == viewport ? Colors.accent : "transparent"
+            Text {
+                text: `v${app.major}.${app.minor}.${app.patch}`
+                font.bold: true
+                font.pointSize: 14
+                color: "#F5F5F5"
+                padding: 10
+            }
 
-                Text {
-                    text: `v${app.major}.${app.minor}.${app.patch}`
-                    font.bold: true
-                    font.pointSize: 14
-                    color: "#F5F5F5"
-                    padding: 10
-                }
-
-                ViewPort {
-                    id: viewport
+            ViewPort {
+                id: viewport
+                anchors.fill: parent
+                clip: true
+                GraphView {
+                    edgeModel: app.controller.uiContext.edgeListModel
+                    nodeModel: app.controller.uiContext.nodeListModel
+                    bboxModel: app.controller.uiContext.bboxListModel
                     anchors.fill: parent
-                    clip: true
-                    GraphView {
-                        edgeModel: app.controller.uiContext.edgeListModel
-                        nodeModel: app.controller.uiContext.nodeListModel
-                        bboxModel: app.controller.uiContext.bboxListModel
-                        anchors.fill: parent
-                        property var highlightedNode: null
-                        property var highlightedEdge: null
-                        viewWidth: main_content.width
-                        viewHeight: main_content.height
-                    }
-                    Connections {
-                        target: app.controller.uiContext.store
-                        function onActiveBoxChanged(box, xpos, ypos) {
-                            viewport.fitArea(box.x, box.y, box.width, box.height, xpos, ypos);
-                        }
-                    }
-                    Keys.onPressed: event => {
-                        if (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
-                            viewport.zoomIn();
-                            event.accepted = true;
-                        } else if (event.key === Qt.Key_Minus) {
-                            viewport.zoomOut();
-                            event.accepted = true;
-                        }
-                        if (event.key === Qt.Key_K) {
-                            viewport.panUp();
-                            event.accepted = true;
-                        }
-                        if (event.key === Qt.Key_J) {
-                            viewport.panDown();
-                            event.accepted = true;
-                        }
-                        if (event.key === Qt.Key_H) {
-                            viewport.panLeft();
-                            event.accepted = true;
-                        }
-                        if (event.key === Qt.Key_L) {
-                            viewport.panRight();
-                            event.accepted = true;
-                        }
-                        if (event.key === Qt.Key_0) {
-                            viewport.resetView();
-                            event.accepted = true;
-                        }
-                        if (event.key == Qt.Key_1) {
-                            viewport.toggleGrid();
-                            event.accepted = true;
-                        }
-                        if (event.key === Qt.Key_X) {
-                            // Test: Fit to a random 400x400 area in the world
-                            let randomX = Math.random() * 1000 - 500;
-                            let randomY = Math.random() * 1000 - 500;
-                            console.log("Fitting to random area at: ", randomX, randomY);
-
-                            viewport.fitArea(randomX, randomY, 400, 400);
-                            event.accepted = true;
-                        }
-                    }
-                    MouseArea {
-                        enabled: app.focusItem != viewport
-                        anchors.fill: parent
-                        propagateComposedEvents: true
-                        onClicked: {
-                            app.focusItem = viewport;
-                            viewport.forceActiveFocus();
-                        }
+                    property var highlightedNode: null
+                    property var highlightedEdge: null
+                    viewWidth: main_content.width
+                    viewHeight: main_content.height
+                }
+                Connections {
+                    target: app.controller.uiContext.store
+                    function onActiveBoxChanged(box, xpos, ypos) {
+                        viewport.fitArea(box.x, box.y, box.width, box.height, xpos, ypos);
                     }
                 }
-                Text {
-                    text: `Mode: ${app.controller.uiContext.modeName}`
-                    font.bold: true
-                    font.pointSize: 18
-                    color: "#F5F5F5"
-                    padding: 10
-                    anchors {
-                        bottom: parent.bottom
-                        left: parent.left
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
+                        viewport.zoomIn();
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Minus) {
+                        viewport.zoomOut();
+                        event.accepted = true;
+                    }
+                    if (event.key === Qt.Key_K) {
+                        viewport.panUp();
+                        event.accepted = true;
+                    }
+                    if (event.key === Qt.Key_J) {
+                        viewport.panDown();
+                        event.accepted = true;
+                    }
+                    if (event.key === Qt.Key_H) {
+                        viewport.panLeft();
+                        event.accepted = true;
+                    }
+                    if (event.key === Qt.Key_L) {
+                        viewport.panRight();
+                        event.accepted = true;
+                    }
+                    if (event.key === Qt.Key_0) {
+                        viewport.resetView();
+                        event.accepted = true;
+                    }
+                    if (event.key == Qt.Key_1) {
+                        viewport.toggleGrid();
+                        event.accepted = true;
+                    }
+                    if (event.key === Qt.Key_X) {
+                        // Test: Fit to a random 400x400 area in the world
+                        let randomX = Math.random() * 1000 - 500;
+                        let randomY = Math.random() * 1000 - 500;
+                        console.log("Fitting to random area at: ", randomX, randomY);
+
+                        viewport.fitArea(randomX, randomY, 400, 400);
+                        event.accepted = true;
+                    }
+                }
+                MouseArea {
+                    enabled: app.focusItem != viewport
+                    anchors.fill: parent
+                    propagateComposedEvents: true
+                    onClicked: {
+                        app.focusItem = viewport;
+                        viewport.forceActiveFocus();
                     }
                 }
             }
 
-            Rectangle {
-                id: command_interface
-                color: Colors.accent
-                Layout.fillWidth: true
-                Layout.preferredHeight: 75
-                border.width: 2
-                border.color: app.focusItem == commandInput ? Colors.primary : "transparent"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 6
-
-                    Text {
-                        id: prompt
-                        text: "$"
-                        font.bold: true
-                        font.pointSize: 20
-                        color: "white"
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    TextField {
-                        id: commandInput
-                        Layout.fillWidth: true
-                        color: "white"
-                        font.pointSize: 20
-                        font.bold: true
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-                        onFocusChanged: {
-                            if (focus) {
-                                app.focusItem = commandInput;
-                            }
-                        }
-                        Keys.onReturnPressed: {
-                            app.controller.executeCommand(commandInput.text.trim());
-                            commandInput.text = "";
-                        }
-                        Keys.onTabPressed: {
-                            commandInput.text = app.auto_completer.complete(commandInput.text.trim());
-                        }
-                        Keys.onEscapePressed: {
-                            app.focusItem = viewport;
-                            viewport.forceActiveFocus();
-                            commandInput.focus = false;
-                        }
-                    }
+            Text {
+                text: `Mode: ${app.controller.uiContext.modeName}`
+                font.bold: true
+                font.pointSize: 18
+                color: "#F5F5F5"
+                padding: 10
+                anchors {
+                    top: parent.top
+                    right: parent.right
                 }
             }
         }
+
+        // Rectangle {
+        //     id: command_interface
+        //     color: Colors.accent
+        //     Layout.fillWidth: true
+        //     Layout.preferredHeight: 75
+        //     RowLayout {
+        //         anchors.fill: parent
+        //         anchors.margins: 10
+        //         spacing: 6
+
+        //         Text {
+        //             id: prompt
+        //             text: "$"
+        //             font.bold: true
+        //             font.pointSize: 20
+        //             color: "white"
+        //             verticalAlignment: Text.AlignVCenter
+        //         }
+
+        //         TextField {
+        //             id: commandInput
+        //             Layout.fillWidth: true
+        //             color: "white"
+        //             font.pointSize: 20
+        //             font.bold: true
+        //             background: Rectangle {
+        //                 color: "transparent"
+        //             }
+        //             onFocusChanged: {
+        //                 if (focus) {
+        //                     app.focusItem = commandInput;
+        //                 }
+        //             }
+        //             Keys.onReturnPressed: {
+        //                 app.controller.executeCommand(commandInput.text.trim());
+        //                 commandInput.text = "";
+        //             }
+        //             Keys.onTabPressed: {
+        //                 commandInput.text = app.auto_completer.complete(commandInput.text.trim());
+        //             }
+        //             Keys.onEscapePressed: {
+        //                 app.focusItem = viewport;
+        //                 viewport.forceActiveFocus();
+        //                 commandInput.focus = false;
+        //             }
+        //         }
+        //     }
+        //}
+        // }
         // Sidebar
         ColumnLayout {
             spacing: 0
@@ -243,7 +243,38 @@ ApplicationWindow {
             }
         }
     }
+    TerminalView {
+        id: terminalDrawer
+        width: main_content.width
+        height: parent.height * .35
+        z: 100
+        property bool isOpen: true
+        y: isOpen ? parent.height - height : parent.height
+
+        Behavior on y {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        // Data & Signals
+        model: TerminalListModel {}
+        onCommandEntered: cmd => {
+            if (cmd.length == 0)
+                return;
+            app.controller.executeCommand(cmd);
+            model.addEntry(cmd);
+        }
+
+        Keys.onEscapePressed: {
+            isOpen = false;
+            viewport.forceActiveFocus();
+        }
+    }
+
     Component.onCompleted: {
         app.focusItem = viewport;
+        viewport.forceActiveFocus();
     }
 }
