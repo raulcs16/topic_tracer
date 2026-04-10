@@ -5,6 +5,7 @@
 #include "label_list_model.hpp"
 #include "node_list_model.hpp"
 #include "selection_manager.hpp"
+#include "terminal_list_model.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>
 
@@ -16,6 +17,7 @@ class UIContext : public QObject {
     Q_PROPERTY(LabelListModel *labelListModel READ labelListModel CONSTANT)
     Q_PROPERTY(EdgeListModel *edgeListModel READ edgeListModel CONSTANT)
     Q_PROPERTY(NodeListModel *nodeListModel READ nodeListModel CONSTANT)
+    Q_PROPERTY(TerminalListModel *terminalListModel READ terminalListModel CONSTANT)
     Q_PROPERTY(BoundingBoxListModel *bboxListModel READ bboxListModel CONSTANT)
     Q_PROPERTY(SelectionManager *selectionManager READ selectionManager CONSTANT)
     Q_PROPERTY(ViewMode mode READ mode WRITE setMode NOTIFY modeChanged)
@@ -30,6 +32,7 @@ public:
     LabelListModel *labelListModel() const { return m_labels; }
     EdgeListModel *edgeListModel() const { return m_edges; }
     NodeListModel *nodeListModel() const { return m_nodes; }
+    TerminalListModel *terminalListModel() const { return m_terminal; }
     BoundingBoxListModel *bboxListModel() const { return m_bboxes; }
     SelectionManager *selectionManager() const { return m_selectionManager; }
     GraphStore *store() const { return m_store; }
@@ -49,6 +52,7 @@ private:
     LabelListModel *m_labels;
     EdgeListModel *m_edges;
     NodeListModel *m_nodes;
+    TerminalListModel *m_terminal;
     BoundingBoxListModel *m_bboxes;
     ViewMode m_mode = ViewMode::Progress;
 };

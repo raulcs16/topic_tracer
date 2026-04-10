@@ -52,8 +52,23 @@ void AppController::calculateHeatScores() {
 void AppController::executeCommand(QString raw_cmd) {
     raw_cmd = raw_cmd.trimmed();
     QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
+    m_uiContext->terminalListModel()->addEntry(raw_cmd, EntryType::Command);
+    // 2. Try to create the command
     auto command = m_commandFactory->create(parts);
-    if (command) {
-        command->execute();
+    if (!command) {
+        m_uiContext->terminalListModel()->addEntry("Unknown command: " + parts.first(),
+                                                   EntryType::Error);
+        return;
+    }
+
+    // 3. Execute and handle results
+    CommandResult result = command->execute();
+
+    if (!result.message.isEmpty()) {
+        m_uiContext->terminalListModel()->addEntry(result.message, result.type);
+    }
+
+    if (result.success) {
+        // m_history.push(std::move(command)); // For undo/redo later
     }
 }

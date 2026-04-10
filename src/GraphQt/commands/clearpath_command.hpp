@@ -7,7 +7,10 @@
 class ClearPathCommand : public ICommand {
 public:
     explicit ClearPathCommand(GraphStore *store) : m_store(store) {}
-    void execute() override { m_store->clearPath(); }
+    CommandResult execute() override {
+        m_store->clearPath();
+        return CommandResult::ok("");
+    }
     void undo() override {}
 
 private:

@@ -5,10 +5,9 @@ import TerminalQt
 
 Rectangle {
     id: terminalRoot
-    color: "#1e1e1e"
     clip: true
 
-    property alias model: historyList.model
+    required property TerminalListModel model
     property alias suggestion: inputField.suggestion
     signal commandEntered(string cmd)
     //border
@@ -26,6 +25,7 @@ Rectangle {
         width: parent.width
         delegate: EntryDelegate {}
         clip: true
+        model: terminalRoot.model
 
         // Disable scroll when growing, enable when fixed
         interactive: terminalRoot.state === "fixed"

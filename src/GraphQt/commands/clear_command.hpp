@@ -8,7 +8,10 @@ class ClearCommand : public ICommand {
 public:
     explicit ClearCommand(GraphStore *store) : m_store(store) {}
 
-    void execute() override { m_store->clear(); }
+    CommandResult execute() override {
+        m_store->clear();
+        return CommandResult::ok("");
+    }
     void undo() override {}
 
 private:

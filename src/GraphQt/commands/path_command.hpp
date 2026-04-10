@@ -9,13 +9,15 @@ class PathCommand : public ICommand {
 public:
     explicit PathCommand(CommandContext *ctx, QStringList parts)
         : m_ctx(ctx), m_parts(parts) {}
-    void execute() override {
-        if (m_parts.size() != 3)
-            return;
+    CommandResult execute() override {
+        if (m_parts.size() != 3) {
+            return CommandResult::error("Usage: path <node_a> <node_b>");
+        }
         auto ta = m_ctx->graph->getNode(m_parts.at(1).toStdString());
         auto tb = m_ctx->graph->getNode(m_parts.at(2).toStdString());
         if (ta == nullptr || tb == nullptr) {
-            return;
+            return CommandResult::error(m_parts.at(1) + " & or " + m_parts.at(2) +
+                                        " not found");
         }
         auto parents = TG::PathAnalyzer::dijsktras(*m_ctx->graph, ta->id, tb->id);
         auto topicIds = TG::PathAnalyzer::topicPath(parents, tb->id);
@@ -59,6 +61,7 @@ public:
                                                         true);
             }
         }
+        return CommandResult::ok("");
     }
     void undo() override {}
 

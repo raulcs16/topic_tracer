@@ -9,9 +9,11 @@ public:
     explicit LinkCommand(Graph *graph, QStringList parts)
         : m_graph(graph), m_parts(parts) {}
 
-    void execute() override {
-        if (m_parts.size() < 3)
-            return;
+    CommandResult execute() override {
+        if (m_parts.size() < 3) {
+
+            return CommandResult::error("Usage: link <nodeA> <nodeB> -t <link-type>");
+        }
         std::string arg1 = m_parts.at(1).toStdString();
         std::string arg2 = m_parts.at(2).toStdString();
         EdgeType edgeType = EdgeType::Composes;
@@ -26,7 +28,11 @@ public:
             if (type == "implements")
                 edgeType = EdgeType::Implements;
         }
-        m_graph->addEdge(arg1, arg2, edgeType);
+        auto success = m_graph->addEdge(arg1, arg2, edgeType);
+        if (success) {
+            return CommandResult::ok("");
+        }
+        return CommandResult::error("unable to link");
     }
     void undo() override {}
 

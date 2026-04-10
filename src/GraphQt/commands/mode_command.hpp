@@ -8,12 +8,13 @@ class ModeCommand : public ICommand {
 public:
     explicit ModeCommand(UIContext *context, QString mode)
         : m_uiContext(context), m_mode(mode) {}
-    void execute() override {
+    CommandResult execute() override {
         if (m_mode.toLower() == "progress") {
             m_uiContext->setMode(UIContext::ViewMode::Progress);
         } else if (m_mode.toLower() == "stress") {
             m_uiContext->setMode(UIContext::ViewMode::Stress);
         }
+        return CommandResult::ok("");
     }
     void undo() override {}
 

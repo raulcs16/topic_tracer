@@ -7,6 +7,8 @@ target_link_libraries(GraphQt PRIVATE Qt6::Quick)
 target_link_libraries(GraphQt
     PRIVATE Qt6::Core
     PRIVATE Qt6::Quick
+    PUBLIC TerminalQt
+    PUBLIC TerminalQtplugin
     PUBLIC GraphCore
     PUBLIC Evidence
     PUBLIC LayoutEngine
@@ -17,6 +19,7 @@ target_link_libraries(GraphQt
 qt_add_qml_module(GraphQt
     URI GraphQt
     VERSION 1.0
+    DEPENDENCIES TerminalQt
     SOURCES
 
 
@@ -63,6 +66,7 @@ qt_add_qml_module(GraphQt
         commands/mode_command.hpp
         commands/command_autocompleter.hpp
         commands/command_autocompleter.cpp
+        commands/command_result.hpp
     
         selection_manager.hpp
         selection_manager.cpp

@@ -1,23 +1,13 @@
+#include "terminal_types.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
-
-enum class EntryType {
-    Command,
-    Output,
-    Error,
-    Hint,
-    Success
-};
-struct TerminalEntry {
-    EntryType type;
-    QString entry;
-};
 
 
 class TerminalListModel : public QAbstractListModel {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Created by ui context")
 public:
     enum Roles {
         TextRole = Qt::UserRole + 1,

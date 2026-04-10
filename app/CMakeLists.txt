@@ -28,6 +28,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     GraphQt
     GraphQtplugin
     TerminalQt
+    TerminalQtplugin
 )
 
 

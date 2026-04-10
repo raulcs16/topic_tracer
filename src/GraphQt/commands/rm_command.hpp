@@ -8,11 +8,12 @@ class RmCommand : public ICommand {
 public:
     explicit RmCommand(Graph *graph, QStringList parts)
         : m_graph(graph), m_parts(parts) {}
-    void execute() override {
+    CommandResult execute() override {
         for (int i = 1; i < m_parts.size(); ++i) {
             QString nodeName = m_parts.at(i);
             m_graph->deleteNode(nodeName.toStdString());
         }
+        return CommandResult::ok("");
     }
     void undo() override {}
 

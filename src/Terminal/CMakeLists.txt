@@ -4,6 +4,7 @@ set_target_properties(TerminalQt PROPERTIES AUTOMOC ON)
 target_link_libraries(TerminalQt
     PRIVATE Qt6::Core
     PRIVATE Qt6::Quick
+    PRIVATE StylesLib
 )
 
 qt_add_qml_module(TerminalQt
@@ -12,6 +13,7 @@ qt_add_qml_module(TerminalQt
     SOURCES
         terminal_list_model.cpp
         terminal_list_model.hpp
+        terminal_types.hpp
     QML_FILES
         EntryDelegate.qml
         TerminalInput.qml

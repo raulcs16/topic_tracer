@@ -8,13 +8,18 @@ class FocusCommand : public ICommand {
 public:
     explicit FocusCommand(CommandContext *ctx, QStringList parts)
         : m_ctx(ctx), m_parts(parts) {}
-    void execute() override {
-        if (m_parts.size() != 2)
-            return;
+    CommandResult execute() override {
+        if (m_parts.size() != 2) {
+
+            return CommandResult::error("Usage: focus <node_name>");
+        }
+
         auto topic = m_ctx->graph->getNode(m_parts.at(1).toStdString());
         if (topic != nullptr) {
             auto clusterId = m_ctx->layout->getNodeBoundingBox(topic->id);
+            return CommandResult::ok("");
         }
+        return CommandResult::error(m_parts.at(1) + " not found");
     }
     void undo() override {}
 

@@ -10,4 +10,10 @@ Item {
 
     readonly property color text_primary: "#09AEFD"
     readonly property color text_secondary: "#CCCCCC"
+
+    readonly property color terminal_command: "#50fa7b"
+    readonly property color terminal_out: "#f8f8f2"
+    readonly property color terminal_error: "#ff5555"
+    readonly property color terminal_hint: "#6272a4"
+    readonly property color terminal_success: "#8be9fd"
 }
