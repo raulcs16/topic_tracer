@@ -6,19 +6,24 @@
 
 class ModeCommand : public ICommand {
 public:
-    explicit ModeCommand(UIContext *context, QString mode)
-        : m_uiContext(context), m_mode(mode) {}
+    explicit ModeCommand(UIContext *context, QStringList parts)
+        : m_uiContext(context), m_parts(parts) {}
     CommandResult execute() override {
-        if (m_mode.toLower() == "progress") {
-            m_uiContext->setMode(UIContext::ViewMode::Progress);
-        } else if (m_mode.toLower() == "stress") {
-            m_uiContext->setMode(UIContext::ViewMode::Stress);
+        if (m_parts.length() != 2) {
+            return CommandResult::error("Usage: mode <'progress|stress'>");
         }
-        return CommandResult::ok("");
+        if (m_parts.at(1).toLower() == "progress") {
+            m_uiContext->setMode(UIContext::ViewMode::Progress);
+            return CommandResult::ok("");
+        } else if (m_parts.at(1).toLower() == "stress") {
+            m_uiContext->setMode(UIContext::ViewMode::Stress);
+            return CommandResult::ok("");
+        }
+        return CommandResult::error("Usage: mode <'progress|stress'>");
     }
     void undo() override {}
 
 private:
     UIContext *m_uiContext;
-    QString m_mode;
+    QStringList m_parts;
 };

@@ -6,9 +6,13 @@
 
 class SaveCommand : public ICommand {
 public:
-    explicit SaveCommand(CommandContext *ctx, QString file) : m_ctx(ctx), m_file(file) {}
+    explicit SaveCommand(CommandContext *ctx, QStringList parts)
+        : m_ctx(ctx), m_parts(parts) {}
     CommandResult execute() override {
-        auto save = m_ctx->repo->save(*m_ctx->graph, m_file);
+        if (m_parts.length() != 2) {
+            return CommandResult::error("Usage: save <file_name>");
+        }
+        auto save = m_ctx->repo->save(*m_ctx->graph, m_parts.at(1));
         if (save) {
             return CommandResult::ok("");
         }
@@ -18,5 +22,5 @@ public:
 
 private:
     CommandContext *m_ctx;
-    QString m_file;
+    QStringList m_parts;
 };

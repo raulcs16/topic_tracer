@@ -22,10 +22,10 @@ void CommandFactory::registerCommands() {
     };
     // File IO
     m_registry["load"] = [this](auto &p) {
-        return p.size() >= 2 ? std::make_unique<LoadCommand>(m_ctx, p[1]) : nullptr;
+        return std::make_unique<LoadCommand>(m_ctx, p);
     };
     m_registry["save"] = [this](auto &p) {
-        return p.size() >= 2 ? std::make_unique<SaveCommand>(m_ctx, p[1]) : nullptr;
+        return std::make_unique<SaveCommand>(m_ctx, p);
     };
 
     // Graph Operations
@@ -48,7 +48,7 @@ void CommandFactory::registerCommands() {
         return std::make_unique<FocusCommand>(m_ctx, p);
     };
     m_registry["mode"] = [this](auto &p) {
-        return std::make_unique<ModeCommand>(m_ctx->uiContext, p.at(1));
+        return std::make_unique<ModeCommand>(m_ctx->uiContext, p);
     };
     // The "NO" sub-parsing fix
     // m_registry["no"] = [this](auto &p) {
