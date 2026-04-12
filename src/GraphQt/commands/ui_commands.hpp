@@ -22,6 +22,7 @@ public:
         return CommandResult::error(m_parts.at(1) + " not found");
     }
     void undo() override {}
+    QString getHint() const override { return ""; }
     QString name() const override { return "focus"; }
     QString description() const override { return "focus viewport on a node"; }
     QString usage() const override { return "focus <node_a>"; }
@@ -50,6 +51,7 @@ public:
         return CommandResult::error("Usage: mode <'progress|stress'>");
     }
     void undo() override {}
+    QString getHint() const override { return ""; }
     QString name() const override { return "mode"; }
     QString description() const override { return "change the heat mode of the graph"; }
     QString usage() const override { return "mode <stress|progress>"; }
@@ -57,4 +59,35 @@ public:
 private:
     CommandContext *m_context;
     QStringList m_parts;
+};
+
+class HelpCommand : public ICommand {
+public:
+    explicit HelpCommand(std::vector<std::unique_ptr<ICommand>> &commands)
+        : m_commands(commands) {}
+    CommandResult execute() override {
+        CommandResult result;
+        result.type = EntryType::Output;
+        result.success = true;
+
+        QStringList list;
+        for (const auto &cmd : m_commands) {
+            auto info = cmd->name() + ":\t" + cmd->description();
+            list.push_back(info);
+        }
+        result.message = list.join('\n');
+
+
+        return result;
+    }
+    void undo() override {}
+    QString getHint() const override { return ""; }
+    QString name() const override { return "help"; }
+    QString description() const override {
+        return "view list of commands, and their usage";
+    }
+    QString usage() const override { return "help"; }
+
+private:
+    std::vector<std::unique_ptr<ICommand>> &m_commands;
 };

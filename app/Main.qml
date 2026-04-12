@@ -17,7 +17,6 @@ ApplicationWindow {
     required property int minor
     required property int patch
 
-    required property CommandAutoCompleter auto_completer
     required property AppController controller
 
     property Item focusItem: null
@@ -165,10 +164,23 @@ ApplicationWindow {
                         return;
                     app.controller.executeCommand(cmd);
                 }
-                onTextInputChanged: text => {
-                    suggestion = app.auto_completer.complete(text);
+                onTextInputChanged: txt => {
+                    if (txt.length === 0)
+                        return;
+                    suggestion = "";
+                    app.controller.handleInput(txt);
                 }
-
+                onTabPressed: txt => {
+                    if (txt.length === 0)
+                        return;
+                    app.controller.handleSuggestion(txt);
+                }
+                Connections {
+                    target: app.controller
+                    function onSuggestionReady(hint) {
+                        terminalView.suggestion = hint;
+                    }
+                }
                 // Return focus to graph when collapsing
                 Keys.onEscapePressed: {
                     app.focusItem = viewport;

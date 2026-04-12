@@ -9,7 +9,10 @@ AppController::AppController(UIContext *ui, QObject *parent)
       m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
       m_commandFactory(
-          new CommandFactory(new CommandContext{m_graph, m_repo, m_layout, m_uiContext}))
+          new CommandFactory(new CommandContext{m_graph, m_repo, m_layout, m_uiContext})),
+      m_autoCompleter(new CommandAutoCompleter(m_commandFactory->availableCommands(),
+                                               m_uiContext->store(),
+                                               this))
 
 {
     if (!m_graph || !m_repo || !m_layout || !m_uiContext)
@@ -49,8 +52,7 @@ void AppController::calculateHeatScores() {
 }
 
 
-void AppController::executeCommand(QString raw_cmd) {
-    raw_cmd = raw_cmd.trimmed();
+void AppController::executeCommand(const QString &raw_cmd) {
     QStringList parts = raw_cmd.split(" ", Qt::SkipEmptyParts);
     m_uiContext->terminalListModel()->addEntry(raw_cmd, EntryType::Command);
     // 2. Try to create the command
@@ -70,5 +72,39 @@ void AppController::executeCommand(QString raw_cmd) {
 
     if (result.success) {
         // m_history.push(std::move(command)); // For undo/redo later
+    }
+}
+
+void AppController::handleSuggestion(const QString &input) {
+    QList<AutoSuggestion> matches = m_autoCompleter->findMatches(input);
+    if (matches.size() == 0) {
+        return;
+    }
+    if (matches.size() == 1) {
+        const auto &match = matches.first();
+        QString fullSuggestion = input.left(match.startIndex) + match.suggestion;
+        emit suggestionReady(fullSuggestion);
+    } else {
+        QStringList names;
+        for (const auto &m : matches) {
+            names << m.suggestion;
+        }
+
+        QString options = names.join("    ");
+        m_uiContext->terminalListModel()->addEntry(options, EntryType::Hint);
+    }
+}
+void AppController::handleInput(const QString &input) {
+    if (input.endsWith("?")) {
+        auto clean = input.left(input.length() - 1).trimmed();
+        QStringList parts = clean.split(" ", Qt::SkipEmptyParts);
+        auto command = m_commandFactory->create(parts);
+        if (command != nullptr) {
+            auto hint = command->getHint();
+            if (hint.size() > 0) {
+                m_uiContext->terminalListModel()->addEntry(input, EntryType::Command);
+                m_uiContext->terminalListModel()->addEntry(hint, EntryType::Hint);
+            }
+        }
     }
 }

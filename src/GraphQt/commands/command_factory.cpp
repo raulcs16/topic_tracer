@@ -61,6 +61,8 @@ std::unique_ptr<ICommand> CommandFactory::create(const QStringList &parts) {
         return std::make_unique<ClearPathCommand>(m_ctx, parts);
     if (cmd == "no link")
         return std::make_unique<UnLinkCommand>(m_ctx, parts);
+    if (cmd == "help")
+        return std::make_unique<HelpCommand>(m_commands);
     return nullptr;
 }
 

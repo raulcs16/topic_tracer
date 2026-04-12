@@ -6,33 +6,23 @@
 #include <QStringList>
 #include <QtQml/qqml.h>
 
+struct AutoSuggestion {
+    int startIndex = -1;
+    QString suggestion;
+};
+
 class CommandAutoCompleter : public QObject {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("Created in main.cpp")
 public:
-    explicit CommandAutoCompleter(GraphStore *store, QObject *parent = nullptr)
-        : m_store(store), QObject{parent} {
-        m_verbs = {"clear",
-                   "save",
-                   "load",
-                   "touch",
-                   "link",
-                   "rm",
-                   "path",
-                   "mv",
-                   "focus",
-                   "mode"};
-        m_edgeTypes = {"composes", "aggregates", "associates", "injects", "implements"};
-    }
-    Q_INVOKABLE QString complete(const QString &raw_input) const;
-
-
-private:
-    QString findBestMatch(const QString &partial, const QStringList &canidates) const;
+    explicit CommandAutoCompleter(QStringList verbs,
+                                  GraphStore *store,
+                                  QObject *parent = nullptr)
+        : m_verbs(verbs), m_store(store), QObject{parent} {}
+    QList<AutoSuggestion> findMatches(const QString &input) const;
 
 private:
     GraphStore *m_store;
     QStringList m_verbs;
-    QStringList m_edgeTypes;
 };

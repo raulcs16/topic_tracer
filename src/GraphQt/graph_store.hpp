@@ -40,6 +40,7 @@ public:
 
     //Getters::nodes
     QString label(uint32_t id);
+    QStringList labels();
     StateFlags flags(uint32_t id);
     Pos pos(uint32_t id);
     float heat(uint32_t id);
@@ -56,8 +57,6 @@ public:
     std::vector<uint32_t> setAllNodes(StateFlag flag, bool state);
     void setNodeHeat(uint32_t id, float heat = 0.0f);
     void setGlobalActiveBox();
-    //find
-    QString findMatch(QString pattern);
 
     void clearPath();
 

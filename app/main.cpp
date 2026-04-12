@@ -1,5 +1,4 @@
 #include "app_controller.hpp"
-#include "command_autocompleter.hpp"
 #include "config.hpp"
 #include "graph.hpp"
 #include "graph_store.hpp"
@@ -26,14 +25,11 @@ int main(int argc, char *argv[]) {
     UIContext *uiContext = new UIContext(store, &engine);
     AppController *appController = new AppController(uiContext, &engine);
 
-    CommandAutoCompleter *autoCompleter = new CommandAutoCompleter(store, &engine);
-
 
     engine.setInitialProperties({
         {"major", project_version_major},
         {"minor", project_version_minor},
         {"patch", project_version_patch},
-        {"auto_completer", QVariant::fromValue(autoCompleter)},
         {"controller", QVariant::fromValue(appController)},
     });
 

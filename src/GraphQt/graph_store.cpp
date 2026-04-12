@@ -136,17 +136,14 @@ void GraphStore::onGraphBluePrint(GraphBlueprint blueprint) {
         }
     }
 }
-QString GraphStore::findMatch(QString pattern) {
-    QString match{};
+QStringList GraphStore::labels() {
+    QStringList labels;
 
     for (const auto &[_, label] : m_labels) {
-        if (label.startsWith(pattern)) {
-            match = label;
-            break;
-        }
+        labels.push_back(label);
     }
 
-    return match;
+    return labels;
 }
 void GraphStore::clearPath() {
     for (auto &[id, state] : m_nodeFlags) {

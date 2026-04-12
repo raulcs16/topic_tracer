@@ -17,6 +17,7 @@ public:
     QString name() const override { return "clear"; }
     QString description() const override { return "clear current graph state"; }
     QString usage() const override { return "clear"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_context;
@@ -37,6 +38,7 @@ public:
         return "un highlight the current highlighted path";
     }
     QString usage() const override { return "no path"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_context;
@@ -76,8 +78,22 @@ public:
     QString name() const override { return "link"; }
     QString description() const override { return "link two nodes together"; }
     QString usage() const override {
-        return "link <node_a> <node_b> -t <composses | injects | implements | associates "
+        return "link <node_a> <node_b> -t <composses | "
+               "injects | implements | associates "
                " | aggregates>";
+    }
+    QString getHint() const override {
+        if (m_parts.size() == 1) {
+            return usage();
+        }
+        if (m_parts.size() == 2) {
+            return m_context->uiContext->store()->labels().join(" ");
+        }
+        if (m_parts.size() == 3) {
+            return "-t <composes | injects | implements | associates | aggregates> ";
+        }
+
+        return "";
     }
 
 private:
@@ -101,6 +117,7 @@ public:
     QString name() const override { return "mv"; }
     QString description() const override { return "rename a node"; }
     QString usage() const override { return "mv  <node_a> <new_name>"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_context;
@@ -174,6 +191,7 @@ public:
         return "highlight the path between starting node and ending node";
     }
     QString usage() const override { return "path <node_a> <node_b>"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_ctx;
@@ -197,6 +215,7 @@ public:
         return "remove an existing node from the graph";
     }
     QString usage() const override { return "rm <node_a>"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_context;
@@ -218,6 +237,7 @@ public:
     QString name() const override { return "touch"; }
     QString description() const override { return "create one or multiple nodes"; }
     QString usage() const override { return "touch <node_a> <node_b> ... <node_n>"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_context;
@@ -242,6 +262,7 @@ public:
     QString name() const override { return "no link"; }
     QString description() const override { return "remove the link between two nodes"; }
     QString usage() const override { return "no link <node_a> <node_b>"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_context;

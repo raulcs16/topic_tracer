@@ -6,6 +6,7 @@ Item {
     id: root
     height: 35
     signal accepted(string text)
+    signal tabPressed(string text)
     property string suggestion: ""
     property alias text: mainInput.text
 
@@ -61,8 +62,10 @@ Item {
             Keys.onTabPressed: event => {
                 if (root.suggestion !== "" && root.suggestion.startsWith(text)) {
                     text = root.suggestion;
-                    event.accepted = true;
+                } else {
+                    root.tabPressed(text);
                 }
+                event.accepted = true;
             }
 
             onAccepted: {

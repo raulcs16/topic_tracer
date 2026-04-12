@@ -26,6 +26,7 @@ public:
     QString name() const override { return "load"; }
     QString description() const override { return "load in a file"; }
     QString usage() const override { return "load <file_name>"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_ctx;
@@ -50,6 +51,7 @@ public:
     QString name() const override { return "save"; }
     QString description() const override { return "save current graph state to a file"; }
     QString usage() const override { return "save <file_name>"; }
+    QString getHint() const override { return ""; }
 
 private:
     CommandContext *m_ctx;

@@ -8,9 +8,7 @@ class CommandFactory {
 public:
     CommandFactory(CommandContext *ctx);
     std::unique_ptr<ICommand> create(const QStringList &parts);
-
     QStringList availableCommands();
-
 
 private:
 private:

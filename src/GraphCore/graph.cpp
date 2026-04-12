@@ -112,6 +112,9 @@ bool Graph::addEdge(const Node *a, const Node *b, EdgeType type) {
     if (!m_nodes.contains(a->id) || !m_nodes.contains(b->id)) {
         return false;
     }
+    if (a->id == b->id) {
+        return false;
+    }
     std::string key = makeKey(a->id, b->id);
 
     if (hasEdge(key))
