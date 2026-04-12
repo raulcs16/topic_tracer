@@ -22,11 +22,6 @@ ApplicationWindow {
 
     property Item focusItem: null
 
-    // Shortcut {
-    //     sequence: [":"]
-    //     onActivated: commandInput.focus = true
-    // }
-
     RowLayout {
         anchors.fill: parent
         spacing: 0
@@ -114,6 +109,14 @@ ApplicationWindow {
                             viewport.fitArea(randomX, randomY, 400, 400);
                             event.accepted = true;
                         }
+                        if (event.key === Qt.Key_T) {
+                            app.focusItem = terminalView;
+                            terminalView.forceActiveFocus();
+                        }
+                        if (event.key === Qt.Key_E) {
+                            app.focusItem = topicListView;
+                            topicListView.forceActiveFocus();
+                        }
                     }
                     MouseArea {
                         enabled: app.focusItem != viewport
@@ -144,9 +147,10 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 model: app.controller.uiContext.terminalListModel
                 color: Colors.primary
+                border.width: 2
+                border.color: app.focusItem == terminalView ? Colors.accent : "transparent"
 
                 Layout.preferredHeight: isOpen ? 300 : 75
-
                 property bool isOpen: true
 
                 Behavior on Layout.preferredHeight {
@@ -164,14 +168,8 @@ ApplicationWindow {
 
                 // Return focus to graph when collapsing
                 Keys.onEscapePressed: {
-                    isOpen = false;
+                    app.focusItem = viewport;
                     viewport.forceActiveFocus();
-                }
-
-                // Allow focus management
-                onActiveFocusChanged: {
-                    if (activeFocus)
-                        app.focusItem = terminalView;
                 }
             }
         }
@@ -226,6 +224,10 @@ ApplicationWindow {
                         app.focusItem = topicListView;
                         topicListView.forceActiveFocus();
                     }
+                }
+                Keys.onEscapePressed: {
+                    app.focusItem = viewport;
+                    viewport.forceActiveFocus();
                 }
             }
         }

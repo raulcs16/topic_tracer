@@ -57,13 +57,12 @@ void EdgeListModel::onEdgeAdded(const std::string &key) {
     endInsertRows();
 }
 void EdgeListModel::onEdgeRemoved(const std::string &key) {
-    auto row = getIndex(key);
-    if (row < 0) {
+    auto index = getIndex(key);
+    if (index < 0) {
         return;
     }
-    const QModelIndex modelIndex = this->index(row);
-    beginRemoveRows(modelIndex, row, row);
-    m_ids.removeAt(row);
+    beginRemoveRows(QModelIndex(), index, index);
+    m_ids.erase(m_ids.begin() + index);
     endRemoveRows();
 }
 int EdgeListModel::getIndex(const std::string &key) {
