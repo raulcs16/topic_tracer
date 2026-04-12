@@ -52,21 +52,14 @@ qt_add_qml_module(GraphQt
         commands/command_context.hpp
         commands/command_factory.hpp
         commands/command_factory.cpp
-        commands/clear_command.hpp
-        commands/load_command.hpp
-        commands/save_command.hpp
-        commands/touch_command.hpp
-        commands/rm_command.hpp
-        commands/mv_command.hpp
-        commands/link_command.hpp
-        commands/unlink_command.hpp
-        commands/path_command.hpp
-        commands/clearpath_command.hpp
-        commands/focus_command.hpp
-        commands/mode_command.hpp
+        
         commands/command_autocompleter.hpp
         commands/command_autocompleter.cpp
         commands/command_result.hpp
+
+        commands/file_commands.hpp
+        commands/graph_commands.hpp
+        commands/ui_commands.hpp
     
         selection_manager.hpp
         selection_manager.cpp

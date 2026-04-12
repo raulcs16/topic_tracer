@@ -3,17 +3,17 @@
 #include "icommand.hpp"
 #include <map>
 
-using CommandCreator = std::function<std::unique_ptr<ICommand>(const QStringList &)>;
 
 class CommandFactory {
 public:
     CommandFactory(CommandContext *ctx);
     std::unique_ptr<ICommand> create(const QStringList &parts);
 
-private:
-    void registerCommands();
+    QStringList availableCommands();
+
 
 private:
+private:
     CommandContext *m_ctx;
-    std::map<QString, CommandCreator> m_registry;
+    std::vector<std::unique_ptr<ICommand>> m_commands;
 };
