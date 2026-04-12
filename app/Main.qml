@@ -165,6 +165,9 @@ ApplicationWindow {
                         return;
                     app.controller.executeCommand(cmd);
                 }
+                onTextInputChanged: text => {
+                    suggestion = app.auto_completer.complete(text);
+                }
 
                 // Return focus to graph when collapsing
                 Keys.onEscapePressed: {

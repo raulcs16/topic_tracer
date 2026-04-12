@@ -10,6 +10,7 @@ Rectangle {
     required property TerminalListModel model
     property alias suggestion: inputField.suggestion
     signal commandEntered(string cmd)
+    signal textInputChanged(string text)
     //border
     Rectangle {
         anchors.top: parent.top
@@ -37,6 +38,7 @@ Rectangle {
         id: inputField
         width: parent.width
         onAccepted: cmd => terminalRoot.commandEntered(cmd)
+        onTextChanged: terminalRoot.textInputChanged(text)
     }
 
     // 3. Define the two states

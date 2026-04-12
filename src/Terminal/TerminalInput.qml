@@ -7,6 +7,7 @@ Item {
     height: 35
     signal accepted(string text)
     property string suggestion: ""
+    property alias text: mainInput.text
 
     function contentWidthOf(txt) {
         return txtMetrics.width;
