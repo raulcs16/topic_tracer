@@ -27,9 +27,7 @@ public:
     void onClear() override;
     void onGraphBluePrint(GraphBlueprint blueprint) override;
     //ILayoutObserver
-    void onNodeAdded(const GraphNode &node) override;
     void onNodeUpdated(const GraphNode &node) override;
-    void onEdgeAdded(const GraphEdge &edge) override;
     void onEdgeUpdated(const GraphEdge &edge) override;
     void onGlobalBoundsUpdated(float x, float y, float w, float h) override;
     void onClusterRectUpdated(uint32_t clusterId,

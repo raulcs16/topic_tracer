@@ -50,14 +50,9 @@ struct Transform {
 
 struct ILayoutObserver {
     virtual ~ILayoutObserver() = default;
-    virtual void onNodeAdded(const GraphNode &node) {}
     virtual void onNodeUpdated(const GraphNode &node) {}
     virtual void onNodeClusterChanged(uint32_t nodeId, uint32_t clusterId) {}
-    virtual void onNodeRemoved(uint32_t id) {}
-    virtual void onEdgeAdded(const GraphEdge &edge) {}
     virtual void onEdgeUpdated(const GraphEdge &edge) {}
-    virtual void onEdgeRemoved(const std::string &key) {}
-
     virtual void onGlobalBoundsUpdated(float x, float y, float w, float h) {}
     virtual void onClusterRectUpdated(uint32_t clusterId,
                                       float x,
@@ -65,5 +60,4 @@ struct ILayoutObserver {
                                       float w,
                                       float h) {}
     virtual void onClusterRectDeleted(uint32_t) {}
-    virtual void onClear() {}
 };

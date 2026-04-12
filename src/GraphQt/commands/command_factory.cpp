@@ -18,7 +18,7 @@ CommandFactory::CommandFactory(CommandContext *ctx) : m_ctx(ctx) { registerComma
 void CommandFactory::registerCommands() {
     // Basic Commands
     m_registry["clear"] = [this](auto &p) {
-        return std::make_unique<ClearCommand>(m_ctx->uiContext->store());
+        return std::make_unique<ClearCommand>(m_ctx);
     };
     // File IO
     m_registry["load"] = [this](auto &p) {

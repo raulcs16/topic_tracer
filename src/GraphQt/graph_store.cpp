@@ -173,7 +173,6 @@ std::vector<uint32_t> GraphStore::setAllNodes(StateFlag flag, bool state) {
     return ids;
 }
 
-void GraphStore::onNodeAdded(const GraphNode &node) {}
 
 Pos GraphStore::pos(uint32_t id) { return m_nodePosition[id]; }
 float GraphStore::heat(uint32_t id) { return m_nodeheats[id]; }
@@ -182,7 +181,6 @@ void GraphStore::onNodeUpdated(const GraphNode &node) {
     m_nodePosition[node.id].y = node.y;
     emit nodePosUpdated(node.id);
 }
-void GraphStore::onEdgeAdded(const GraphEdge &edge) {}
 void GraphStore::onEdgeUpdated(const GraphEdge &edge) {
     m_edgePosData[edge.key].source.x = edge.source_x;
     m_edgePosData[edge.key].source.y = edge.source_y;

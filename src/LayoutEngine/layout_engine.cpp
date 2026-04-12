@@ -23,7 +23,6 @@ void LayoutEngine::clear() {
     m_clusterMap.clear();
     initPool();
     updateGlobalBoundingBox();
-    // notify(&ILayoutObserver::onClear);
 }
 void LayoutEngine::addNode(uint32_t id) {
     auto pool = m_clusterMap[M_POOL_ID];
@@ -39,7 +38,6 @@ void LayoutEngine::removeNode(uint32_t id) {
     auto it = m_clusterMap.find(clusterId);
     if (it != m_clusterMap.end()) {
         it->second->removeNode(id);
-        notify(&ILayoutObserver::onNodeRemoved, id);
     }
 }
 void LayoutEngine::addEdge(uint32_t from, uint32_t to) {
@@ -118,7 +116,6 @@ void LayoutEngine::removeEdge(const std::string &k) {
         return;
     }
     fromIt->second->removeEdge(fromIt->first, toIt->first);
-    notify(&ILayoutObserver::onEdgeRemoved, k);
 }
 std::shared_ptr<OGDFCluster> LayoutEngine::makeClusterFromPool(uint32_t from,
                                                                uint32_t to) {
