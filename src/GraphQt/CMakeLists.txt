@@ -9,6 +9,7 @@ target_link_libraries(GraphQt
     PRIVATE Qt6::Quick
     PUBLIC TerminalQt
     PUBLIC TerminalQtplugin
+    PUBLIC FileManagerQt
     PUBLIC GraphCore
     PUBLIC Evidence
     PUBLIC LayoutEngine
@@ -19,7 +20,8 @@ target_link_libraries(GraphQt
 qt_add_qml_module(GraphQt
     URI GraphQt
     VERSION 1.0
-    DEPENDENCIES TerminalQt
+    DEPENDENCIES 
+        TerminalQt
     SOURCES
 
 

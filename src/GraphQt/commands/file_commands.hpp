@@ -33,7 +33,16 @@ public:
     }
 
     QStringList getValidArgs(const QStringList &parts) const override {
+        auto files = m_ctx->fileManger->listFiles();
+        if (parts.size() <= 1) {
+            return files;
+        }
         QStringList results;
+        for (const auto &file : files) {
+            if (file.startsWith(parts.last(), Qt::CaseSensitive)) {
+                results.append(file);
+            }
+        }
         return results;
     }
 
@@ -64,6 +73,38 @@ public:
 
     std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
         return std::make_unique<SaveCommand>(m_ctx, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
+private:
+    CommandContext *m_ctx;
+    QStringList m_parts;
+};
+
+class LsCommand : public ICommand {
+public:
+    explicit LsCommand(CommandContext *ctx, QStringList parts)
+        : m_ctx(ctx), m_parts(parts) {}
+    CommandResult execute() override {
+        auto files = m_ctx->fileManger->listFiles();
+        if (files.size() > 0) {
+            return CommandResult::ok(files.join("\t"));
+        }
+        return CommandResult::error("unable to find files @" +
+                                    m_ctx->fileManger->getBaseDataPath());
+    }
+    void undo() override {}
+    QString name() const override { return "ls"; }
+    QString description() const override { return "list all files"; }
+    QString usage() const override { return "ls"; }
+    QString getHint() const override { return usage(); }
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<LsCommand>(m_ctx, parts);
     }
 
     QStringList getValidArgs(const QStringList &parts) const override {

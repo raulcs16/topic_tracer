@@ -8,7 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
-option(TESTING "Enable Unit Testing" OFF)
+option(TESTING "Enable Unit Testing" ON)
 option(COVERAGE "Enable Code Coverage" OFF)
 
 if(TESTING AND COVERAGE)

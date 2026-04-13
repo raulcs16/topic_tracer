@@ -1,15 +1,15 @@
 #include "app_controller.hpp"
+#include "file_manager_dev.hpp"
 #include "graph_keys.hpp"
 #include <QTimer>
-
 
 AppController::AppController(UIContext *ui, QObject *parent)
     : QObject{parent}, m_uiContext{ui}, m_graph{new Graph()},
       m_repo{new GraphRepository("./data")}, m_layout{new LayoutEngine()},
-      m_evidenceDb{new EvidenceDB()},
+      m_fileManager{new FileManagerDev("./data")}, m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
-      m_commandFactory(
-          new CommandFactory(new CommandContext{m_graph, m_repo, m_layout, m_uiContext}))
+      m_commandFactory(new CommandFactory(
+          new CommandContext{m_graph, m_repo, m_layout, m_uiContext, m_fileManager}))
 
 {
     if (!m_graph || !m_repo || !m_layout || !m_uiContext)
@@ -87,7 +87,7 @@ void AppController::handleSuggestion(const QString &input) {
             names << m.suggestion;
         }
 
-        QString options = names.join("    ");
+        QString options = names.join("\t");
         m_uiContext->terminalListModel()->addEntry(options, EntryType::Hint);
     }
 }

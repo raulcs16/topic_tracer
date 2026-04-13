@@ -1,5 +1,5 @@
+#include "graph.hpp"
 #include "path_analyzer.hpp"
-#include "topic_graph.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 

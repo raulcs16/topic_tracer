@@ -5,6 +5,7 @@
 #include "graph.hpp"
 #include "graph_repo.hpp"
 #include "heat_score.hpp"
+#include "ifile_manager.hpp"
 #include "layout_engine.hpp"
 #include "selection_manager.hpp"
 #include "ui_context.hpp"
@@ -37,6 +38,7 @@ private:
     LayoutEngine *m_layout;
     GraphRepository *m_repo;
     UIContext *m_uiContext;
+    IFileManager *m_fileManager;
     CommandFactory *m_commandFactory;
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;

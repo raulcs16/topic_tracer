@@ -3,6 +3,7 @@ add_subdirectory(GraphCore)
 add_subdirectory(LayoutEngine)
 add_subdirectory(Persistence)
 add_subdirectory(Evidence)
+add_subdirectory(FileManager)
 
 IF(NOT TESTING)
 add_subdirectory(Styles)

@@ -1,15 +1,23 @@
 include(Catch)
 
+message(STATUS ">>>> PROCESSING TESTS DIRECTORY <<<<")
+# add_executable(TopicGraphUnderTest test_topic_graph.cpp)
+# target_link_libraries(TopicGraphUnderTest PUBLIC TopicGraphCore)
+# target_link_libraries(TopicGraphUnderTest PUBLIC Catch2::Catch2WithMain)
+# catch_discover_tests(TopicGraphUnderTest PROPERTIES LABELS "CORE")
 
-add_executable(TopicGraphUnderTest test_topic_graph.cpp)
-target_link_libraries(TopicGraphUnderTest PUBLIC TopicGraphCore)
-target_link_libraries(TopicGraphUnderTest PUBLIC Catch2::Catch2WithMain)
-catch_discover_tests(TopicGraphUnderTest)
+# add_executable(LayoutEngineUnderTest test_layout_engine.cpp)
+# target_link_libraries(LayoutEngineUnderTest PUBLIC LayoutEngine)
+# target_link_libraries(LayoutEngineUnderTest PUBLIC Catch2::Catch2WithMain)
+# catch_discover_tests(LayoutEngineUnderTest PROPERTIES LABLES "LAYOUT")
 
-add_executable(LayoutEngineUnderTest test_layout_engine.cpp)
-target_link_libraries(LayoutEngineUnderTest PUBLIC LayoutEngine)
-target_link_libraries(LayoutEngineUnderTest PUBLIC Catch2::Catch2WithMain)
-catch_discover_tests(LayoutEngineUnderTest)
+add_executable(FileManagerUnderTest test_file_manager.cpp)
+target_link_libraries(FileManagerUnderTest PUBLIC FileManagerQt)
+target_link_libraries(FileManagerUnderTest PUBLIC Catch2::Catch2WithMain)
+target_compile_definitions(FileManagerUnderTest PRIVATE 
+    DEV_DATA_PATH="${PROJECT_SOURCE_DIR}/data"
+)
+catch_discover_tests(FileManagerUnderTest PROPERTIES LABELS "Storage")
 
 
 

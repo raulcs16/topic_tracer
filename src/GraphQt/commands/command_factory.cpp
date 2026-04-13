@@ -12,6 +12,7 @@ CommandFactory::CommandFactory(CommandContext *ctx) : m_ctx(ctx) {
     QStringList list;
     add(std::make_unique<LoadCommand>(m_ctx, list));
     add(std::make_unique<SaveCommand>(m_ctx, list));
+    add(std::make_unique<LsCommand>(m_ctx, list));
     add(std::make_unique<ClearCommand>(m_ctx, list));
     add(std::make_unique<TouchCommand>(m_ctx, list));
     add(std::make_unique<RmCommand>(m_ctx, list));

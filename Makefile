@@ -1,4 +1,4 @@
-.Phony: all clean build compile graph show tests 
+.Phony: all clean build compile graph show test-off test-on
 
 .DEFAULT_GOAL := compile
 BUILD_DIR := build
@@ -15,8 +15,11 @@ build:
 compile:
 	cmake --build $(BUILD_DIR)
 
-app:
+test-off:
 	cmake -S .B $(BUILD_DIR) -DTESTING=OFF
+
+test-on:
+	cmake -S .B $(BUILD_DIR) -DTESTING=ON
 
 graph: 
 	cmake -S . -B $(BUILD_DIR) --graphviz=$(GRAPH_DOT)
