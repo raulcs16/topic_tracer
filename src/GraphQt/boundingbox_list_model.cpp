@@ -51,13 +51,12 @@ void BoundingBoxListModel::onBoxAdded(uint32_t id) {
     endInsertRows();
 }
 void BoundingBoxListModel::onBoxRemoved(uint32_t id) {
-    auto row = getIndex(id);
-    if (row < 0) {
+    auto index = getIndex(id);
+    if (index < 0) {
         return;
     }
-    const QModelIndex modelIndex = this->index(row);
-    beginRemoveRows(modelIndex, row, row);
-    m_ids.removeAt(row);
+    beginRemoveRows(QModelIndex(), index, index);
+    m_ids.erase(m_ids.begin() + index);
     endRemoveRows();
 }
 void BoundingBoxListModel::onBoxUpdated(uint32_t id) {
