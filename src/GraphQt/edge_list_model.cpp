@@ -57,7 +57,9 @@ void EdgeListModel::onEdgeAdded(const std::string &key) {
     endInsertRows();
 }
 void EdgeListModel::onEdgeRemoved(const std::string &key) {
+    qDebug() << "onEdgeRemoved::" << key;
     auto index = getIndex(key);
+    qDebug() << "onEdgeRemoved::@" << index;
     if (index < 0) {
         return;
     }

@@ -66,6 +66,7 @@ Canvas {
 
     onColorChanged: requestPaint()
     onFlagsChanged: requestPaint()
+    onPositionChanged: requestPaint()
 
     onPaint: {
         var context = getContext('2d');
