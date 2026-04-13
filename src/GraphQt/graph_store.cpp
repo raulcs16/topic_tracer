@@ -183,6 +183,7 @@ void GraphStore::onEdgeUpdated(const GraphEdge &edge) {
     m_edgePosData[edge.key].source.y = edge.source_y;
     m_edgePosData[edge.key].target.x = edge.target_x;
     m_edgePosData[edge.key].target.y = edge.target_y;
+    m_edgePosData[edge.key].bends.clear();
     for (const auto &p : edge.bends) {
         Pos pos;
         pos.x = p.m_x;
