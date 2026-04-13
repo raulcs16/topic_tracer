@@ -53,8 +53,8 @@ qt_add_qml_module(GraphQt
         commands/command_factory.hpp
         commands/command_factory.cpp
         
-        commands/command_autocompleter.hpp
-        commands/command_autocompleter.cpp
+        # commands/command_autocompleter.hpp
+        # commands/command_autocompleter.cpp
         commands/command_result.hpp
 
         commands/file_commands.hpp

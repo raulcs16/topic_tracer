@@ -9,10 +9,7 @@ AppController::AppController(UIContext *ui, QObject *parent)
       m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
       m_commandFactory(
-          new CommandFactory(new CommandContext{m_graph, m_repo, m_layout, m_uiContext})),
-      m_autoCompleter(new CommandAutoCompleter(m_commandFactory->availableCommands(),
-                                               m_uiContext->store(),
-                                               this))
+          new CommandFactory(new CommandContext{m_graph, m_repo, m_layout, m_uiContext}))
 
 {
     if (!m_graph || !m_repo || !m_layout || !m_uiContext)
@@ -76,7 +73,7 @@ void AppController::executeCommand(const QString &raw_cmd) {
 }
 
 void AppController::handleSuggestion(const QString &input) {
-    QList<AutoSuggestion> matches = m_autoCompleter->findMatches(input);
+    QList<AutoSuggestion> matches = m_commandFactory->findMatch(input);
     if (matches.size() == 0) {
         return;
     }
@@ -95,16 +92,16 @@ void AppController::handleSuggestion(const QString &input) {
     }
 }
 void AppController::handleInput(const QString &input) {
-    if (input.endsWith("?")) {
-        auto clean = input.left(input.length() - 1).trimmed();
-        QStringList parts = clean.split(" ", Qt::SkipEmptyParts);
-        auto command = m_commandFactory->create(parts);
-        if (command != nullptr) {
-            auto hint = command->getHint();
-            if (hint.size() > 0) {
-                m_uiContext->terminalListModel()->addEntry(input, EntryType::Command);
-                m_uiContext->terminalListModel()->addEntry(hint, EntryType::Hint);
-            }
-        }
-    }
+    // if (input.endsWith("?")) {
+    //     auto clean = input.left(input.length() - 1).trimmed();
+    //     QStringList parts = clean.split(" ", Qt::SkipEmptyParts);
+    //     auto command = m_commandFactory->create(parts);
+    //     if (command != nullptr) {
+    //         auto hint = command->getHint();
+    //         if (hint.size() > 0) {
+    //             m_uiContext->terminalListModel()->addEntry(input, EntryType::Command);
+    //             m_uiContext->terminalListModel()->addEntry(hint, EntryType::Hint);
+    //         }
+    //     }
+    // }
 }

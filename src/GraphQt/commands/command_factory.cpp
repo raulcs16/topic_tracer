@@ -6,19 +6,22 @@
 
 
 CommandFactory::CommandFactory(CommandContext *ctx) : m_ctx(ctx) {
+    auto add = [this](std::unique_ptr<ICommand> cmd) {
+        m_commands.emplace(cmd->name(), std::move(cmd));
+    };
     QStringList list;
-    m_commands.push_back(std::make_unique<LoadCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<SaveCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<ClearCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<TouchCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<RmCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<MvCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<LinkCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<UnLinkCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<PathCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<ClearPathCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<FocusCommand>(m_ctx, list));
-    m_commands.push_back(std::make_unique<MvCommand>(m_ctx, list));
+    add(std::make_unique<LoadCommand>(m_ctx, list));
+    add(std::make_unique<SaveCommand>(m_ctx, list));
+    add(std::make_unique<ClearCommand>(m_ctx, list));
+    add(std::make_unique<TouchCommand>(m_ctx, list));
+    add(std::make_unique<RmCommand>(m_ctx, list));
+    add(std::make_unique<MvCommand>(m_ctx, list));
+    add(std::make_unique<LinkCommand>(m_ctx, list));
+    add(std::make_unique<UnLinkCommand>(m_ctx, list));
+    add(std::make_unique<PathCommand>(m_ctx, list));
+    add(std::make_unique<ClearPathCommand>(m_ctx, list));
+    add(std::make_unique<FocusCommand>(m_ctx, list));
+    add(std::make_unique<ModeCommand>(m_ctx, list));
 }
 
 // The "NO" sub-parsing fix
@@ -37,39 +40,50 @@ std::unique_ptr<ICommand> CommandFactory::create(const QStringList &parts) {
         return nullptr;
 
     QString cmd = parts.first().toLower();
-    if (cmd == "load")
-        return std::make_unique<LoadCommand>(m_ctx, parts);
-    if (cmd == "save")
-        return std::make_unique<SaveCommand>(m_ctx, parts);
-    if (cmd == "clear")
-        return std::make_unique<ClearCommand>(m_ctx, parts);
-    if (cmd == "touch")
-        return std::make_unique<TouchCommand>(m_ctx, parts);
-    if (cmd == "rm")
-        return std::make_unique<RmCommand>(m_ctx, parts);
-    if (cmd == "mv")
-        return std::make_unique<MvCommand>(m_ctx, parts);
-    if (cmd == "link")
-        return std::make_unique<LinkCommand>(m_ctx, parts);
-    if (cmd == "path")
-        return std::make_unique<PathCommand>(m_ctx, parts);
-    if (cmd == "focus")
-        return std::make_unique<FocusCommand>(m_ctx, parts);
-    if (cmd == "mv")
-        return std::make_unique<MvCommand>(m_ctx, parts);
-    if (cmd == "no path")
-        return std::make_unique<ClearPathCommand>(m_ctx, parts);
-    if (cmd == "no link")
-        return std::make_unique<UnLinkCommand>(m_ctx, parts);
-    if (cmd == "help")
-        return std::make_unique<HelpCommand>(m_commands);
+    auto it = m_commands.find(cmd);
+    if (it != m_commands.end()) {
+        return it->second->clone(parts);
+    }
     return nullptr;
 }
 
 QStringList CommandFactory::availableCommands() {
     QStringList names;
-    for (const auto &cmd : m_commands) {
-        names << cmd->name();
+    for (const auto &[name, _] : m_commands) {
+        names << name;
     }
     return names;
+}
+
+QList<AutoSuggestion> CommandFactory::findMatch(const QString &input) {
+    QStringList parts = input.split(" ", Qt::SkipEmptyParts);
+    QList<AutoSuggestion> results;
+
+    if (parts.isEmpty())
+        return results;
+
+    // Detect if the user just typed a space at the end (e.g., "link ")
+    bool endsWithSpace = input.endsWith(" ");
+    QString partial = endsWithSpace ? "" : parts.last();
+    int startIndex = endsWithSpace ? input.length() : input.lastIndexOf(partial);
+
+    // PHASE 1: Command Name Completion
+    if (parts.size() == 1 && !endsWithSpace) {
+        for (const auto &[name, _] : m_commands) {
+            if (name.startsWith(partial, Qt::CaseInsensitive)) {
+                results.append({startIndex, name});
+            }
+        }
+    } else {
+        QString cmdName = parts.first().toLower();
+        if (m_commands.contains(cmdName)) {
+            QStringList candidates = m_commands[cmdName]->getValidArgs(parts);
+            for (const auto &candidate : candidates) {
+                if (candidate.startsWith(partial, Qt::CaseInsensitive)) {
+                    results.append({startIndex, candidate});
+                }
+            }
+        }
+    }
+    return results;
 }

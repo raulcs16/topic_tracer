@@ -27,6 +27,16 @@ public:
     QString description() const override { return "focus viewport on a node"; }
     QString usage() const override { return "focus <node_a>"; }
 
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<FocusCommand>(m_ctx, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
 private:
     CommandContext *m_ctx;
     QStringList m_parts;
@@ -56,6 +66,16 @@ public:
     QString description() const override { return "change the heat mode of the graph"; }
     QString usage() const override { return "mode <stress|progress>"; }
 
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<ModeCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
 private:
     CommandContext *m_context;
     QStringList m_parts;
@@ -63,7 +83,7 @@ private:
 
 class HelpCommand : public ICommand {
 public:
-    explicit HelpCommand(std::vector<std::unique_ptr<ICommand>> &commands)
+    explicit HelpCommand(std::map<QString, std::unique_ptr<ICommand>> &commands)
         : m_commands(commands) {}
     CommandResult execute() override {
         CommandResult result;
@@ -71,8 +91,8 @@ public:
         result.success = true;
 
         QStringList list;
-        for (const auto &cmd : m_commands) {
-            auto info = cmd->name() + ":\t" + cmd->description();
+        for (const auto &[name, cmd] : m_commands) {
+            auto info = name + ":\t" + cmd->description();
             list.push_back(info);
         }
         result.message = list.join('\n');
@@ -88,6 +108,16 @@ public:
     }
     QString usage() const override { return "help"; }
 
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<HelpCommand>(m_commands);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
 private:
-    std::vector<std::unique_ptr<ICommand>> &m_commands;
+    std::map<QString, std::unique_ptr<ICommand>> &m_commands;
 };

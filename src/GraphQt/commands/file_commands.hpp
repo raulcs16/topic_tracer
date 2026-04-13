@@ -26,7 +26,16 @@ public:
     QString name() const override { return "load"; }
     QString description() const override { return "load in a file"; }
     QString usage() const override { return "load <file_name>"; }
-    QString getHint() const override { return ""; }
+    QString getHint() const override { return usage(); }
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<LoadCommand>(m_ctx, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
 
 private:
     CommandContext *m_ctx;
@@ -51,7 +60,16 @@ public:
     QString name() const override { return "save"; }
     QString description() const override { return "save current graph state to a file"; }
     QString usage() const override { return "save <file_name>"; }
-    QString getHint() const override { return ""; }
+    QString getHint() const override { return usage(); }
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<SaveCommand>(m_ctx, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
 
 private:
     CommandContext *m_ctx;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "command_autocompleter.hpp"
 #include "command_factory.hpp"
 #include "evidence.hpp"
 #include "graph.hpp"
@@ -18,12 +17,10 @@ class AppController : public QObject {
     QML_ELEMENT
     QML_UNCREATABLE("Created in main.cpp")
     Q_PROPERTY(UIContext *uiContext READ uiContext CONSTANT)
-    Q_PROPERTY(CommandAutoCompleter *autoCompleter READ autoCompleter CONSTANT)
 public:
     explicit AppController(UIContext *ui, QObject *parent = nullptr);
     ~AppController();
     UIContext *uiContext() const { return m_uiContext; }
-    CommandAutoCompleter *autoCompleter() const { return m_autoCompleter; }
 
     Q_INVOKABLE void executeCommand(const QString &raw_cmd);
     Q_INVOKABLE void handleSuggestion(const QString &input);
@@ -41,7 +38,6 @@ private:
     GraphRepository *m_repo;
     UIContext *m_uiContext;
     CommandFactory *m_commandFactory;
-    CommandAutoCompleter *m_autoCompleter;
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;
 };

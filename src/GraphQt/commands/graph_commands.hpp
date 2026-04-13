@@ -19,6 +19,15 @@ public:
     QString usage() const override { return "clear"; }
     QString getHint() const override { return ""; }
 
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<ClearCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
 private:
     CommandContext *m_context;
     QStringList m_parts;
@@ -40,6 +49,15 @@ public:
     QString usage() const override { return "no path"; }
     QString getHint() const override { return ""; }
 
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<ClearPathCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
 private:
     CommandContext *m_context;
     QStringList m_parts;
@@ -48,7 +66,9 @@ private:
 class LinkCommand : public ICommand {
 public:
     explicit LinkCommand(CommandContext *context, QStringList parts)
-        : m_context(context), m_parts(parts) {}
+        : m_context(context), m_parts(parts) {
+        m_linkTypes = {"composes", "injects", "implements", "associates", "aggregates"};
+    }
     CommandResult execute() override {
         if (m_parts.size() < 3) {
 
@@ -96,9 +116,35 @@ public:
         return "";
     }
 
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<LinkCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        if (parts.size() <= 2) {
+            return m_context->uiContext->store()->labels();
+        }
+        if (parts.size() == 3) {
+            return {"-t"};
+        }
+        if (parts.size() == 4) {
+            return m_linkTypes;
+        } else {
+            QStringList results;
+            for (const auto &type : m_linkTypes) {
+                if (type.startsWith(parts.last(), Qt::CaseInsensitive)) {
+                    results.append(type);
+                }
+            }
+            return results;
+        }
+    }
+
 private:
     CommandContext *m_context;
     QStringList m_parts;
+    QStringList m_linkTypes;
 };
 
 class MvCommand : public ICommand {
@@ -118,6 +164,15 @@ public:
     QString description() const override { return "rename a node"; }
     QString usage() const override { return "mv  <node_a> <new_name>"; }
     QString getHint() const override { return ""; }
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<MvCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
 
 private:
     CommandContext *m_context;
@@ -193,6 +248,15 @@ public:
     QString usage() const override { return "path <node_a> <node_b>"; }
     QString getHint() const override { return ""; }
 
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<PathCommand>(m_ctx, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
 private:
     CommandContext *m_ctx;
     QStringList m_parts;
@@ -217,6 +281,15 @@ public:
     QString usage() const override { return "rm <node_a>"; }
     QString getHint() const override { return ""; }
 
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<RmCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
 private:
     CommandContext *m_context;
     QStringList m_parts;
@@ -238,6 +311,15 @@ public:
     QString description() const override { return "create one or multiple nodes"; }
     QString usage() const override { return "touch <node_a> <node_b> ... <node_n>"; }
     QString getHint() const override { return ""; }
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<TouchCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
 
 private:
     CommandContext *m_context;
@@ -263,6 +345,15 @@ public:
     QString description() const override { return "remove the link between two nodes"; }
     QString usage() const override { return "no link <node_a> <node_b>"; }
     QString getHint() const override { return ""; }
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<UnLinkCommand>(m_context, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
 
 private:
     CommandContext *m_context;
