@@ -10,7 +10,8 @@ OGDFCluster::OGDFCluster(uint32_t id, std::shared_ptr<OGDFStrategy> strategy)
 void OGDFCluster::addNode(uint32_t id) {
     auto node = m_ogdf->graph.newNode(id);
     m_ogdf->idToNode[id] = node;
-    m_nodes.emplace_back(id, 0, 0);
+    tt::Point pos;
+    m_nodes.emplace_back(id, pos);
 }
 GraphNode *OGDFCluster::getNode(uint32_t id) const {
     for (size_t i = 0; i < m_nodes.size(); ++i) {

@@ -3,6 +3,7 @@ add_library(LayoutEngine STATIC
     disjoint_set.hpp
     disjoint_set.cpp
     #interface
+    ilayout_observer.hpp
     icluster_layout.hpp
     pool_cluster.hpp
     pool_cluster.cpp
@@ -16,6 +17,7 @@ add_library(LayoutEngine STATIC
     ogdf_strategy.hpp
     ogdf_strategy.cpp
     #ogdf strats
+    ogdf_context.hpp
     fmmm_strategy.hpp
     fmmm_strategy.cpp
     sugiyama_strategy.hpp
@@ -31,6 +33,7 @@ target_link_libraries(LayoutEngine
     PUBLIC OGDF
     PUBLIC Utils
     PUBLIC GraphCore
+    PUBLIC Geometry
 )
 target_include_directories(LayoutEngine
     PUBLIC

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "layout_strategy.hpp"
+#include "ogdf_context.hpp"
 
 
 class OGDFStrategy : public LayoutStrategy {

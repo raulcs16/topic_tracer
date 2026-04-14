@@ -2,6 +2,7 @@
 
 
 #include "icluster_layout.hpp"
+#include "ogdf_context.hpp"
 #include "ogdf_strategy.hpp"
 
 

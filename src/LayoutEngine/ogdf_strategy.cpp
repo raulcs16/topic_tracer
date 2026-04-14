@@ -22,8 +22,8 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                     continue;
                 double x = ctx->attributes.x(it->second);
                 double y = ctx->attributes.y(it->second);
-                node.x = x;
-                node.y = y;
+                node.pos.x = x;
+                node.pos.y = y;
                 bbox.max_x = std::max(x, bbox.max_x);
                 bbox.min_x = std::min(x, bbox.min_x);
                 bbox.max_y = std::max(y, bbox.max_y);
@@ -35,16 +35,16 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                 if (src == ctx->idToNode.end() || target == ctx->idToNode.end())
                     continue;
 
-                edge.source_x = ctx->attributes.x(src->second);
-                edge.source_y = ctx->attributes.y(src->second);
-                edge.target_x = ctx->attributes.x(target->second);
-                edge.target_y = ctx->attributes.y(target->second);
+                edge.source.x = ctx->attributes.x(src->second);
+                edge.source.y = ctx->attributes.y(src->second);
+                edge.target.x = ctx->attributes.x(target->second);
+                edge.target.y = ctx->attributes.y(target->second);
                 auto e = ctx->keyToEdge.find(edge.key);
                 if (e == ctx->keyToEdge.end())
                     continue;
                 edge.bends.clear();
                 for (ogdf::DPoint &p : ctx->attributes.bends(e->second)) {
-                    edge.bends.push_back(p);
+                    edge.bends.emplace_back(p.m_x, p.m_y);
                     bbox.max_x = std::max(bbox.max_x, p.m_x);
                     bbox.min_x = std::min(bbox.min_x, p.m_x);
                     bbox.max_y = std::max(bbox.max_y, p.m_y);

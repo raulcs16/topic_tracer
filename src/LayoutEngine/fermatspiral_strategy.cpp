@@ -17,8 +17,8 @@ void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
         //     x /= m;
         //     y /= m;
         // }
-        nodes[i].x = x;
-        nodes[i].y = y;
+        nodes[i].pos.x = x;
+        nodes[i].pos.y = y;
         bbox.max_x = std::max(x, bbox.max_x);
         bbox.min_x = std::min(x, bbox.min_x);
         bbox.max_y = std::max(y, bbox.max_y);
@@ -37,17 +37,12 @@ void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
 
         if (fromIt != nodes.end() && toIt != nodes.end()) {
             // Update edge endpoints
-            edge.source_x = fromIt->x;
-            edge.source_y = fromIt->y;
-            edge.target_x = toIt->x;
-            edge.target_y = toIt->y;
-
+            edge.source = fromIt->pos;
+            edge.target = toIt->pos;
             // Optionally set bends (straight line for now)
             edge.bends.clear();
-            ogdf::DPoint src(fromIt->x, fromIt->y);
-            ogdf::DPoint dst(toIt->x, toIt->y);
-            edge.bends.push_back(src);
-            edge.bends.push_back(dst);
+            edge.bends.push_back(edge.source);
+            edge.bends.push_back(edge.target);
         }
     }
 }

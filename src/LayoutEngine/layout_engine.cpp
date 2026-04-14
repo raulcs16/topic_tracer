@@ -235,31 +235,31 @@ GraphNode LayoutEngine::toScreenNode(const GraphNode &node,
 
     GraphNode screenNode = node;
     screenNode.id = node.id;
-    screenNode.x = transform.worldX(node.x);
-    screenNode.y = transform.worldY(node.y);
+    screenNode.pos.x = transform.worldX(node.pos.x);
+    screenNode.pos.y = transform.worldY(node.pos.y);
     return screenNode;
 }
 GraphEdge LayoutEngine::toScreenEdge(const GraphEdge &edge,
                                      std::shared_ptr<IClusterLayout> cluster) {
     auto transform = cluster.get()->transform();
-    float targetX = transform.worldX(edge.target_x);
-    float targetY = transform.worldY(edge.target_y);
-    float sourceX = transform.worldX(edge.source_x);
-    float sourceY = transform.worldY(edge.source_y);
+    float targetX = transform.worldX(edge.target.x);
+    float targetY = transform.worldY(edge.target.y);
+    float sourceX = transform.worldX(edge.source.x);
+    float sourceY = transform.worldY(edge.source.y);
 
-    std::vector<ogdf::DPoint> screenbends;
+    tt::Path screenbends;
     screenbends.reserve(edge.bends.size());
     for (const auto &point : edge.bends) {
-        float x = transform.worldX(point.m_x);
-        float y = transform.worldY(point.m_y);
+        float x = transform.worldX(point.x);
+        float y = transform.worldY(point.y);
         screenbends.emplace_back(x, y);
     }
 
     GraphEdge screenEdge = edge;
-    screenEdge.source_x = sourceX;
-    screenEdge.source_y = sourceY;
-    screenEdge.target_x = targetX;
-    screenEdge.target_y = targetY;
+    screenEdge.source.x = sourceX;
+    screenEdge.source.y = sourceY;
+    screenEdge.target.x = targetX;
+    screenEdge.target.y = targetY;
     screenEdge.bends = screenbends;
     return screenEdge;
 }
@@ -329,7 +329,9 @@ void LayoutEngine::resolveCollisions(std::shared_ptr<IClusterLayout> newCluster)
         float ww = (bb.max_x - bb.min_x) * trans.scale;
         float wh = (bb.max_y - bb.min_y) * trans.scale;
 
-        notify(&ILayoutObserver::onClusterRectUpdated, cluster->id(), wx, wy, ww, wh);
+        notify(&ILayoutObserver::onClusterRectUpdated,
+               cluster->id(),
+               tt::Rect{wx, wy, ww, wh});
     }
 }
 void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
@@ -362,7 +364,9 @@ void LayoutEngine::onGraphBluePrint(GraphBlueprint blueprint) {
         float wy = trans.worldY(bb.min_y);
         float ww = (bb.max_x - bb.min_x) * trans.scale;
         float wh = (bb.max_y - bb.min_y) * trans.scale;
-        notify(&ILayoutObserver::onClusterRectUpdated, cluster->id(), wx, wy, ww, wh);
+        notify(&ILayoutObserver::onClusterRectUpdated,
+               cluster->id(),
+               tt::Rect{wx, wy, ww, wh});
     }
     updateGlobalBoundingBox();
 }
@@ -406,7 +410,7 @@ void LayoutEngine::updateGlobalBoundingBox() {
     float wy = trans.worldX(m_global_bb.min_y);
     float ww = (m_global_bb.max_x - m_global_bb.min_x) * trans.scale;
     float wh = (m_global_bb.max_y - m_global_bb.min_y) * trans.scale;
-    notify(&ILayoutObserver::onGlobalBoundsUpdated, wx, wy, ww, wh);
+    notify(&ILayoutObserver::onGlobalBoundsUpdated, tt::Rect{wx, wy, ww, wh});
 }
 
 // Logic to move everything from source to target and update the map

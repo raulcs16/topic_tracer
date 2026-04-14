@@ -1,7 +1,7 @@
 #pragma once
 #include "edge_pos.hpp"
 #include "graph.hpp"
-#include "layout_types.hpp"
+#include "ilayout_observer.hpp"
 #include "pos.hpp"
 #include "ui_states.hpp"
 #include <QObject>
@@ -29,12 +29,8 @@ public:
     //ILayoutObserver
     void onNodeUpdated(const GraphNode &node) override;
     void onEdgeUpdated(const GraphEdge &edge) override;
-    void onGlobalBoundsUpdated(float x, float y, float w, float h) override;
-    void onClusterRectUpdated(uint32_t clusterId,
-                              float x,
-                              float y,
-                              float w,
-                              float h) override;
+    void onGlobalBoundsUpdated(tt::Rect rect) override;
+    void onClusterRectUpdated(uint32_t clusterId, tt::Rect rect) override;
     void onClusterRectDeleted(uint32_t) override;
     void onNodeClusterChanged(uint32_t nodeId, uint32_t clusterId) override;
 

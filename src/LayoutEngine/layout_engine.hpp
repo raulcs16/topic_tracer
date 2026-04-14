@@ -3,6 +3,7 @@
 
 #include "graph.hpp"
 #include "icluster_layout.hpp"
+#include "ilayout_observer.hpp"
 #include "layout_strategy.hpp"
 #include "layout_types.hpp"
 #include "ogdf_cluster.hpp"

@@ -174,35 +174,31 @@ std::vector<uint32_t> GraphStore::setAllNodes(StateFlag flag, bool state) {
 Pos GraphStore::pos(uint32_t id) { return m_nodePosition[id]; }
 float GraphStore::heat(uint32_t id) { return m_nodeheats[id]; }
 void GraphStore::onNodeUpdated(const GraphNode &node) {
-    m_nodePosition[node.id].x = node.x;
-    m_nodePosition[node.id].y = node.y;
+    m_nodePosition[node.id].x = node.pos.x;
+    m_nodePosition[node.id].y = node.pos.y;
     emit nodePosUpdated(node.id);
 }
 void GraphStore::onEdgeUpdated(const GraphEdge &edge) {
-    m_edgePosData[edge.key].source.x = edge.source_x;
-    m_edgePosData[edge.key].source.y = edge.source_y;
-    m_edgePosData[edge.key].target.x = edge.target_x;
-    m_edgePosData[edge.key].target.y = edge.target_y;
+    m_edgePosData[edge.key].source.x = edge.source.x;
+    m_edgePosData[edge.key].source.y = edge.source.y;
+    m_edgePosData[edge.key].target.x = edge.target.x;
+    m_edgePosData[edge.key].target.y = edge.target.y;
     m_edgePosData[edge.key].bends.clear();
     for (const auto &p : edge.bends) {
         Pos pos;
-        pos.x = p.m_x;
-        pos.y = p.m_y;
+        pos.x = p.x;
+        pos.y = p.y;
         m_edgePosData[edge.key].bends.push_back(pos);
     }
     emit edgePositionUpdated(edge.key);
 }
 EdgePos GraphStore::edgePos(const std::string &key) { return m_edgePosData[key]; }
-void GraphStore::onGlobalBoundsUpdated(float x, float y, float w, float h) {
-    m_globalRect = QRectF{x, y, w, h};
+void GraphStore::onGlobalBoundsUpdated(tt::Rect rect) {
+    m_globalRect = QRectF{rect.x, rect.y, rect.width, rect.height};
 }
-void GraphStore::onClusterRectUpdated(uint32_t clusterId,
-                                      float x,
-                                      float y,
-                                      float w,
-                                      float h) {
+void GraphStore::onClusterRectUpdated(uint32_t clusterId, tt::Rect rect) {
     bool isNew = (m_rects.find(clusterId) == m_rects.end());
-    auto box = QRectF{x, y, w, h};
+    auto box = QRectF{rect.x, rect.y, rect.width, rect.height};
     m_rects[clusterId] = box;
     if (isNew)
         emit boxAdded(clusterId);

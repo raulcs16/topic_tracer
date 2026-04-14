@@ -10,7 +10,11 @@ PoolCluster::PoolCluster(uint32_t id,
     m_slots.reserve(capacity);
     m_indexMap.reserve(capacity);
     for (size_t i = 0; i < capacity; i++) {
-        m_nodes.emplace_back(0, 0, 0);
+        GraphNode node;
+        node.id = 0;
+        node.pos.x = 0;
+        node.pos.y = 0;
+        m_nodes.emplace_back(node);
         m_slots.emplace_back(false, 0);
     }
     apply();
@@ -38,7 +42,11 @@ size_t PoolCluster::getFreeSlot() {
     std::vector<GraphEdge> edges;
     std::vector<GraphNode> nodes;
     for (size_t i = 0; i < m_capacity; i++) {
-        nodes.emplace_back(0, 0, 0);
+        GraphNode node;
+        node.id = 0;
+        node.pos.x = 0;
+        node.pos.y = 0;
+        nodes.emplace_back(node);
         if (i >= old_cap) {
             m_slots.push_back({false, 0});
         }
