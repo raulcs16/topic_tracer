@@ -18,7 +18,7 @@ public:
     GraphNode *getNode(uint32_t id) const override;
     void clear() override;
     void apply() override;
-    BoundingBox boundingBox() const override;
+    tt::BoundingBox boundingBox() const override;
     void setStrategy(std::shared_ptr<LayoutStrategy> s) override;
     std::vector<GraphNode> nodes() const override { return m_nodes; }
     std::vector<GraphEdge> edges() const override { return m_edges; }
@@ -32,5 +32,5 @@ private:
     std::shared_ptr<OGDFStrategy> m_strategy;
     std::vector<GraphNode> m_nodes;
     std::vector<GraphEdge> m_edges;
-    BoundingBox m_bb;
+    tt::BoundingBox m_bb;
 };

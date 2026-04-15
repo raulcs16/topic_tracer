@@ -4,7 +4,7 @@
 OGDFStrategy::OGDFStrategy() {}
 void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                          std::vector<GraphEdge> &edges,
-                         BoundingBox &bbox) {
+                         tt::BoundingBox &bbox) {
     if (!m_layout)
         return;
     try {

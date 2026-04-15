@@ -75,7 +75,7 @@ void OGDFCluster::apply() {
     if (m_strategy)
         m_strategy->apply(m_nodes, m_edges, m_bb);
 }
-BoundingBox OGDFCluster::boundingBox() const { return m_bb; }
+tt::BoundingBox OGDFCluster::boundingBox() const { return m_bb; }
 void OGDFCluster::setStrategy(std::shared_ptr<LayoutStrategy> s) {
     auto ogdfStrat = std::dynamic_pointer_cast<OGDFStrategy>(s);
     if (!ogdfStrat) {

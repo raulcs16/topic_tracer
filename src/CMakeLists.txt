@@ -7,6 +7,7 @@ add_subdirectory(Evidence)
 add_subdirectory(FileManager)
 
 IF(NOT TESTING)
+# add_subdirectory(VisualState)
 add_subdirectory(Styles)
 add_subdirectory(GraphQt)
 add_subdirectory(Terminal)

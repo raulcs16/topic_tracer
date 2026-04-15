@@ -5,13 +5,6 @@
 #include <vector>
 
 
-struct BoundingBox {
-    double min_x;
-    double max_x;
-    double min_y;
-    double max_y;
-};
-
 struct GraphNode {
     uint32_t id;
     tt::Point pos;

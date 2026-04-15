@@ -11,7 +11,7 @@ public:
     virtual ~OGDFStrategy() = default;
     void apply(std::vector<GraphNode> &nodes,
                std::vector<GraphEdge> &edges,
-               BoundingBox &bbox) override;
+               tt::BoundingBox &bbox) override;
     void setContext(std::weak_ptr<OGDFContext> context);
 
 protected:

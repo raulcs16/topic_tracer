@@ -101,5 +101,5 @@ void PoolCluster::apply() {
         m_strategy->apply(m_nodes, edges, m_bbox);
     }
 }
-BoundingBox PoolCluster::boundingBox() const { return m_bbox; }
+tt::BoundingBox PoolCluster::boundingBox() const { return m_bbox; }
 void PoolCluster::setStrategy(std::shared_ptr<LayoutStrategy> s) { m_strategy = s; }

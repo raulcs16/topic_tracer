@@ -81,7 +81,7 @@ private:
     std::unordered_map<uint32_t, std::shared_ptr<IClusterLayout>> m_clusterMap;
     //map nodeId to clusterId
     std::unordered_map<uint32_t, uint32_t> m_nodeToCluster;
-    BoundingBox m_global_bb;
+    tt::BoundingBox m_global_bb;
     bool m_batchUpdate = false;
     std::vector<ILayoutObserver *> m_observers;
 };

@@ -16,7 +16,7 @@ public:
     void removeEdge(uint32_t from, uint32_t to) override;
     void clear() override;
     void apply() override;
-    BoundingBox boundingBox() const override;
+    tt::BoundingBox boundingBox() const override;
     void setStrategy(std::shared_ptr<LayoutStrategy> s) override;
     std::vector<GraphNode> nodes() const override;
     std::vector<GraphEdge> edges() const override { return m_edges; }
@@ -37,7 +37,7 @@ private:
     Transform m_transfrom;
     std::vector<GraphNode> m_nodes; // actual positioned nodes
     std::vector<GraphEdge> m_edges; // actual positioned edges
-    BoundingBox m_bbox;
+    tt::BoundingBox m_bbox;
     std::vector<Slot> m_slots;                    // occupancy map
     std::unordered_map<uint32_t, int> m_indexMap; // id → slot index
     size_t m_capacity;

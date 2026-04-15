@@ -3,7 +3,7 @@
 //TODO: add  coordinate translations
 void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
                                  std::vector<GraphEdge> &edges,
-                                 BoundingBox &bbox) {
+                                 tt::BoundingBox &bbox) {
 
     const double golden = M_PI * (3 - std::sqrt(5));
     for (int i = 0; i < nodes.size(); i++) {

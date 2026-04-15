@@ -27,4 +27,11 @@ struct Rect {
     Point center() const { return {x + width / 2.0, y + height / 2.0}; }
 };
 
+struct BoundingBox {
+    double min_x;
+    double max_x;
+    double min_y;
+    double max_y;
+};
+
 } // namespace tt

@@ -7,5 +7,5 @@ public:
     FermatSpiralStrategy() {};
     void apply(std::vector<GraphNode> &nodes,
                std::vector<GraphEdge> &edges,
-               BoundingBox &bbox) override;
+               tt::BoundingBox &bbox) override;
 };

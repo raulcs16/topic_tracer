@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geometry.hpp"
 #include "layout_strategy.hpp"
 #include "layout_types.hpp"
 #include <cstdint>
@@ -16,7 +17,7 @@ public:
     virtual void removeEdge(uint32_t from, uint32_t to) = 0;
     virtual void clear() = 0;
     virtual void apply() = 0;
-    virtual BoundingBox boundingBox() const = 0;
+    virtual tt::BoundingBox boundingBox() const = 0;
     virtual void setStrategy(std::shared_ptr<LayoutStrategy> s) = 0;
     virtual std::vector<GraphNode> nodes() const = 0;
     virtual std::vector<GraphEdge> edges() const = 0;

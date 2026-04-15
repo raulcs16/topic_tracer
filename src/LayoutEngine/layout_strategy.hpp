@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "geometry.hpp"
 #include "layout_types.hpp"
 
 
@@ -9,5 +10,5 @@ public:
     virtual ~LayoutStrategy() = default;
     virtual void apply(std::vector<GraphNode> &nodes,
                        std::vector<GraphEdge> &edge,
-                       BoundingBox &bbox) = 0;
+                       tt::BoundingBox &bbox) = 0;
 };
