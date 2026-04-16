@@ -3,7 +3,7 @@ add_library(Persistence STATIC
     graph_repo.cpp
 )
 target_link_libraries(Persistence
-    PRIVATE Qt6::Core
+    PUBLIC Qt6::Core
     PUBLIC GraphCore
     PUBLIC FileManager
 )

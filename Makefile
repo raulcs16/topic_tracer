@@ -24,7 +24,8 @@ test-on:
 graph: 
 	cmake -S . -B $(BUILD_DIR) --graphviz=$(GRAPH_DOT)
 	dot -Tpng $(GRAPH_DOT) -o $(GRAPH_IMG)
-
+ctest: test-on
+	./buld/ctest
 show:
 	open $(GRAPH_IMG)
 run:

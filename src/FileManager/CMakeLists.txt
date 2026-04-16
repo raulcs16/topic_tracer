@@ -6,7 +6,7 @@ add_library(FileManager STATIC
      file_manager_dev.cpp
 )
 target_link_libraries(FileManager
-    PRIVATE Qt6::Core
+    PUBLIC Qt6::Core
 )
 target_include_directories(FileManager
     PUBLIC
