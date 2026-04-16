@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "graph.hpp"
 #include "icluster_layout.hpp"
+#include "igraph_observer.hpp"
 #include "ilayout_observer.hpp"
 #include "layout_strategy.hpp"
 #include "layout_types.hpp"

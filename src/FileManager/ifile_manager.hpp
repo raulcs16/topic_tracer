@@ -1,6 +1,7 @@
 #pragma once
 #include <QString>
 #include <QStringList>
+
 class IFileManager {
 public:
     virtual ~IFileManager() = default;

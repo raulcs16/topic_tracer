@@ -1,9 +1,14 @@
 add_library(GraphCore STATIC
     graph_types.hpp
+
+    igraph_observer.hpp
+    
     graph.cpp
     graph.hpp
+
     path_analyzer.hpp
     path_analyzer.cpp
+
 )
 target_link_libraries(GraphCore PUBLIC Utils)
 target_include_directories(GraphCore

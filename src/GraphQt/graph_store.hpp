@@ -1,6 +1,6 @@
 #pragma once
 #include "edge_pos.hpp"
-#include "graph.hpp"
+#include "igraph_observer.hpp"
 #include "ilayout_observer.hpp"
 #include "pos.hpp"
 #include "ui_states.hpp"
