@@ -242,10 +242,10 @@ GraphNode LayoutEngine::toScreenNode(const GraphNode &node,
 GraphEdge LayoutEngine::toScreenEdge(const GraphEdge &edge,
                                      std::shared_ptr<IClusterLayout> cluster) {
     auto transform = cluster.get()->transform();
-    float targetX = transform.worldX(edge.line.start.x);
-    float targetY = transform.worldY(edge.line.start.y);
-    float sourceX = transform.worldX(edge.line.end.x);
-    float sourceY = transform.worldY(edge.line.end.y);
+    float sourceX = transform.worldX(edge.line.start.x);
+    float sourceY = transform.worldY(edge.line.start.y);
+    float targetX = transform.worldX(edge.line.end.x);
+    float targetY = transform.worldY(edge.line.end.y);
 
     tt::Path screenbends;
     screenbends.reserve(edge.line.bends.size());
