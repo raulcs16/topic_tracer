@@ -120,38 +120,25 @@ bool GraphSerializer::decodeEdge(const QJsonObject &obj,
 
     return true;
 }
-GraphRepository::GraphRepository(QString basePath) : m_basePath(basePath) {
-    QDir dir(m_basePath);
-    if (!dir.exists()) {
-        dir.mkpath(".");
-    }
-}
+GraphRepository::GraphRepository(IFileManager *file_manager) : m_filegm(file_manager) {}
 bool GraphRepository::save(const Graph &graph, QString fileName) {
-
-    QFile file(m_basePath + "/" + fileName + ".json");
-    if (!file.open(QIODevice::WriteOnly)) {
-        // qDebug() << "TGR::save::open file error";
+    if (!m_filegm)
         return false;
-    }
-
     QJsonDocument doc = GraphSerializer::toJson(graph);
-    file.write(doc.toJson(QJsonDocument::Indented));
-    file.close();
+    m_filegm->saveFile(fileName + ".json", doc.toJson(QJsonDocument::Indented));
     return true;
 }
 bool GraphRepository::load(Graph &graph, QString file_name) {
-
-    QFile file(m_basePath + "/" + file_name + ".json");
-    if (!file.open(QIODevice::ReadOnly)) {
-        // qDebug() << "TGR::load::Cannot open file for reading";
+    if (!m_filegm)
+        return false;
+    QByteArray bytes = m_filegm->loadFile(file_name + ".json");
+    if (bytes.isEmpty()) {
         return false;
     }
     QJsonParseError parseErr;
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseErr);
+    QJsonDocument doc = QJsonDocument::fromJson(bytes, &parseErr);
     if (parseErr.error != QJsonParseError::NoError) {
-        // qDebug() << "TGR::load::JSON PArseError";
         return false;
     }
-    file.close();
     return GraphSerializer::fromJson(doc, graph);
 }

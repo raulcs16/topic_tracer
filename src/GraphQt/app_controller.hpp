@@ -36,9 +36,9 @@ public slots:
 private:
     Graph *m_graph;
     LayoutEngine *m_layout;
+    IFileManager *m_fileManager;
     GraphRepository *m_repo;
     UIContext *m_uiContext;
-    IFileManager *m_fileManager;
     CommandFactory *m_commandFactory;
     EvidenceDB *m_evidenceDb;
     HeatScoreSystem *m_heatScore;

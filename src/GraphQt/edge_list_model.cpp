@@ -20,7 +20,7 @@ EdgeListModel::EdgeListModel(GraphStore *store, QObject *parent)
 
 QHash<int, QByteArray> EdgeListModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[EdgePosRole] = "position";
+    roles[EdgePosRole] = "line";
     roles[FlagsRole] = "flags";
     roles[EdgeTypeRole] = "edgeType";
     return roles;

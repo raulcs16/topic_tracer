@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graph.hpp"
+#include "ifile_manager.hpp"
 #include <QJsonDocument>
 #include <QString>
 
@@ -24,10 +25,10 @@ private:
 
 class GraphRepository {
 public:
-    GraphRepository(QString basePath);
+    GraphRepository(IFileManager *file_gm);
     bool save(const Graph &graph, QString file_name);
     bool load(Graph &graph, QString file_name);
 
 private:
-    QString m_basePath;
+    IFileManager *m_filegm;
 };

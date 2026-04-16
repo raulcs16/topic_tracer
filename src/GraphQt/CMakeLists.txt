@@ -9,7 +9,7 @@ target_link_libraries(GraphQt
     PRIVATE Qt6::Quick
     PUBLIC TerminalQt
     PUBLIC TerminalQtplugin
-    PUBLIC FileManagerQt
+    PUBLIC FileManager
     PUBLIC GraphCore
     PUBLIC Evidence
     PUBLIC LayoutEngine

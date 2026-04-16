@@ -5,9 +5,10 @@
 
 AppController::AppController(UIContext *ui, QObject *parent)
     : QObject{parent}, m_uiContext{ui}, m_graph{new Graph()},
-      m_repo{new GraphRepository("./data")}, m_layout{new LayoutEngine()},
-      m_fileManager{new FileManagerDev("./data")}, m_evidenceDb{new EvidenceDB()},
+      m_fileManager{new FileManagerDev("./data")}, m_layout{new LayoutEngine()},
+      m_evidenceDb{new EvidenceDB()},
       m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
+      m_repo(new GraphRepository{m_fileManager}),
       m_commandFactory(new CommandFactory(
           new CommandContext{m_graph, m_repo, m_layout, m_uiContext, m_fileManager}))
 

@@ -5,6 +5,7 @@ add_library(Persistence STATIC
 target_link_libraries(Persistence
     PRIVATE Qt6::Core
     PUBLIC GraphCore
+    PUBLIC FileManager
 )
 target_include_directories(Persistence
     PUBLIC
