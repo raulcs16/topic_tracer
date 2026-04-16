@@ -1,58 +1,38 @@
 #pragma once
 #include "geometry.hpp"
 #include <QMetaType>
+#include <QPointF>
 #include <QRectF>
 #include <QVector>
 #include <QtQml/qqml.h>
 
 namespace qt {
 
-struct Point {
-    Q_GADGET
-    QML_VALUE_TYPE(point)
-    Q_PROPERTY(double x MEMBER x)
-    Q_PROPERTY(double y MEMBER y)
-public:
-    Point() = default;
-    double x = 0.0;
-    double y = 0.0;
-    bool operator==(const Point &other) const { return x == other.x && y == other.y; }
-    bool operator!=(const Point &other) const { return !(*this == other); }
-    static Point fromTT(const tt::Point p) {
-        Point point;
-        point.x = p.x;
-        point.y = p.y;
-        return point;
-    }
-};
-
-// Use a type alias for Path to keep it clean
-using Path = QVector<Point>;
+inline QPointF QPointFfromTT(tt::Point p) { return QPointF{p.x, p.y}; }
 
 struct Line {
     Q_GADGET
     QML_VALUE_TYPE(line)
-    Q_PROPERTY(Point start MEMBER start)
-    Q_PROPERTY(Point end MEMBER end)
-    Q_PROPERTY(Path bends MEMBER bends)
+    Q_PROPERTY(QPointF start MEMBER start)
+    Q_PROPERTY(QPointF end MEMBER end)
+    Q_PROPERTY(QVector<QPointF> bends MEMBER bends)
 public:
     Line() = default;
-    Point start;
-    Point end;
-    Path bends;
+    QPointF start;
+    QPointF end;
+    QVector<QPointF> bends;
 
     static Line fromTT(const tt::Line line) {
         Line l;
-        Point start = Point::fromTT(line.start);
-        Point end = Point::fromTT(line.end);
-        Path path;
-        path.reserve(static_cast<int>(line.bends.size()));
+        QPointF start = QPointFfromTT(line.start);
+        QPointF end = QPointFfromTT(line.end);
+        QVector<QPointF> bends;
         for (const auto &p : line.bends) {
-            path.append(Point::fromTT(p));
+            bends.append(QPointFfromTT(p));
         }
         l.start = start;
         l.end = end;
-        l.bends = path;
+        l.bends = bends;
         return l;
     }
 };

@@ -37,12 +37,12 @@ void FermatSpiralStrategy::apply(std::vector<GraphNode> &nodes,
 
         if (fromIt != nodes.end() && toIt != nodes.end()) {
             // Update edge endpoints
-            edge.source = fromIt->pos;
-            edge.target = toIt->pos;
+            edge.line.start = fromIt->pos;
+            edge.line.end = toIt->pos;
             // Optionally set bends (straight line for now)
-            edge.bends.clear();
-            edge.bends.push_back(edge.source);
-            edge.bends.push_back(edge.target);
+            edge.line.bends.clear();
+            edge.line.bends.push_back(edge.line.start);
+            edge.line.bends.push_back(edge.line.end);
         }
     }
 }

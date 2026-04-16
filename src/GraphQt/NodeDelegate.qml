@@ -10,7 +10,7 @@ Item {
     required property int index
     required property int nodeId
     required property string label
-    required property pos position
+    required property point position
     required property int flags
     required property real heatScore
 

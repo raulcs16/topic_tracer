@@ -46,7 +46,7 @@ void OGDFCluster::addEdge(uint32_t from, uint32_t to) {
     auto edge = m_ogdf->graph.newEdge(fromNode->second, toNode->second);
     std::string k = GraphKeys::key(from, to);
     m_ogdf->keyToEdge[k] = edge;
-    m_edges.push_back(GraphEdge{.key = k, .from = from, .to = to, .bends = {}});
+    m_edges.push_back(GraphEdge{.key = k, .from = from, .to = to, .line = {}});
 }
 void OGDFCluster::removeEdge(uint32_t from, uint32_t to) {
     auto key = GraphKeys::key(from, to);

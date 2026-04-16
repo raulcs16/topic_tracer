@@ -15,6 +15,8 @@ target_link_libraries(GraphQt
     PUBLIC LayoutEngine
     PUBLIC OGDF
     PUBLIC Persistence
+    PUBLIC GeometryQt
+    PUBLIC GeometryQtplugin
 )
 
 qt_add_qml_module(GraphQt
@@ -22,8 +24,8 @@ qt_add_qml_module(GraphQt
     VERSION 1.0
     DEPENDENCIES 
         TerminalQt
+        GeometryQt
     SOURCES
-
 
         app_controller.hpp
         app_controller.cpp
@@ -66,20 +68,8 @@ qt_add_qml_module(GraphQt
         selection_manager.hpp
         selection_manager.cpp
 
-
-
-
-
         enums.hpp
         enums.cpp
-
-        pos.hpp
-        pos.cpp
-
-        edge_pos.hpp
-        edge_pos.cpp
-
-
     QML_FILES
         LabelListView.qml
         LabelDelegate.qml

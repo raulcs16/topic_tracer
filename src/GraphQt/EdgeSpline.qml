@@ -1,20 +1,22 @@
 import QtQuick
 
+import GeometryQt
+
 Canvas {
     property int headSize: 10
 
-    required property edgePos position
+    required property line line
     required property int flags
     required property int edgeType
 
     readonly property bool hover: (flags & ENUMS.StateFlag.Hovered) !== 0
     readonly property bool highlight: (flags & ENUMS.StateFlag.InPath) !== 0
     readonly property bool hidden: (flags & ENUMS.StateFlag.Hidden) !== 0
-    readonly property double sourceX: position.source.x
-    readonly property double sourceY: position.source.y
-    readonly property double targetX: position.target.x
-    readonly property double targetY: position.target.y
-    readonly property var bends: position.bends
+    readonly property double sourceX: line.start.x
+    readonly property double sourceY: line.start.y
+    readonly property double targetX: line.end.x
+    readonly property double targetY: line.end.y
+    readonly property var bends: line.bends
 
     property color color: highlight ? "yellow" : hover ? '#4cb4e1' : '#ffffff'
     property real opacityFactor: hidden ? 0.1 : 1.0
@@ -66,7 +68,7 @@ Canvas {
 
     onColorChanged: requestPaint()
     onFlagsChanged: requestPaint()
-    onPositionChanged: requestPaint()
+    onLineChanged: requestPaint()
 
     onPaint: {
         var context = getContext('2d');

@@ -1,14 +1,12 @@
 #pragma once
-#include "edge_pos.hpp"
+
+#include "geometryqt.hpp"
 #include "igraph_observer.hpp"
 #include "ilayout_observer.hpp"
-#include "pos.hpp"
 #include "ui_states.hpp"
 #include <QObject>
-#include <QRectF>
 #include <QtQml/qqml.h>
 #include <vector>
-
 
 class GraphStore : public QObject, public IGraphObserver, public ILayoutObserver {
     Q_OBJECT
@@ -38,11 +36,11 @@ public:
     QString label(uint32_t id);
     QStringList labels();
     StateFlags flags(uint32_t id);
-    Pos pos(uint32_t id);
+    QPointF pos(uint32_t id);
     float heat(uint32_t id);
     //Getters::edges
     EdgeType edgeType(const std::string &key);
-    EdgePos edgePos(const std::string &key);
+    qt::Line edgePos(const std::string &key);
     StateFlags flags(const std::string &key);
     //Getters::boxes
     QRectF rect(uint32_t clusterId);
@@ -86,12 +84,12 @@ private:
     //nodes
     std::unordered_map<uint32_t, QString> m_labels;
     std::unordered_map<uint32_t, ItemState> m_nodeFlags;
-    std::unordered_map<uint32_t, Pos> m_nodePosition;
+    std::unordered_map<uint32_t, QPointF> m_nodePosition;
     std::unordered_map<uint32_t, float> m_nodeheats;
     //edges
     std::unordered_map<std::string, EdgeType> m_edgeTypes;
     std::unordered_map<std::string, ItemState> m_edgeFlags;
-    std::unordered_map<std::string, EdgePos> m_edgePosData;
+    std::unordered_map<std::string, qt::Line> m_edgePosData;
     //boxes
     int m_hoverId = -1;
     QRectF m_globalRect;

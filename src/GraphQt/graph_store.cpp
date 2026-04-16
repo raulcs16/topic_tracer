@@ -3,7 +3,7 @@
 void GraphStore::onNodeAdded(const Node &node) {
     m_labels.emplace(node.id, QString::fromStdString(node.label));
     m_nodeFlags.emplace(node.id, StateFlag::None);
-    m_nodePosition[node.id] = Pos{};
+    m_nodePosition[node.id] = QPointF{};
     m_nodeheats[node.id] = 0.0f;
     emit nodeAdded(node.id);
 }
@@ -32,7 +32,7 @@ void GraphStore::onNodeRenamed(const Node &node) {
 void GraphStore::onEdgeAdded(const Edge &edge) {
     m_edgeFlags.emplace(edge.key, StateFlag::None);
     m_edgeTypes.emplace(edge.key, edge.type);
-    m_edgePosData[edge.key] = EdgePos();
+    m_edgePosData[edge.key] = qt::Line();
     emit edgeAdded(edge.key);
 }
 void GraphStore::onEdgeRemoved(const std::string &key) {
@@ -171,28 +171,17 @@ std::vector<uint32_t> GraphStore::setAllNodes(StateFlag flag, bool state) {
 }
 
 
-Pos GraphStore::pos(uint32_t id) { return m_nodePosition[id]; }
+QPointF GraphStore::pos(uint32_t id) { return m_nodePosition[id]; }
 float GraphStore::heat(uint32_t id) { return m_nodeheats[id]; }
 void GraphStore::onNodeUpdated(const GraphNode &node) {
-    m_nodePosition[node.id].x = node.pos.x;
-    m_nodePosition[node.id].y = node.pos.y;
+    m_nodePosition[node.id] = qt::QPointFfromTT(node.pos);
     emit nodePosUpdated(node.id);
 }
 void GraphStore::onEdgeUpdated(const GraphEdge &edge) {
-    m_edgePosData[edge.key].source.x = edge.source.x;
-    m_edgePosData[edge.key].source.y = edge.source.y;
-    m_edgePosData[edge.key].target.x = edge.target.x;
-    m_edgePosData[edge.key].target.y = edge.target.y;
-    m_edgePosData[edge.key].bends.clear();
-    for (const auto &p : edge.bends) {
-        Pos pos;
-        pos.x = p.x;
-        pos.y = p.y;
-        m_edgePosData[edge.key].bends.push_back(pos);
-    }
+    m_edgePosData[edge.key] = qt::Line::fromTT(edge.line);
     emit edgePositionUpdated(edge.key);
 }
-EdgePos GraphStore::edgePos(const std::string &key) { return m_edgePosData[key]; }
+qt::Line GraphStore::edgePos(const std::string &key) { return m_edgePosData[key]; }
 void GraphStore::onGlobalBoundsUpdated(tt::Rect rect) {
     m_globalRect = QRectF{rect.x, rect.y, rect.width, rect.height};
 }
@@ -227,5 +216,5 @@ void GraphStore::setHoveredState(uint32_t nodeId, bool state) {
     auto clusterId = m_nodeRectMap[nodeId];
     auto pos = m_nodePosition[nodeId];
     auto box = (m_hoverId == nodeId) ? m_rects[clusterId] : m_globalRect;
-    emit activeBoxChanged(box, pos.x, pos.y);
+    emit activeBoxChanged(box, pos.x(), pos.y());
 }

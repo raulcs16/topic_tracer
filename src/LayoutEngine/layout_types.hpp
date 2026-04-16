@@ -13,9 +13,7 @@ struct GraphEdge {
     std::string key;
     uint32_t from;
     uint32_t to;
-    tt::Point source;
-    tt::Point target;
-    tt::Path bends;
+    tt::Line line;
 };
 
 struct GraphData {

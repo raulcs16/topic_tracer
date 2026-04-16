@@ -35,16 +35,16 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                 if (src == ctx->idToNode.end() || target == ctx->idToNode.end())
                     continue;
 
-                edge.source.x = ctx->attributes.x(src->second);
-                edge.source.y = ctx->attributes.y(src->second);
-                edge.target.x = ctx->attributes.x(target->second);
-                edge.target.y = ctx->attributes.y(target->second);
+                edge.line.start.x = ctx->attributes.x(src->second);
+                edge.line.start.y = ctx->attributes.y(src->second);
+                edge.line.end.x = ctx->attributes.x(target->second);
+                edge.line.end.y = ctx->attributes.y(target->second);
                 auto e = ctx->keyToEdge.find(edge.key);
                 if (e == ctx->keyToEdge.end())
                     continue;
-                edge.bends.clear();
+                edge.line.bends.clear();
                 for (ogdf::DPoint &p : ctx->attributes.bends(e->second)) {
-                    edge.bends.emplace_back(p.m_x, p.m_y);
+                    edge.line.bends.emplace_back(p.m_x, p.m_y);
                     bbox.max_x = std::max(bbox.max_x, p.m_x);
                     bbox.min_x = std::min(bbox.min_x, p.m_x);
                     bbox.max_y = std::max(bbox.max_y, p.m_y);

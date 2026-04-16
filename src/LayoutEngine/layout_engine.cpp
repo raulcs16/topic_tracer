@@ -242,25 +242,25 @@ GraphNode LayoutEngine::toScreenNode(const GraphNode &node,
 GraphEdge LayoutEngine::toScreenEdge(const GraphEdge &edge,
                                      std::shared_ptr<IClusterLayout> cluster) {
     auto transform = cluster.get()->transform();
-    float targetX = transform.worldX(edge.target.x);
-    float targetY = transform.worldY(edge.target.y);
-    float sourceX = transform.worldX(edge.source.x);
-    float sourceY = transform.worldY(edge.source.y);
+    float targetX = transform.worldX(edge.line.start.x);
+    float targetY = transform.worldY(edge.line.start.y);
+    float sourceX = transform.worldX(edge.line.end.x);
+    float sourceY = transform.worldY(edge.line.end.y);
 
     tt::Path screenbends;
-    screenbends.reserve(edge.bends.size());
-    for (const auto &point : edge.bends) {
+    screenbends.reserve(edge.line.bends.size());
+    for (const auto &point : edge.line.bends) {
         float x = transform.worldX(point.x);
         float y = transform.worldY(point.y);
         screenbends.emplace_back(x, y);
     }
 
     GraphEdge screenEdge = edge;
-    screenEdge.source.x = sourceX;
-    screenEdge.source.y = sourceY;
-    screenEdge.target.x = targetX;
-    screenEdge.target.y = targetY;
-    screenEdge.bends = screenbends;
+    screenEdge.line.start.x = sourceX;
+    screenEdge.line.start.y = sourceY;
+    screenEdge.line.end.x = targetX;
+    screenEdge.line.end.y = targetY;
+    screenEdge.line.bends = screenbends;
     return screenEdge;
 }
 
