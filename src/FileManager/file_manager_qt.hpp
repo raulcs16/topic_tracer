@@ -5,13 +5,12 @@ class FileManagerQt : public IFileManager {
 public:
     FileManagerQt(const QString &appName);
     QString getBaseDataPath() const override;
-    virtual QStringList listFiles() const = 0;
-
-    virtual bool saveFile(const QString &fileName, const QByteArray &data) = 0;
-    virtual QByteArray loadFile(const QString &fileName) = 0;
-    virtual bool exists(const QString &fileName) const = 0;
-    virtual bool removeFile(const QString &fileName) = 0;
+    QStringList listFiles() const override;
+    bool saveFile(const QString &fileName, const QByteArray &data) override;
+    QByteArray loadFile(const QString &fileName) override;
+    bool exists(const QString &fileName) const override;
+    bool removeFile(const QString &fileName) override;
 
 private:
-    QString m_appName;
+    QString m_basePath;
 };

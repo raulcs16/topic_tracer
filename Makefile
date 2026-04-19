@@ -13,7 +13,10 @@ build:
 	cmake -S . -B $(BUILD_DIR)
 
 compile:
-	cmake --build $(BUILD_DIR)
+	cmake --build $(BUILD_DIR) 
+
+-v:
+	cmake --build $(BUILD_DIR) -v
 
 test-off:
 	cmake -S .B $(BUILD_DIR) -DTESTING=OFF
@@ -21,15 +24,24 @@ test-off:
 test-on:
 	cmake -S .B $(BUILD_DIR) -DTESTING=ON
 
+debug:
+	cmake -S .B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Debug
+
+rel-deb:	
+	cmake -S .B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+mac-icon:
+	cd app/resources; iconutil -c icns tt.iconset
+
 graph: 
 	cmake -S . -B $(BUILD_DIR) --graphviz=$(GRAPH_DOT)
 	dot -Tpng $(GRAPH_DOT) -o $(GRAPH_IMG)
-ctest: test-on
-	./buld/ctest
+ctest: 
+	cd $(BUILD_DIR); ctest
 show:
 	open $(GRAPH_IMG)
 run:
-	./build/app/TopicTracer.app/Contents/MacOS/TopicTracer
+	./build/app/TopicTracerEx.app/Contents/MacOS/TopicTracerEx
 
 coverage:
 	cmake -S . -B $(BUILD_DIR) -DCOVERAGE=ON

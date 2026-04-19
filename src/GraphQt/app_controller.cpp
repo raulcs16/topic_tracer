@@ -1,20 +1,36 @@
 #include "app_controller.hpp"
 #include "file_manager_dev.hpp"
+#include "file_manager_qt.hpp"
 #include "graph_keys.hpp"
+#include <QCoreApplication>
 #include <QTimer>
 
 AppController::AppController(UIContext *ui, QObject *parent)
-    : QObject{parent}, m_uiContext{ui}, m_graph{new Graph()},
-      m_fileManager{new FileManagerDev("./data")}, m_layout{new LayoutEngine()},
-      m_evidenceDb{new EvidenceDB()},
-      m_heatScore(new HeatScoreSystem(*m_evidenceDb, *m_graph)),
-      m_repo(new GraphRepository{m_fileManager}),
-      m_commandFactory(new CommandFactory(
-          new CommandContext{m_graph, m_repo, m_layout, m_uiContext, m_fileManager}))
+    : QObject{parent}, m_uiContext{ui} {
+    // 1. Resolve implementation based on Build Mode
+#ifdef QT_DEBUG
+    // Uses the local project folder during development
+    m_fileManager = new FileManagerDev("./data");
+#else
+    // Uses ~/Library/Application Support/TopicTracer or equivalent
+    m_fileManager = new FileManagerQt(QCoreApplication::applicationName());
+#endif
 
-{
+    // 2. Initialize remaining systems
+    m_graph = new Graph();
+    m_layout = new LayoutEngine();
+    m_evidenceDb = new EvidenceDB();
+    m_heatScore = new HeatScoreSystem(*m_evidenceDb, *m_graph);
+    m_repo = new GraphRepository(m_fileManager);
+
+    // CommandContext now receives the IFileManager interface seamlessly
+    m_commandFactory = new CommandFactory(
+        new CommandContext{m_graph, m_repo, m_layout, m_uiContext, m_fileManager});
+
+    // 3. Setup Observer Chain
     if (!m_graph || !m_repo || !m_layout || !m_uiContext)
         return;
+
     m_graph->addObserver(m_uiContext->store());
     m_graph->addObserver(m_layout);
     m_layout->addObserver(m_uiContext->store());
@@ -25,12 +41,13 @@ AppController::AppController(UIContext *ui, QObject *parent)
             &AppController::calculateHeatScores);
 }
 AppController::~AppController() {
+    delete m_commandFactory;
     delete m_repo;
     delete m_layout;
     delete m_graph;
     delete m_evidenceDb;
     delete m_heatScore;
-    delete m_commandFactory;
+    delete m_fileManager; // Don't forget this one!
 }
 
 

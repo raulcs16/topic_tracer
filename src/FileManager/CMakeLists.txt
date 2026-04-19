@@ -1,7 +1,7 @@
 add_library(FileManager STATIC
      ifile_manager.hpp
-     # file_manager_qt.hpp
-     # file_manager_qt.cpp
+     file_manager_qt.hpp
+     file_manager_qt.cpp
      file_manager_dev.hpp
      file_manager_dev.cpp
 )

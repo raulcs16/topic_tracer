@@ -4,14 +4,22 @@
 #include "graph_store.hpp"
 #include "ui_context.hpp"
 #include <QGuiApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
 
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("TT");
+    QCoreApplication::setApplicationName("TopicTracer");
 
-
+    QIcon appIcon(":/qt/qml/TopicTracer/resources/tt.iconset/icon_128x128.png");
+    if (appIcon.isNull()) {
+        qDebug() << "failed to load icon";
+        return -1;
+    }
+    app.setWindowIcon(appIcon);
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine,
@@ -34,7 +42,7 @@ int main(int argc, char *argv[]) {
     });
 
 
-    engine.loadFromModule("App", "Main");
+    engine.loadFromModule("TopicTracer", "Main");
 
     return app.exec();
 }

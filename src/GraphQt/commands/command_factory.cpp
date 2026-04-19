@@ -23,6 +23,7 @@ CommandFactory::CommandFactory(CommandContext *ctx) : m_ctx(ctx) {
     add(std::make_unique<ClearPathCommand>(m_ctx, list));
     add(std::make_unique<FocusCommand>(m_ctx, list));
     add(std::make_unique<ModeCommand>(m_ctx, list));
+    add(std::make_unique<PWDCommand>(m_ctx, list));
 }
 
 // The "NO" sub-parsing fix

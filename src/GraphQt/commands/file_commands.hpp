@@ -116,3 +116,31 @@ private:
     CommandContext *m_ctx;
     QStringList m_parts;
 };
+
+class PWDCommand : public ICommand {
+public:
+    explicit PWDCommand(CommandContext *ctx, QStringList parts)
+        : m_ctx(ctx), m_parts(parts) {}
+    CommandResult execute() override {
+        auto path = m_ctx->fileManger->getBaseDataPath();
+        return CommandResult::ok(path);
+    }
+    void undo() override {}
+    QString name() const override { return "pwd"; }
+    QString description() const override { return "list directory of files"; }
+    QString usage() const override { return "pwd"; }
+    QString getHint() const override { return usage(); }
+
+    std::unique_ptr<ICommand> clone(const QStringList &parts) const override {
+        return std::make_unique<PWDCommand>(m_ctx, parts);
+    }
+
+    QStringList getValidArgs(const QStringList &parts) const override {
+        QStringList results;
+        return results;
+    }
+
+private:
+    CommandContext *m_ctx;
+    QStringList m_parts;
+};
