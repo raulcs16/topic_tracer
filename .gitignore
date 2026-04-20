@@ -5,3 +5,4 @@ notes/
 dist/
 CMakeFiles/
 *.dmg
+.DS_Store
