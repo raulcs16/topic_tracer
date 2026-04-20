@@ -12,7 +12,7 @@
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QCoreApplication::setOrganizationName("TT");
-    QCoreApplication::setApplicationName("TopicTracer");
+    QCoreApplication::setApplicationName("Topic Tracer");
 
     QIcon appIcon(":/qt/qml/TopicTracer/resources/tt.iconset/icon_128x128.png");
     if (appIcon.isNull()) {

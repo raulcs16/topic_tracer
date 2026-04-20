@@ -2,3 +2,6 @@
 build/
 data/
 notes/
+dist/
+CMakeFiles/
+*.dmg

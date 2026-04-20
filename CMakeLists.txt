@@ -68,3 +68,8 @@ if(TESTING)
     add_subdirectory(tests)
 endif()
 
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/metadata.mk.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/metadata.mk"
+    @ONLY
+)
