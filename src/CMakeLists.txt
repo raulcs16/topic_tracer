@@ -1,4 +1,5 @@
 add_subdirectory(Utils)
+add_subdirectory(PropertyGraph)
 add_subdirectory(GraphCore)
 add_subdirectory(Geometry)
 add_subdirectory(LayoutEngine)
