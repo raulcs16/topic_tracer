@@ -14,6 +14,7 @@ bool PGraph::addNode(type_id nodeType, const QString &name) {
                                                .position = {.x = 0, .y = 0},
                                                .typeId = nodeType});
     m_nodes[newNode->id] = newNode;
+    notify(&IPGObserver::onNodeAdded, newNode->id);
     return true;
 }
 std::shared_ptr<const Node> PGraph::getNode(const QString &name) {
@@ -60,5 +61,19 @@ bool PGraph::addEdge(type_id edgeType, node_id from, node_id to) {
                                             .line = tt::Line()});
     m_edges[edge->id] = edge;
 
+    notify(&IPGObserver::onEdgeAdded, edge->id);
     return true;
+}
+void PGraph::addObserver(ObserPtr observer) {
+    auto found = std::find(m_observers.begin(), m_observers.end(), observer);
+    if (found == m_observers.end()) {
+        m_observers.push_back(observer);
+    }
+}
+
+template <typename Func, typename... Args>
+void PGraph::notify(Func memberFunc, Args &&...args) {
+    for (auto &obs : m_observers) {
+        (obs.get()->*memberFunc)(std::forward<Args>(args)...);
+    }
 }

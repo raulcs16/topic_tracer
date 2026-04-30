@@ -6,6 +6,7 @@ add_library(PropertyGraph STATIC
     node_registry.cpp
     edge_registry.hpp
     edge_registry.cpp
+    ipg_observer.hpp
     pgraph.hpp
     pgraph.cpp
 )
