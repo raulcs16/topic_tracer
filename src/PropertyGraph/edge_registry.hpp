@@ -6,6 +6,7 @@
 class EdgeRegistry {
 public:
     bool create(const QString &label, std::vector<AllowedDir> dir = {});
+    //IMMUTABLE
     bool has(const QString &label) const;
     bool has(type_id typeId) const;
     std::shared_ptr<const EdgeType> get(const QString &label) const;
@@ -16,6 +17,6 @@ private:
     std::shared_ptr<EdgeType> find(const QString &label) const;
 
 private:
-    uint16_t m_ref_id = 1;
+    type_id m_ref_id = 1;
     std::vector<std::shared_ptr<EdgeType>> m_labels;
 };
