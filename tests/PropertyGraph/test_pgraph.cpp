@@ -3,8 +3,8 @@
 #include <random>
 
 
-auto nreg = std::make_shared<NodeRegistry>();
-auto ereg = std::make_shared<EdgeRegistry>();
+auto nreg = std::make_shared<NodeTypeRegistry>();
+auto ereg = std::make_shared<EdgeTypeRegistry>();
 PGraph graph(nreg, ereg);
 TEST_CASE("PGraph::Add Nodes if class type exits") {
     nreg->create("Class");

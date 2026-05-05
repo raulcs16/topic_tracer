@@ -3,7 +3,7 @@
 #include "edges.hpp"
 #include <vector>
 
-class EdgeRegistry {
+class EdgeTypeRegistry {
 public:
     bool create(const QString &label, std::vector<AllowedDir> dir = {});
     //IMMUTABLE

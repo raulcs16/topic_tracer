@@ -2,11 +2,19 @@ add_library(PropertyGraph STATIC
     pgtypes.hpp
     nodes.hpp
     edges.hpp
-    node_registry.hpp
-    node_registry.cpp
-    edge_registry.hpp
-    edge_registry.cpp
-    ipg_observer.hpp
+
+    # node_registry.hpp
+    # node_registry.cpp
+
+    node_type_registry.hpp
+    node_type_registry.cpp
+
+    # edge_registry.hpp
+    # edge_registry.cpp
+
+    edge_type_registry.hpp
+    edge_type_registry.cpp
+
     pgraph.hpp
     pgraph.cpp
 )

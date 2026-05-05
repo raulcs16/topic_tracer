@@ -1,31 +1,24 @@
 #pragma once
 
-#include "edge_registry.hpp"
-#include "ipg_observer.hpp"
-#include "node_registry.hpp"
+#include "edge_type_registry.hpp"
+#include "node_type_registry.hpp"
 
-using NodeRegPtr = std::shared_ptr<NodeRegistry>;
-using EdgeRegPtr = std::shared_ptr<EdgeRegistry>;
-using ObserPtr = std::shared_ptr<IPGObserver>;
+using NodeTypeRegPtr = std::shared_ptr<NodeTypeRegistry>;
+using EdgeTypeRegPtr = std::shared_ptr<EdgeTypeRegistry>;
 
 class PGraph {
 public:
-    explicit PGraph(NodeRegPtr node_reg, EdgeRegPtr edge_reg);
+    explicit PGraph(NodeTypeRegPtr node_reg, EdgeTypeRegPtr edge_reg);
 
     bool addNode(type_id nodeType, const QString &name);
     std::shared_ptr<const Node> getNode(const QString &name);
     bool addEdge(type_id edgeType, node_id from, node_id to);
 
-    void addObserver(ObserPtr observer);
-
 private:
-    template <typename Func, typename... Args>
-    void notify(Func memberFunc, Args &&...args);
-
 private:
-    NodeRegPtr m_node_reg;
-    EdgeRegPtr m_edge_reg;
-    std::vector<ObserPtr> m_observers;
+    NodeTypeRegPtr m_nodeTypeReg;
+    EdgeTypeRegPtr m_edgeTypeReg;
+
     std::unordered_map<node_id, std::shared_ptr<Node>> m_nodes;
     std::unordered_map<edge_id, std::shared_ptr<Edge>> m_edges;
     node_id m_node_id_ref = 0;

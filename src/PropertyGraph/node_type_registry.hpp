@@ -2,7 +2,7 @@
 
 #include "nodes.hpp"
 
-class NodeRegistry {
+class NodeTypeRegistry {
 
 public:
     bool create(const QString &label);

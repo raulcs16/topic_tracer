@@ -1,15 +1,15 @@
-#include "node_registry.hpp"
+#include "node_type_registry.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <random>
 
 
 TEST_CASE("Register Node Type") {
-    NodeRegistry reg;
+    NodeTypeRegistry reg;
     reg.create("Class");
     REQUIRE(reg.has("Class") == true);
 }
-TEST_CASE("Register size matches added types", "Core,NodeRegistry") {
-    NodeRegistry reg;
+TEST_CASE("Register size matches added types", "Core,NodeTypeRegistry") {
+    NodeTypeRegistry reg;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distr(1, 255);

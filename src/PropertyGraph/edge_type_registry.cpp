@@ -1,6 +1,6 @@
-#include "edge_registry.hpp"
+#include "edge_type_registry.hpp"
 
-bool EdgeRegistry::create(const QString &label, std::vector<AllowedDir> pairs) {
+bool EdgeTypeRegistry::create(const QString &label, std::vector<AllowedDir> pairs) {
     auto found = find(label);
     if (found != nullptr) {
         return false;
@@ -12,7 +12,7 @@ bool EdgeRegistry::create(const QString &label, std::vector<AllowedDir> pairs) {
     m_labels.push_back(edgl);
     return true;
 }
-std::shared_ptr<EdgeType> EdgeRegistry::find(const QString &label) const {
+std::shared_ptr<EdgeType> EdgeTypeRegistry::find(const QString &label) const {
     auto found = std::find_if(m_labels.begin(),
                               m_labels.end(),
                               [&label](const auto &ptr) { return ptr->label == label; });
@@ -21,16 +21,16 @@ std::shared_ptr<EdgeType> EdgeRegistry::find(const QString &label) const {
     }
     return (*found);
 }
-bool EdgeRegistry::has(const QString &label) const { return get(label) != nullptr; }
-bool EdgeRegistry::has(type_id typeId) const { return get(typeId) != nullptr; }
-std::shared_ptr<const EdgeType> EdgeRegistry::get(const QString &label) const {
+bool EdgeTypeRegistry::has(const QString &label) const { return get(label) != nullptr; }
+bool EdgeTypeRegistry::has(type_id typeId) const { return get(typeId) != nullptr; }
+std::shared_ptr<const EdgeType> EdgeTypeRegistry::get(const QString &label) const {
     auto found = find(label);
     if (found == nullptr) {
         return nullptr;
     }
     return static_cast<std::shared_ptr<const EdgeType>>(found);
 }
-std::shared_ptr<const EdgeType> EdgeRegistry::get(type_id typeId) const {
+std::shared_ptr<const EdgeType> EdgeTypeRegistry::get(type_id typeId) const {
     auto found =
         std::find_if(m_labels.begin(), m_labels.end(), [&typeId](const auto &ptr) {
             return ptr->typeId = typeId;

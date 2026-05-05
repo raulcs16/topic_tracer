@@ -1,7 +1,7 @@
-#include "node_registry.hpp"
+#include "node_type_registry.hpp"
 
 
-bool NodeRegistry::create(const QString &label) {
+bool NodeTypeRegistry::create(const QString &label) {
     if (has(label)) {
         return false;
     }
@@ -11,11 +11,11 @@ bool NodeRegistry::create(const QString &label) {
     m_types.push_back(t);
     return true;
 }
-bool NodeRegistry::has(const QString &label) const {
+bool NodeTypeRegistry::has(const QString &label) const {
     auto found = get(label);
     return found != nullptr;
 }
-std::shared_ptr<const NodeType> NodeRegistry::get(const QString &label) const {
+std::shared_ptr<const NodeType> NodeTypeRegistry::get(const QString &label) const {
     auto found = std::find_if(m_types.begin(), m_types.end(), [&label](const auto &ptr) {
         return ptr->label == label;
     });
@@ -24,7 +24,7 @@ std::shared_ptr<const NodeType> NodeRegistry::get(const QString &label) const {
     }
     return static_cast<std::shared_ptr<const NodeType>>(*found);
 }
-std::shared_ptr<const NodeType> NodeRegistry::get(type_id typeId) const {
+std::shared_ptr<const NodeType> NodeTypeRegistry::get(type_id typeId) const {
     auto found = std::find_if(m_types.begin(), m_types.end(), [&typeId](const auto &ptr) {
         return ptr->typeId == typeId;
     });

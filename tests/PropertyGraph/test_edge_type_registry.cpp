@@ -1,17 +1,17 @@
-#include "edge_registry.hpp"
+#include "edge_type_registry.hpp"
 #include "edges.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <random>
 
 TEST_CASE("Register Edge Label") {
-    EdgeRegistry reg;
+    EdgeTypeRegistry reg;
     std::vector<AllowedDir> pairs{{1, 2}};
     auto created = reg.create("inherits_from", pairs);
     REQUIRE(created == true);
     REQUIRE(reg.has("inherits_from") == true);
 }
 TEST_CASE("Don't allow duplicate edge lables") {
-    EdgeRegistry reg;
+    EdgeTypeRegistry reg;
     auto created = reg.create("inherits_from", {});
     auto duplicated = reg.create("inherits_from", {});
     REQUIRE(created == true);
@@ -19,7 +19,7 @@ TEST_CASE("Don't allow duplicate edge lables") {
     REQUIRE(reg.size() == 1);
 }
 TEST_CASE("Ingore duplicate Allowed Directions per definition") {
-    EdgeRegistry reg;
+    EdgeTypeRegistry reg;
     std::vector<AllowedDir> dir{{1, 2}, {2, 1}, {1, 2}};
     auto created = reg.create("_", dir);
     auto edgeDef = reg.get("_");
@@ -27,7 +27,7 @@ TEST_CASE("Ingore duplicate Allowed Directions per definition") {
     REQUIRE(edgeDef->allowed_dir.size() == 2);
 }
 TEST_CASE("ensure the added directions are on the definition") {
-    EdgeRegistry reg;
+    EdgeTypeRegistry reg;
     reg.create("implements", {{0, 1}});
     auto def = reg.get("implements");
     REQUIRE(def != nullptr);

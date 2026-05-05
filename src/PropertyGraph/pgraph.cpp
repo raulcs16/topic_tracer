@@ -1,10 +1,10 @@
 #include "pgraph.hpp"
 
-PGraph::PGraph(NodeRegPtr nodeReg, EdgeRegPtr edgeReg)
-    : m_node_reg(nodeReg), m_edge_reg(edgeReg) {}
+PGraph::PGraph(NodeTypeRegPtr nodeTypeReg, EdgeTypeRegPtr edgeTypeReg)
+    : m_nodeTypeReg(nodeTypeReg), m_edgeTypeReg(edgeTypeReg) {}
 
 bool PGraph::addNode(type_id nodeType, const QString &name) {
-    auto nodeDef = m_node_reg->get(nodeType);
+    auto nodeDef = m_nodeTypeReg->get(nodeType);
     if (nodeDef == nullptr) {
         //provided node type was not found
         return false;
@@ -14,7 +14,6 @@ bool PGraph::addNode(type_id nodeType, const QString &name) {
                                                .position = {.x = 0, .y = 0},
                                                .typeId = nodeType});
     m_nodes[newNode->id] = newNode;
-    notify(&IPGObserver::onNodeAdded, newNode->id);
     return true;
 }
 std::shared_ptr<const Node> PGraph::getNode(const QString &name) {
@@ -27,7 +26,7 @@ std::shared_ptr<const Node> PGraph::getNode(const QString &name) {
     return static_cast<std::shared_ptr<const Node>>(found->second);
 }
 bool PGraph::addEdge(type_id edgeType, node_id from, node_id to) {
-    auto edgeDef = m_edge_reg->get(edgeType);
+    auto edgeDef = m_edgeTypeReg->get(edgeType);
     if (edgeDef == nullptr) {
         //edge type not found
         return false;
@@ -42,8 +41,8 @@ bool PGraph::addEdge(type_id edgeType, node_id from, node_id to) {
         //one or more nodes missing
         return false;
     }
-    auto fromType = m_node_reg->get(fromNode->second->typeId);
-    auto toType = m_node_reg->get(toNode->second->typeId);
+    auto fromType = m_nodeTypeReg->get(fromNode->second->typeId);
+    auto toType = m_nodeTypeReg->get(toNode->second->typeId);
     if (!fromType || !toType) {
         //one or more types not found
         return false;
@@ -61,19 +60,5 @@ bool PGraph::addEdge(type_id edgeType, node_id from, node_id to) {
                                             .line = tt::Line()});
     m_edges[edge->id] = edge;
 
-    notify(&IPGObserver::onEdgeAdded, edge->id);
     return true;
-}
-void PGraph::addObserver(ObserPtr observer) {
-    auto found = std::find(m_observers.begin(), m_observers.end(), observer);
-    if (found == m_observers.end()) {
-        m_observers.push_back(observer);
-    }
-}
-
-template <typename Func, typename... Args>
-void PGraph::notify(Func memberFunc, Args &&...args) {
-    for (auto &obs : m_observers) {
-        (obs.get()->*memberFunc)(std::forward<Args>(args)...);
-    }
 }
