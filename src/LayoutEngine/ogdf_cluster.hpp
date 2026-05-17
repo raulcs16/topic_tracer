@@ -4,6 +4,7 @@
 #include "icluster_layout.hpp"
 #include "ogdf_context.hpp"
 #include "ogdf_strategy.hpp"
+#include "pgtypes.hpp"
 
 
 class OGDFCluster : public IClusterLayout {
@@ -11,11 +12,11 @@ class OGDFCluster : public IClusterLayout {
 public:
     OGDFCluster(uint32_t id, std::shared_ptr<OGDFStrategy> strategy);
     uint32_t id() const override { return m_id; }
-    void addNode(uint32_t id) override;
-    void removeNode(uint32_t id) override;
-    void addEdge(uint32_t from, uint32_t to) override;
-    void removeEdge(uint32_t from, uint32_t to) override;
-    GraphNode *getNode(uint32_t id) const override;
+    void addNode(node_id id) override;
+    void removeNode(node_id id) override;
+    void addEdge(node_id from, node_id to, edge_id id) override;
+    void removeEdge(edge_id id) override;
+    GraphNode *getNode(node_id id) const override;
     void clear() override;
     void apply() override;
     tt::BoundingBox boundingBox() const override;

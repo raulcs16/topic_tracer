@@ -9,11 +9,11 @@ class PoolCluster : public IClusterLayout {
 public:
     PoolCluster(uint32_t id, std::shared_ptr<LayoutStrategy> strategy, size_t capacity);
     uint32_t id() const override { return m_id; }
-    void addNode(uint32_t id) override;
-    void removeNode(uint32_t id) override;
-    GraphNode *getNode(uint32_t id) const override;
-    void addEdge(uint32_t from, uint32_t to) override;
-    void removeEdge(uint32_t from, uint32_t to) override;
+    void addNode(node_id id) override;
+    void removeNode(node_id id) override;
+    GraphNode *getNode(node_id id) const override;
+    void addEdge(node_id from, node_id to, edge_id id) override {}
+    void removeEdge(edge_id id) override {}
     void clear() override;
     void apply() override;
     tt::BoundingBox boundingBox() const override;

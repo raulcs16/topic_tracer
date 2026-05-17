@@ -1,6 +1,7 @@
 #pragma once
 #include "graph_types.hpp"
 
+using namespace gg;
 struct IGraphObserver {
     virtual ~IGraphObserver() = default;
 

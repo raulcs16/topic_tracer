@@ -1,18 +1,19 @@
 #pragma once
 
 #include "geometry.hpp"
+#include "pgtypes.hpp"
 #include <string>
 #include <vector>
 
 
 struct GraphNode {
-    uint32_t id;
+    node_id id;
     tt::Point pos;
 };
 struct GraphEdge {
-    std::string key;
-    uint32_t from;
-    uint32_t to;
+    edge_id id;
+    node_id from;
+    node_id to;
     tt::Line line;
 };
 

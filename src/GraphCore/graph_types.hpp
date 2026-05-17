@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 
+namespace gg {
+
+
 enum class EdgeType {
     Null,
     Composes,
@@ -32,3 +35,4 @@ struct GraphBlueprint {
     std::vector<SemanticCluster> clusters;
     std::vector<Node> isoNodes;
 };
+} // namespace gg

@@ -1,16 +1,21 @@
 #include "boundingbox_list_model.hpp"
 
-BoundingBoxListModel::BoundingBoxListModel(GraphStore *store, QObject *parent)
-    : QAbstractListModel{parent}, m_store(store) {
-    connect(m_store, &GraphStore::clear, this, &BoundingBoxListModel::onClear);
-    connect(m_store, &GraphStore::boxAdded, this, &BoundingBoxListModel::onBoxAdded);
-    connect(m_store, &GraphStore::boxDeleted, this, &BoundingBoxListModel::onBoxRemoved);
-    connect(m_store, &GraphStore::boxUpdated, this, &BoundingBoxListModel::onBoxUpdated);
+BoundingBoxListModel::BoundingBoxListModel(NodeTypePresentor *presentor)
+    : QAbstractListModel{presentor}, m_presentor(presentor) {
+    connect(m_presentor,
+            &NodeTypePresentor::onNewTypeCreated,
+            this,
+            &BoundingBoxListModel::onBoxAdded);
+    // connect(m_store, &GraphStore::clear, this, &BoundingBoxListModel::onClear);
+    // connect(m_store, &GraphStore::boxAdded, this, &BoundingBoxListModel::onBoxAdded);
+    // connect(m_store, &GraphStore::boxDeleted, this, &BoundingBoxListModel::onBoxRemoved);
+    // connect(m_store, &GraphStore::boxUpdated, this, &BoundingBoxListModel::onBoxUpdated);
 }
 
 QHash<int, QByteArray> BoundingBoxListModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[IdRole] = "id";
+    roles[LabelRole] = "label";
     roles[RectRole] = "rect";
     return roles;
 }
@@ -33,7 +38,8 @@ QVariant BoundingBoxListModel::data(const QModelIndex &index, int role) const {
     auto id = m_ids[index.row()];
     switch (role) {
     case IdRole: return id;
-    case RectRole: return QVariant::fromValue(m_store->rect(id));
+    case LabelRole: return m_presentor->getLabel(id);
+    case RectRole: return QVariant::fromValue(m_presentor->getRect(id));
     default: return QVariant();
     }
 }

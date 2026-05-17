@@ -20,7 +20,7 @@ PoolCluster::PoolCluster(uint32_t id,
     apply();
 }
 
-void PoolCluster::addNode(uint32_t id) {
+void PoolCluster::addNode(node_id id) {
     size_t slot = getFreeSlot();
     m_slots[slot].used = true;
     m_slots[slot].id = id;
@@ -57,7 +57,7 @@ size_t PoolCluster::getFreeSlot() {
     }
     return m_capacity;
 }
-void PoolCluster::removeNode(uint32_t id) {
+void PoolCluster::removeNode(node_id id) {
     auto it = m_indexMap.find(id);
     if (it == m_indexMap.end())
         return;
@@ -66,8 +66,7 @@ void PoolCluster::removeNode(uint32_t id) {
     m_slots[slot].used = false;
     m_indexMap.erase(it);
 }
-void PoolCluster::addEdge(uint32_t from, uint32_t to) {}
-void PoolCluster::removeEdge(uint32_t from, uint32_t to) {}
+
 void PoolCluster::clear() {
     m_indexMap.clear();
     for (auto &slot : m_slots) {
@@ -75,7 +74,7 @@ void PoolCluster::clear() {
         slot.id = 0;
     }
 }
-GraphNode *PoolCluster::getNode(uint32_t id) const {
+GraphNode *PoolCluster::getNode(node_id id) const {
     for (size_t i = 0; i < m_nodes.size(); ++i) {
         if (m_slots[i].used && m_nodes[i].id == id) {
             return const_cast<GraphNode *>(&m_nodes[i]);

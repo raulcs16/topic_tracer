@@ -39,7 +39,7 @@ void OGDFStrategy::apply(std::vector<GraphNode> &nodes,
                 edge.line.start.y = ctx->attributes.y(src->second);
                 edge.line.end.x = ctx->attributes.x(target->second);
                 edge.line.end.y = ctx->attributes.y(target->second);
-                auto e = ctx->keyToEdge.find(edge.key);
+                auto e = ctx->keyToEdge.find(edge.id);
                 if (e == ctx->keyToEdge.end())
                     continue;
                 edge.line.bends.clear();

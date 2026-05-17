@@ -1,28 +1,27 @@
 #pragma once
 
-#include "command_factory.hpp"
-#include "evidence.hpp"
-#include "graph.hpp"
-#include "graph_repo.hpp"
-#include "heat_score.hpp"
-#include "ifile_manager.hpp"
+// #include "boundingbox_list_model.hpp"
 #include "layout_engine.hpp"
-#include "selection_manager.hpp"
-#include "ui_context.hpp"
-#include "ui_states.hpp"
+// #include "node_type_presentor.hpp"
+#include "pgraph.hpp"
+// #include "terminal_list_model.hpp"
 #include <QObject>
 #include <QtQml/qqml.h>
 
 class AppController : public QObject {
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("Created in main.cpp")
-    Q_PROPERTY(UIContext *uiContext READ uiContext CONSTANT)
-public:
-    explicit AppController(UIContext *ui, QObject *parent = nullptr);
-    ~AppController();
-    UIContext *uiContext() const { return m_uiContext; }
+    // QML_UNCREATABLE("Created in main.cpp")
+    // Q_PROPERTY(BoundingBoxListModel *bboxListModel READ bboxListModel CONSTANT)
+    // Q_PROPERTY(TerminalListModel *terminalListModel READ terminalListModel CONSTANT)
 
+public:
+    explicit AppController(QObject *parent = nullptr);
+    ~AppController();
+    // UIContext *uiContext() const { return m_uiContext; }
+
+    // BoundingBoxListModel *bboxListModel() const { return m_bboxes; }
+    // TerminalListModel *terminalListModel() const { return m_terminal; }
     Q_INVOKABLE void executeCommand(const QString &raw_cmd);
     Q_INVOKABLE void handleSuggestion(const QString &input);
     Q_INVOKABLE void handleInput(const QString &input);
@@ -34,12 +33,17 @@ public slots:
     void onTopicRequested(const QString &topic);
 
 private:
-    Graph *m_graph;
-    LayoutEngine *m_layout;
-    IFileManager *m_fileManager;
-    GraphRepository *m_repo;
-    UIContext *m_uiContext;
-    CommandFactory *m_commandFactory;
-    EvidenceDB *m_evidenceDb;
-    HeatScoreSystem *m_heatScore;
+    // Graph *m_graph;
+    // GraphStore *m_store;
+    // NodeTypeRegPtr m_nodeReg;
+    // EdgeTypeRegPtr m_edgeReg;
+    // PGraph *m_pgraph;
+
+    // LayoutEngine *m_layout;
+
+    // NodeTypePresentor *m_nodeTypePresentor;
+
+    // BoundingBoxListModel *m_bboxes;
+
+    // TerminalListModel *m_terminal;
 };

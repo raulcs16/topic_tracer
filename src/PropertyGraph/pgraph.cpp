@@ -3,18 +3,18 @@
 PGraph::PGraph(NodeTypeRegPtr nodeTypeReg, EdgeTypeRegPtr edgeTypeReg)
     : m_nodeTypeReg(nodeTypeReg), m_edgeTypeReg(edgeTypeReg) {}
 
-bool PGraph::addNode(type_id nodeType, const QString &name) {
+std::shared_ptr<const Node> PGraph::addNode(type_id nodeType, const QString &name) {
     auto nodeDef = m_nodeTypeReg->get(nodeType);
     if (nodeDef == nullptr) {
         //provided node type was not found
-        return false;
+        return nullptr;
     }
     auto newNode = std::make_shared<Node>(Node{.id = ++m_node_id_ref,
                                                .name = name,
                                                .position = {.x = 0, .y = 0},
                                                .typeId = nodeType});
     m_nodes[newNode->id] = newNode;
-    return true;
+    return newNode;
 }
 std::shared_ptr<const Node> PGraph::getNode(const QString &name) {
     auto found = std::find_if(m_nodes.begin(), m_nodes.end(), [&name](const auto &pair) {
@@ -61,4 +61,11 @@ bool PGraph::addEdge(type_id edgeType, node_id from, node_id to) {
     m_edges[edge->id] = edge;
 
     return true;
+}
+
+void PGraph::updateNodePosition(node_id id, tt::Point pos) {
+    auto it = m_nodes.find(id);
+    if (it == m_nodes.end())
+        return;
+    it->second->position = pos;
 }

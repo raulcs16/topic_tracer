@@ -9,7 +9,7 @@ PGraph graph(nreg, ereg);
 TEST_CASE("PGraph::Add Nodes if class type exits") {
     nreg->create("Class");
     REQUIRE(graph.addNode(nreg->get("Class")->typeId, "graph"));
-    REQUIRE(graph.addNode(-1, "dne") == false);
+    REQUIRE(graph.addNode(-1, "dne") == nullptr);
 }
 TEST_CASE("PGraph::Add Edge if allowed dir") {
     nreg->create("Class");

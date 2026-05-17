@@ -19,7 +19,7 @@ TEST_CASE("Register size matches added types", "Core,NodeTypeRegistry") {
     for (size_t i = 0; i < total; i++) {
         auto ch = QString::fromStdString(std::to_string(distr(gen)));
 
-        if (reg.create(ch)) {
+        if (reg.create(ch) != nullptr) {
             added++;
         } else {
             missed++;

@@ -1,6 +1,7 @@
 include(Catch)
 
-add_subdirectory(PropertyGraph)
+add_subdirectory(TerminalToolKit)
+# add_subdirectory(PropertyGraph)
 # add_executable(TopicGraphUnderTest test_topic_graph.cpp)
 # target_link_libraries(TopicGraphUnderTest PUBLIC TopicGraphCore)
 # target_link_libraries(TopicGraphUnderTest PUBLIC Catch2::Catch2WithMain)

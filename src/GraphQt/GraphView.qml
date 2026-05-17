@@ -6,8 +6,8 @@ import GraphQt
 Item {
     id: root
 
-    required property NodeListModel nodeModel
-    required property EdgeListModel edgeModel
+    // required property NodeListModel nodeModel
+    // required property EdgeListModel edgeModel
     required property BoundingBoxListModel bboxModel
 
     property real viewWidth: 0
@@ -16,17 +16,17 @@ Item {
     width: viewWidth
     height: viewHeight
 
-    Repeater {
-        model: root.edgeModel
-        delegate: EdgeSpline {}
-    }
+    // Repeater {
+    //     model: root.edgeModel
+    //     delegate: EdgeSpline {}
+    // }
 
-    Repeater {
-        model: root.nodeModel
-        delegate: NodeDelegate {
-            model: root.nodeModel
-        }
-    }
+    // Repeater {
+    //     model: root.nodeModel
+    //     delegate: NodeDelegate {
+    //         model: root.nodeModel
+    //     }
+    // }
     Repeater {
         model: root.bboxModel
         delegate: BoundingBoxDelegate {}

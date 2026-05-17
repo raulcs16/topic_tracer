@@ -31,9 +31,10 @@ add_library(LayoutEngine STATIC
 
 target_link_libraries(LayoutEngine
     PUBLIC OGDF
-    PUBLIC Utils
-    PUBLIC GraphCore
-    PUBLIC Geometry
+    # PUBLIC Utils
+    # # PUBLIC GraphCore
+    # PUBLIC Geometry
+    PUBLIC PropertyGraph
 )
 target_include_directories(LayoutEngine
     PUBLIC

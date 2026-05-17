@@ -10,9 +10,11 @@ class PGraph {
 public:
     explicit PGraph(NodeTypeRegPtr node_reg, EdgeTypeRegPtr edge_reg);
 
-    bool addNode(type_id nodeType, const QString &name);
+    std::shared_ptr<const NodeTypeRegistry> nodeTypes() { return m_nodeTypeReg; }
+    std::shared_ptr<const Node> addNode(type_id nodeType, const QString &name);
     std::shared_ptr<const Node> getNode(const QString &name);
     bool addEdge(type_id edgeType, node_id from, node_id to);
+    void updateNodePosition(node_id, tt::Point);
 
 private:
 private:

@@ -29,16 +29,10 @@ int main(int argc, char *argv[]) {
         Qt::QueuedConnection);
 
 
-    GraphStore *store = new GraphStore(&engine);
-    UIContext *uiContext = new UIContext(store, &engine);
-    AppController *appController = new AppController(uiContext, &engine);
-
-
     engine.setInitialProperties({
         {"major", project_version_major},
         {"minor", project_version_minor},
         {"patch", project_version_patch},
-        {"controller", QVariant::fromValue(appController)},
     });
 
 

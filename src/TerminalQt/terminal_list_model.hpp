@@ -1,3 +1,4 @@
+#pragma once
 #include "terminal_types.hpp"
 #include <QAbstractListModel>
 #include <QObject>

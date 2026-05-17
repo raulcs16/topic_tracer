@@ -1,15 +1,15 @@
 #include "node_type_registry.hpp"
 
 
-bool NodeTypeRegistry::create(const QString &label) {
+std::shared_ptr<const NodeType> NodeTypeRegistry::create(const QString &label) {
     if (has(label)) {
-        return false;
+        return nullptr;
     }
     auto t = std::make_shared<NodeType>();
     t->typeId = ++m_ref_id;
     t->label = label;
     m_types.push_back(t);
-    return true;
+    return t;
 }
 bool NodeTypeRegistry::has(const QString &label) const {
     auto found = get(label);

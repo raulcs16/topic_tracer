@@ -5,16 +5,17 @@ set_target_properties(GraphQt PROPERTIES AUTOMOC ON)
 target_link_libraries(GraphQt PRIVATE Qt6::Quick)
 
 target_link_libraries(GraphQt
-    PRIVATE Qt6::Core
-    PRIVATE Qt6::Quick
+    PUBLIC Qt6::Core
+    PUBLIC Qt6::Quick
+    PUBLIC Interactors
     PUBLIC TerminalQt
     PUBLIC TerminalQtplugin
-    PUBLIC FileManager
-    PUBLIC GraphCore
-    PUBLIC Evidence
+    # PUBLIC FileManager
+    # PUBLIC GraphCore
+    # PUBLIC Evidence
     PUBLIC LayoutEngine
     PUBLIC OGDF
-    PUBLIC Persistence
+    # PUBLIC Persistence
     PUBLIC GeometryQt
     PUBLIC GeometryQtplugin
 )
@@ -26,59 +27,60 @@ qt_add_qml_module(GraphQt
         TerminalQt
         GeometryQt
     SOURCES
-
-        app_controller.hpp
-        app_controller.cpp
-
-        graph_store.hpp
-        graph_store.cpp
-
-        label_list_model.hpp
-        label_list_model.cpp
-
-        edge_list_model.hpp
-        edge_list_model.cpp
-
-        node_list_model.hpp
-        node_list_model.cpp
+        node_type_presentor.hpp
+        node_type_presentor.cpp
 
         boundingbox_list_model.hpp
         boundingbox_list_model.cpp
 
+        # app_controller.hpp
+        # app_controller.cpp
 
-        ui_states.hpp
-        ui_states.cpp
+        # graph_store.hpp
+        # graph_store.cpp
 
-        ui_context.hpp
-        ui_context.cpp
+        # label_list_model.hpp
+        # label_list_model.cpp
 
-        commands/icommand.hpp
-        commands/command_context.hpp
-        commands/command_factory.hpp
-        commands/command_factory.cpp
+        # edge_list_model.hpp
+        # edge_list_model.cpp
+
+        # node_list_model.hpp
+        # node_list_model.cpp
+
+        # ui_states.hpp
+        # ui_states.cpp
+
+        # ui_context.hpp
+        # ui_context.cpp
+
+        # commands/icommand.hpp
+        # commands/command_context.hpp
+        # commands/command_factory.hpp
+        # commands/command_factory.cpp
         
         # commands/command_autocompleter.hpp
         # commands/command_autocompleter.cpp
-        commands/command_result.hpp
+        # commands/command_result.hpp
 
-        commands/file_commands.hpp
-        commands/graph_commands.hpp
-        commands/ui_commands.hpp
+        # commands/file_commands.hpp
+        # commands/graph_commands.hpp
+        # commands/ui_commands.hpp
     
-        selection_manager.hpp
-        selection_manager.cpp
+        # selection_manager.hpp
+        # selection_manager.cpp
 
-        enums.hpp
-        enums.cpp
+        # enums.hpp
+        # enums.cpp
     QML_FILES
-        LabelListView.qml
-        LabelDelegate.qml
+        BoundingBoxDelegate.qml
         GraphView.qml
         CanvasView.qml
-        EdgeSpline.qml
-        NodeDelegate.qml
         ViewPort.qml
-        BoundingBoxDelegate.qml
+        # LabelListView.qml
+        # LabelDelegate.qml
+        # EdgeSpline.qml
+        # NodeDelegate.qml
 
     IMPORT_PATH 
         ${QT_QML_OUTPUT_DIRECTORY}
@@ -86,6 +88,6 @@ qt_add_qml_module(GraphQt
 
 target_include_directories(GraphQt PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}  
-        ${CMAKE_CURRENT_SOURCE_DIR}/commands
+        # ${CMAKE_CURRENT_SOURCE_DIR}/commands
         "${CMAKE_BINARY_DIR}/configured_files/include"
 )

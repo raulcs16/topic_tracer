@@ -5,7 +5,7 @@
 class NodeTypeRegistry {
 
 public:
-    bool create(const QString &label);
+    std::shared_ptr<const NodeType> create(const QString &label);
     //IMMUTABLE
     std::shared_ptr<const NodeType> get(const QString &label) const;
     std::shared_ptr<const NodeType> get(type_id typeId) const;

@@ -1,5 +1,6 @@
 #pragma once
-#include "graph_store.hpp"
+
+#include "node_type_presentor.hpp"
 #include <QAbstractListModel>
 #include <QObject>
 #include <QtQml/qqml.h>
@@ -13,10 +14,11 @@ class BoundingBoxListModel : public QAbstractListModel {
 public:
     enum Roles {
         IdRole = Qt::UserRole + 1,
+        LabelRole,
         RectRole,
     };
 
-    explicit BoundingBoxListModel(GraphStore *store, QObject *parent = nullptr);
+    explicit BoundingBoxListModel(NodeTypePresentor *presentor);
 
     //abstractlistmodel interface
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -37,5 +39,5 @@ private:
 
 private:
     QVector<uint32_t> m_ids;
-    GraphStore *m_store;
+    NodeTypePresentor *m_presentor;
 };

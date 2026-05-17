@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <vector>
 
+using namespace gg;
+
 
 class Graph {
 public:

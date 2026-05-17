@@ -17,7 +17,9 @@ ApplicationWindow {
     required property int minor
     required property int patch
 
-    required property AppController controller
+    AppController {
+        id: controller
+    }
 
     property Item focusItem: null
 
@@ -52,21 +54,21 @@ ApplicationWindow {
                     anchors.fill: parent
                     clip: true
                     GraphView {
-                        edgeModel: app.controller.uiContext.edgeListModel
-                        nodeModel: app.controller.uiContext.nodeListModel
-                        bboxModel: app.controller.uiContext.bboxListModel
+                        // edgeModel: app.controller.uiContext.edgeListModel
+                        // nodeModel: app.controller.uiContext.nodeListModel
+                        bboxModel: controller.bboxListModel
                         anchors.fill: parent
                         property var highlightedNode: null
                         property var highlightedEdge: null
                         viewWidth: main_content.width
                         viewHeight: main_content.height
                     }
-                    Connections {
-                        target: app.controller.uiContext.store
-                        function onActiveBoxChanged(box, xpos, ypos) {
-                            viewport.fitArea(box.x, box.y, box.width, box.height, xpos, ypos);
-                        }
-                    }
+                    // Connections {
+                    //     target: app.controller.uiContext.store
+                    //     function onActiveBoxChanged(box, xpos, ypos) {
+                    //         viewport.fitArea(box.x, box.y, box.width, box.height, xpos, ypos);
+                    //     }
+                    // }
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
                             viewport.zoomIn();
@@ -112,10 +114,10 @@ ApplicationWindow {
                             app.focusItem = terminalView;
                             terminalView.forceActiveFocus();
                         }
-                        if (event.key === Qt.Key_E) {
-                            app.focusItem = topicListView;
-                            topicListView.forceActiveFocus();
-                        }
+                    // if (event.key === Qt.Key_E) {
+                    //     app.focusItem = topicListView;
+                    //     topicListView.forceActiveFocus();
+                    // }
                     }
                     MouseArea {
                         enabled: app.focusItem != viewport
@@ -129,7 +131,7 @@ ApplicationWindow {
                 }
 
                 Text {
-                    text: `Mode: ${app.controller.uiContext.modeName}`
+                    text: `Mode: Null`
                     font.bold: true
                     font.pointSize: 18
                     color: "#F5F5F5"
@@ -144,7 +146,7 @@ ApplicationWindow {
             TerminalView {
                 id: terminalView
                 Layout.fillWidth: true
-                model: app.controller.uiContext.terminalListModel
+                model: controller.terminalListModel
                 color: Colors.primary
                 border.width: 2
                 border.color: app.focusItem == terminalView ? Colors.accent : "transparent"
@@ -162,21 +164,21 @@ ApplicationWindow {
                 onCommandEntered: cmd => {
                     if (cmd.length === 0)
                         return;
-                    app.controller.executeCommand(cmd);
+                    controller.executeCommand(cmd);
                 }
                 onTextInputChanged: txt => {
                     if (txt.length === 0)
                         return;
                     suggestion = "";
-                    app.controller.handleInput(txt);
+                    controller.handleInput(txt);
                 }
                 onTabPressed: txt => {
                     if (txt.length === 0)
                         return;
-                    app.controller.handleSuggestion(txt);
+                    controller.handleSuggestion(txt);
                 }
                 Connections {
-                    target: app.controller
+                    target: controller
                     function onSuggestionReady(hint) {
                         terminalView.suggestion = hint;
                     }
@@ -211,40 +213,40 @@ ApplicationWindow {
                 }
             }
 
-            Rectangle {
-                color: Colors.secondary
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                border.width: 2
-                border.color: app.focusItem == topicListView ? Colors.accent : "transparent"
-                LabelListView {
-                    id: topicListView
-                    model: app.controller.uiContext.labelListModel
-                    anchors.fill: parent
-                    anchors.topMargin: 15
-                }
-                Shortcut {
-                    sequence: StandardKey.Copy
-                    onActivated: app.controller.uiContext.selectionManager.copySelection()
-                }
-                Shortcut {
-                    sequence: StandardKey.SelectAll
-                    onActivated: app.controller.uiContext.selectionManager.selectAll()
-                }
-                MouseArea {
-                    enabled: app.focusItem != topicListView
-                    anchors.fill: parent
-                    propagateComposedEvents: true
-                    onClicked: {
-                        app.focusItem = topicListView;
-                        topicListView.forceActiveFocus();
-                    }
-                }
-                Keys.onEscapePressed: {
-                    app.focusItem = viewport;
-                    viewport.forceActiveFocus();
-                }
-            }
+            // Rectangle {
+            //     color: Colors.secondary
+            //     Layout.fillWidth: true
+            //     Layout.fillHeight: true
+            //     border.width: 2
+            //     border.color: app.focusItem == topicListView ? Colors.accent : "transparent"
+            //     LabelListView {
+            //         id: topicListView
+            //         model: app.controller.uiContext.labelListModel
+            //         anchors.fill: parent
+            //         anchors.topMargin: 15
+            //     }
+            //     Shortcut {
+            //         sequence: StandardKey.Copy
+            //         onActivated: app.controller.uiContext.selectionManager.copySelection()
+            //     }
+            //     Shortcut {
+            //         sequence: StandardKey.SelectAll
+            //         onActivated: app.controller.uiContext.selectionManager.selectAll()
+            //     }
+            //     MouseArea {
+            //         enabled: app.focusItem != topicListView
+            //         anchors.fill: parent
+            //         propagateComposedEvents: true
+            //         onClicked: {
+            //             app.focusItem = topicListView;
+            //             topicListView.forceActiveFocus();
+            //         }
+            //     }
+            //     Keys.onEscapePressed: {
+            //         app.focusItem = viewport;
+            //         viewport.forceActiveFocus();
+            //     }
+            // }
         }
     }
     Component.onCompleted: {

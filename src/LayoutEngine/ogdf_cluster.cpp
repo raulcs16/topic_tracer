@@ -1,4 +1,3 @@
-#include "graph_keys.hpp"
 #include "ogdf_cluster.hpp"
 
 OGDFCluster::OGDFCluster(uint32_t id, std::shared_ptr<OGDFStrategy> strategy)
@@ -7,13 +6,13 @@ OGDFCluster::OGDFCluster(uint32_t id, std::shared_ptr<OGDFStrategy> strategy)
     m_ogdf->attributes = ogdf::GraphAttributes(m_ogdf->graph);
     m_strategy->setContext(m_ogdf);
 }
-void OGDFCluster::addNode(uint32_t id) {
+void OGDFCluster::addNode(node_id id) {
     auto node = m_ogdf->graph.newNode(id);
     m_ogdf->idToNode[id] = node;
     tt::Point pos;
     m_nodes.emplace_back(id, pos);
 }
-GraphNode *OGDFCluster::getNode(uint32_t id) const {
+GraphNode *OGDFCluster::getNode(node_id id) const {
     for (size_t i = 0; i < m_nodes.size(); ++i) {
         if (m_nodes[i].id == id) {
             return const_cast<GraphNode *>(&m_nodes[i]);
@@ -21,7 +20,7 @@ GraphNode *OGDFCluster::getNode(uint32_t id) const {
     }
     return nullptr;
 }
-void OGDFCluster::removeNode(uint32_t id) {
+void OGDFCluster::removeNode(node_id id) {
     auto it = m_ogdf->idToNode.find(id);
     if (it == m_ogdf->idToNode.end()) {
         return;
@@ -37,27 +36,25 @@ void OGDFCluster::removeNode(uint32_t id) {
         m_nodes.erase(nit);
     }
 }
-void OGDFCluster::addEdge(uint32_t from, uint32_t to) {
+void OGDFCluster::addEdge(node_id from, node_id to, edge_id id) {
     auto fromNode = m_ogdf->idToNode.find(from);
     auto toNode = m_ogdf->idToNode.find(to);
     if (fromNode == m_ogdf->idToNode.end() || toNode == m_ogdf->idToNode.end()) {
         return;
     }
     auto edge = m_ogdf->graph.newEdge(fromNode->second, toNode->second);
-    std::string k = GraphKeys::key(from, to);
-    m_ogdf->keyToEdge[k] = edge;
-    m_edges.push_back(GraphEdge{.key = k, .from = from, .to = to, .line = {}});
+    m_ogdf->keyToEdge[id] = edge;
+    m_edges.push_back(GraphEdge{.id = id, .from = from, .to = to, .line = {}});
 }
-void OGDFCluster::removeEdge(uint32_t from, uint32_t to) {
-    auto key = GraphKeys::key(from, to);
-    auto it = m_ogdf->keyToEdge.find(key);
+void OGDFCluster::removeEdge(edge_id id) {
+    auto it = m_ogdf->keyToEdge.find(id);
     if (it == m_ogdf->keyToEdge.end()) {
         return;
     }
     m_ogdf->graph.delEdge(it->second);
     auto nit = m_edges.begin();
     while (nit != m_edges.end()) {
-        if (nit->key == key)
+        if (nit->id == id)
             break;
         ++nit;
     }
