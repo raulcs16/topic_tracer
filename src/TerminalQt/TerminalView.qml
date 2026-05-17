@@ -6,12 +6,7 @@ import TerminalQt
 Rectangle {
     id: terminalRoot
     clip: true
-
-    required property TerminalListModel model
-    property alias suggestion: inputField.suggestion
-    signal commandEntered(string cmd)
-    signal tabPressed(string text)
-    signal textInputChanged(string text)
+    required property TerminalController controller
     //border
     Rectangle {
         anchors.top: parent.top
@@ -27,20 +22,19 @@ Rectangle {
         width: parent.width
         delegate: EntryDelegate {}
         clip: true
-        model: terminalRoot.model
-
+        model: terminalRoot.controller.terminalListModel
         // Disable scroll when growing, enable when fixed
         interactive: terminalRoot.state === "fixed"
-
         onCountChanged: Qt.callLater(historyList.positionViewAtEnd)
     }
 
     TerminalInput {
         id: inputField
         width: parent.width
-        onAccepted: cmd => terminalRoot.commandEntered(cmd)
-        onTextChanged: terminalRoot.textInputChanged(text)
-        onTabPressed: text => terminalRoot.tabPressed(text)
+        onAccepted: cmd => terminalRoot.controller.handleEnter(cmd)
+        onTextChanged: terminalRoot.controller.handleChange(text)
+        onTabPressed: text => terminalRoot.controller.handleTab(text)
+        suggestion: terminalRoot.controller.suggestion
     }
 
     // 3. Define the two states

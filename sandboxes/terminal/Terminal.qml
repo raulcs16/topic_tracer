@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-import GraphControllers
 import TerminalQt
 
 ApplicationWindow {
@@ -13,7 +12,7 @@ ApplicationWindow {
     visible: true
 
     required property TerminalController controller
-    required property TerminalListModel model
+
     Item {
         id: viewport
         focus: true
@@ -25,17 +24,14 @@ ApplicationWindow {
 
         TerminalView {
             id: terminalView
-            model: app.model
+            controller: app.controller
             // Now Layout attached properties work cleanly!
             Layout.fillWidth: true
             Layout.preferredHeight: isOpen ? 300 : 75
 
             // Declare local properties used by your event handlers
             property bool isOpen: true
-            property string suggestion: ""
 
-            // Hardcoding colors/borders for sandbox isolation if Colors module isn't loaded
-            // Replace with your 'Colors.primary' / 'Colors.accent' assets as needed
             color: "#1e1e1e"
             border.width: 2
             border.color: app.activeFocusItem === terminalView ? "#00FFCC" : "transparent"
@@ -47,26 +43,6 @@ ApplicationWindow {
                 }
             }
 
-            // Input handlers communicating with your Controller API
-            onCommandEntered: cmd => {
-                if (cmd.length === 0)
-                    return;
-                app.controller.executeCommand(cmd);
-            }
-
-            onTabPressed: txt => {
-                if (txt.length === 0)
-                    return;
-                app.controller.handleSuggestion(txt);
-            }
-
-            // Catch the C++ signal broadcast
-            Connections {
-                target: app.controller
-                function onSuggestionReady(hint) {
-                    terminalView.suggestion = hint;
-                }
-            }
             // Return focus to fallback element when escaping
             Keys.onEscapePressed: {
                 viewport.forceActiveFocus();

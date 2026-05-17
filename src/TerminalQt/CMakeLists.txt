@@ -11,6 +11,7 @@ qt_add_qml_module(TerminalQt
     URI TerminalQt
     VERSION 1.0
     SOURCES
+        terminal_controller.hpp
         terminal_list_model.cpp
         terminal_list_model.hpp
         terminal_types.hpp

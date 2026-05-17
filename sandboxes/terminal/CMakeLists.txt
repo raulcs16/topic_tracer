@@ -6,6 +6,9 @@ qt_add_executable(TerminalEx
 qt_add_qml_module(TerminalEx
     URI Terminal
     VERSION 1.0
+    DEPENDENCIES 
+        TerminalQt
+        Styles
     QML_FILES
         Terminal.qml
     RESOURCES
@@ -16,7 +19,8 @@ target_link_libraries(TerminalEx
     PUBLIC Qt6::Core
     PUBLIC Qt6::Quick
     PUBLIC GraphControllers
-    PUBLIC GraphControllersplugin
+    PUBLIC TerminalQt
+    PUBLIC TerminalQtplugin
 )
 
 set_target_properties(TerminalEx PROPERTIES
