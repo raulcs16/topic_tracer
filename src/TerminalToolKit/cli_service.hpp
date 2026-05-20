@@ -4,15 +4,25 @@
 #include <map>
 
 
+class RootCommand : public ICommand {
+public:
+    RootCommand() : ICommand("") {}
+
+protected:
+    bool doExecute(const std::map<std::string, std::string> &values) const override {
+        return false;
+    }
+};
 class CLIService {
 
 public:
     CLIService();
     void registerCommand(std::unique_ptr<ICommand> cmd);
-    bool hasCommand(const std::string &name) const;
-    size_t commandSize() const { return m_commands.size(); }
-    bool execute(std::string rawString);
+    size_t commandCount() { return m_cmd_count; }
+    bool execute(const std::string &rawString);
+    const ICommand *getCommand(const std::vector<Token> &tokens);
 
 private:
-    std::map<std::string, std::unique_ptr<ICommand>> m_commands;
+    RootCommand m_root;
+    size_t m_cmd_count = 0;
 };

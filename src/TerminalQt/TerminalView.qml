@@ -7,6 +7,7 @@ Rectangle {
     id: terminalRoot
     clip: true
     required property TerminalController controller
+    required property TerminalListModel model
     //border
     Rectangle {
         anchors.top: parent.top
@@ -22,7 +23,7 @@ Rectangle {
         width: parent.width
         delegate: EntryDelegate {}
         clip: true
-        model: terminalRoot.controller.terminalListModel
+        model: terminalRoot.model
         // Disable scroll when growing, enable when fixed
         interactive: terminalRoot.state === "fixed"
         onCountChanged: Qt.callLater(historyList.positionViewAtEnd)

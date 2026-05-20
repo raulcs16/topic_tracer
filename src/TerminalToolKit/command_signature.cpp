@@ -27,14 +27,23 @@ std::vector<std::string> CommandSignature::keys(const std::vector<Token> &tokens
     if (tokens.empty())
         return keys;
     // Command Root
-    if (tokens[0].value != m_name) {
+    size_t tokenIdx = 0;
+    size_t positionalCount = 0;
+
+    bool includes_name = false;
+    while (tokens[tokenIdx].type == TokenType::Word) {
+        keys.push_back(TerminalKeys::Cmd);
+        if (tokens[tokenIdx].value == m_name) {
+            includes_name = true;
+            tokenIdx++;
+            break;
+        }
+        tokenIdx++;
+    }
+    if (!includes_name) {
         keys.push_back(TerminalKeys::Error);
         return keys;
     }
-    keys.push_back(TerminalKeys::Cmd);
-
-    size_t tokenIdx = 1;
-    size_t positionalCount = 0;
 
     while (tokenIdx < tokens.size()) {
         auto token = tokens.at(tokenIdx);

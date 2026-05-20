@@ -1,94 +1,42 @@
 #include "cli_service.hpp"
 #include <catch2/catch_test_macros.hpp>
 
-class TestCmd : public ICommand {
+
+class MockCmd : public ICommand {
+
 public:
-    TestCmd() : ICommand{"test"} {}
+    MockCmd(const std::string &name) : ICommand(name) {}
 
 protected:
-    bool doExecute(const std::map<std::string, std::string> &) override { return true; }
-};
-class MestCmd : public ICommand {
-public:
-    MestCmd() : ICommand{"mest"} {}
-
-protected:
-    bool doExecute(const std::map<std::string, std::string> &) override { return true; }
-};
-
-class LinkCmd : public ICommand {
-public:
-    LinkCmd() : ICommand{"link"} {
-        m_signature.addShortFlag(
-
-            Flag{.flag = "t", .isBoolean = false, .providerKey = "graph.edge.type"});
-        m_signature.addPositionalArg(
-            Argument{.name = "src", .providerKey = "graph.node.name"});
-        m_signature.addPositionalArg(
-            Argument{.name = "target", .providerKey = "graph.node.name"});
-    }
-
-protected:
-    bool doExecute(const std::map<std::string, std::string> &) override { return true; }
-};
-CLIService cli;
-TEST_CASE("CLI::UnderTest") {
-    cli.registerCommand(std::make_unique<TestCmd>());
-    cli.registerCommand(std::make_unique<MestCmd>());
-    cli.registerCommand(std::make_unique<LinkCmd>());
-    SECTION("cli:register") {
-        REQUIRE(cli.commandSize() == 3);
-        CHECK(cli.hasCommand("test"));
-        CHECK(cli.hasCommand("mest"));
-        CHECK(cli.hasCommand("link"));
-    }
-}
-class RmNode : public ICommand {
-public:
-    RmNode() : ICommand{"rm"} {
-        m_signature.addPositionalArg(
-            Argument{.name = "node_name", .providerKey = "graph.nodes.names"});
-    }
-
-protected:
-    bool doExecute(const std::map<std::string, std::string> &val) override {
-        return true;
-    }
-};
-class AddNode : public ICommand {
-public:
-    AddNode() : ICommand{"add"} {
-        m_signature.addShortFlag(Flag{.flag = "t",
-                                      .isBoolean = false,
-                                      .isRequired = true,
-                                      .providerKey = "graph.node.types"});
-        m_signature.addPositionalArg(Argument{.name = "node_name"});
-    }
-
-protected:
-    bool doExecute(const std::map<std::string, std::string> &val) override {
+    bool doExecute(const std::map<std::string, std::string> &values) const override {
         return true;
     }
 };
 
-class NodeNameSpace : public ICommand {
-public:
-    NodeNameSpace() : ICommand{"node"} {}
 
-protected:
-    bool doExecute(const std::map<std::string, std::string> &val) override {
-        return true;
-    }
-};
-TEST_CASE("CLI::Nested Comands") {
-    auto rootNode = std::make_unique<NodeNameSpace>();
-    auto addCmd = std::make_unique<AddNode>();
-    auto rmCmd = std::make_unique<RmNode>();
-
-    rootNode->registerSubCommand(std::move(addCmd));
-    rootNode->registerSubCommand(std::move(rmCmd));
-
+TEST_CASE("CLI:NestedCmds") {
     CLIService cli;
-    cli.registerCommand(std::move(rootNode));
-    REQUIRE(cli.execute("node add node_a -t person") == true);
-}
+    auto node = std::make_unique<MockCmd>("node");
+    auto edge = std::make_unique<MockCmd>("edge");
+
+
+    SECTION("update cmd count") {
+        cli.registerCommand(std::move(node));
+        cli.registerCommand(std::move(edge));
+        REQUIRE(cli.commandCount() == 2);
+    }
+    SECTION("no repeated counts") {
+        cli.registerCommand(std::move(node));
+        cli.registerCommand(std::move(node));
+        REQUIRE(cli.commandCount() == 1);
+    }
+    SECTION("find nested cmd") {
+        node->registerSubCommand(std::move(edge));
+        cli.registerCommand(std::move(node));
+        Token tnode{.type = TokenType::Word, .value = "node"};
+        Token tedge{.type = TokenType::Word, .value = "edge"};
+        auto cmd = cli.getCommand({tnode, tedge});
+        REQUIRE(cmd != nullptr);
+        CHECK(cmd->getCommandSignature().name() == "edge");
+    }
+};

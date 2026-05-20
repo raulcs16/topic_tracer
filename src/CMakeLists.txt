@@ -8,6 +8,7 @@ add_subdirectory(Interactors)
 
 add_subdirectory(TerminalToolKit)
 add_subdirectory(TerminalDriver)
+add_subdirectory(TTKUseCases)
 
 add_subdirectory(TerminalQt)
 add_subdirectory(GraphControllers)

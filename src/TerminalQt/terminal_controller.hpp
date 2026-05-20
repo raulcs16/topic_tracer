@@ -1,6 +1,7 @@
 #pragma once
 
-#include "terminal_list_model.hpp"
+#include "get_auto_suggestions.hpp"
+#include "handle_input.hpp"
 #include <QObject>
 #include <QString>
 #include <QtQml/qqml.h>
@@ -11,25 +12,22 @@ class TerminalController : public QObject {
     QML_ELEMENT
     QML_UNCREATABLE("Passed in Property")
 
-    Q_PROPERTY(TerminalListModel *terminalListModel READ terminalListModel CONSTANT)
-    Q_PROPERTY(QString suggestion READ suggestion NOTIFY suggestionChanged)
-
 public:
-    explicit TerminalController(TerminalListModel *model, QObject *parent = nullptr)
-        : QObject{parent}, m_model{model} {}
-
+    explicit TerminalController(GetAutoSuggestion *autoS,
+                                HandleInput *input,
+                                QObject *parent = nullptr)
+        : QObject{parent}, m_auto{autoS}, m_input{input} {}
     virtual ~TerminalController() = default;
-    QString suggestion() { return m_suggestion; }
 
-    Q_INVOKABLE virtual void handleEnter(const QString &raw_input) = 0;
-    Q_INVOKABLE virtual void handleTab(const QString &raw_input) = 0;
-    Q_INVOKABLE virtual void handleChange(const QString &raw_input) = 0;
+    Q_INVOKABLE void handleEnter(const QString &raw_input) {
+        m_input->execute(raw_input.toStdString());
+    }
+    Q_INVOKABLE void handleTab(const QString &raw_input) {
+        m_auto->execute(raw_input.toStdString());
+    }
+    Q_INVOKABLE void handleChange(const QString &raw_input) {}
 
-    TerminalListModel *terminalListModel() const { return m_model; }
-signals:
-    void suggestionChanged();
-
-protected:
-    QString m_suggestion = "";
-    TerminalListModel *m_model;
+private:
+    GetAutoSuggestion *m_auto;
+    HandleInput *m_input;
 };

@@ -14,3 +14,7 @@ catch_discover_tests(CliUT PROPERTIES LABELS "TerminalToolKit")
 add_executable(SEUT test_suggestion_engine.cpp)
 target_link_libraries(SEUT PUBLIC TerminalToolKit Catch2::Catch2WithMain)
 catch_discover_tests(SEUT PROPERTIES LABELS "TerminalToolKit")
+
+add_executable(ICommandUT test_icommand.cpp)
+target_link_libraries(ICommandUT PUBLIC TerminalToolKit Catch2::Catch2WithMain)
+catch_discover_tests(ICommandUT PROPERTIES LABELS "TerminalToolKit")

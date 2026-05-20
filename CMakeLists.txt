@@ -58,7 +58,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 
 add_subdirectory(configured)
 add_subdirectory(src)
-add_subdirectory(sandboxes)
+# add_subdirectory(sandboxes)
 if (NOT TESTING)
     add_subdirectory(app)
 endif( )

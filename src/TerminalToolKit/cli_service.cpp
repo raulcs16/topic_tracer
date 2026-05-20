@@ -4,29 +4,19 @@
 
 CLIService::CLIService() {}
 void CLIService::registerCommand(std::unique_ptr<ICommand> cmd) {
-    auto def = cmd->getCommandSignature();
-    auto name = def.name();
-    auto it = m_commands.find(name);
-    if (it != m_commands.end()) //found
+    if (!cmd)
         return;
-
-    m_commands[name] = std::move(cmd);
+    m_root.registerSubCommand(std::move(cmd));
+    m_cmd_count++;
 }
-bool CLIService::hasCommand(const std::string &name) const {
-    auto it = m_commands.find(name);
-    return !(it == m_commands.end());
-}
-bool CLIService::execute(std::string rawString) {
+bool CLIService::execute(const std::string &rawString) {
     auto tokens = Tokenizer::tokenize(rawString);
-    // / 2. Guard : Basic sanity checks
-    if (tokens.empty() || tokens.front().type != TokenType::Word) {
-        return false;
-    }
-    auto name = tokens.front().value;
-    auto it = m_commands.find(name);
-    if (it == m_commands.end()) {
-        return false;
-    }
-    ICommand *cmd = it->second.get();
+    auto cmd = getCommand(tokens);
     return cmd->execute(tokens);
+}
+const ICommand *CLIService::getCommand(const std::vector<Token> &tokens) {
+    if (tokens.empty()) {
+        return &m_root;
+    }
+    return m_root.getSubCommand(tokens);
 }
