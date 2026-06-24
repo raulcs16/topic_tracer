@@ -1,14 +1,15 @@
-.Phony: all clean build compile graph show test-off test-on
+.PHONY: all clean build compile core qt-on qt-off apps-on apps-off main-on main-off coverage-off test-off test-on debug rel-deb release install mac-sign dmg mac-icon graph ctest show
 
 -include build/metadata.mk
 
 .DEFAULT_GOAL := compile
 BUILD_DIR := build
-DIST_DIR := dist
-REL_DIR := releases
+DIST_DIR  := dist
+REL_DIR   := releases
 GRAPH_DOT := $(BUILD_DIR)/graph.dot
 GRAPH_IMG := $(BUILD_DIR)/dependencyGraph.png
-DMG_OUT := $(REL_DIR)/$(APP_NAME)_v$(APP_VERSION).dmg
+DMG_OUT   := $(REL_DIR)/$(APP_NAME)_v$(APP_VERSION).dmg
+
 
 clean:
 	cmake --build $(BUILD_DIR) --target clean
@@ -18,13 +19,34 @@ build:
 	cmake -S . -B $(BUILD_DIR)
 
 compile:
-	cmake --build $(BUILD_DIR) 
+	cmake --build $(BUILD_DIR)
 
 -v:
 	cmake --build $(BUILD_DIR) -v
 
+core:
+	cmake -S . -B $(BUILD_DIR) -DQT=OFF -DAPPS=OFF -DMAIN=OFF
+
+qt-on:
+	cmake -S . -B $(BUILD_DIR) -DQT=ON -DAPSS=OFF -DMAIN=OFF
+
+qt-off:
+	cmake -S . -B $(BUILD_DIR) -DQT=OFF
+
+apps-on:
+	cmake -S . -B $(BUILD_DIR) -DQT=ON -DAPPS=ON
+
+apps-off:
+	cmake -S . -B $(BUILD_DIR) -DAPPS=OFF
+
+main-on:
+	cmake -S . -B $(BUILD_DIR) -DQT=ON -DAPPS=ON -DMAIN=On
+
+main-off:
+	cmake -S . -B $(BUILD_DIR) -DMAIN=OFF
+
 coverage-off:
-	cmake -S . -B $(BUILD_DIR) -DCOVERAGE=ON
+	cmake -S . -B $(BUILD_DIR) -DCOVERAGE=OFF
 
 test-off:
 	cmake -S . -B $(BUILD_DIR) -DTESTING=OFF
@@ -35,7 +57,7 @@ test-on:
 debug:
 	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Debug
 
-rel-deb:	
+rel-deb:
 	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 release:
@@ -48,25 +70,20 @@ mac-sign:
 	codesign --force --deep --sign - $(DIST_DIR)/$(APP_NAME).app
 
 dmg: install mac-sign
-	 mkdir -p $(REL_DIR)
-	 hdiutil create -volname "$(APP_NAME) $(APP_VERSION)" -srcfolder $(DIST_DIR) -ov -format UDZO $(DMG_OUT)
+	mkdir -p $(REL_DIR)
+	hdiutil create -volname "$(APP_NAME) $(APP_VERSION)" -srcfolder $(DIST_DIR) -ov -format UDZO $(DMG_OUT)
 
 mac-icon:
-	cd app/resources; iconutil -c icns tt.iconset
+	cd app/resources && iconutil -c icns tt.iconset
 
-graph: 
+graph:
 	cmake -S . -B $(BUILD_DIR) --graphviz=$(GRAPH_DOT)
 	dot -Tpng $(GRAPH_DOT) -o $(GRAPH_IMG)
 
-ctest: 
-	cd $(BUILD_DIR); ctest
+ctest:
+	cd $(BUILD_DIR) && ctest
 
 show:
 	open $(GRAPH_IMG)
 
-run:
-	./build/app/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)
-
-coverage:
-	cmake -S . -B $(BUILD_DIR) -DCOVERAGE=ON
-	cmake --build $(BUILD_DIR) --target coverage
+# chmod +x rml; export PATH=".:$PATH"%

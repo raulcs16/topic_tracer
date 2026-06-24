@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# 1. Find the project's build artifacts dynamically
+BUILD_DIR=$(ls -d build/qml build-*/qml 2>/dev/null | head -n 1)
+
+# 2. If found, automatically inject the include path flag
+if [ -n "$BUILD_DIR" ]; then
+    command make && exec command qml -I "$BUILD_DIR" "$@"
+else
+    # Fallback to the regular system qml command if build folder isn't there yet
+    exec command qml "$@"
+fi
