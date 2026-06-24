@@ -15,10 +15,10 @@ Item {
     required property bool hovered
     required property bool highlighted
 
-    signal onMouseOver
-    signal onMouseExit
-    signal onSelected
-    signal onContextMenu(point pos)
+    signal mouseOver
+    signal mouseExit
+    signal clicked
+    signal contextMenu(point pos)
 
     readonly property double posx: position.x
     readonly property double posy: position.y
@@ -85,15 +85,15 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onEntered: root.onMouseOver()
-        onExited: root.onMouseExit()
+        onEntered: root.mouseOver()
+        onExited: root.mouseExit()
         onClicked: mouse => {
             if (mouse.button == Qt.RightButton)
-                root.onContextMenu(Qt.point(mouse.x, mouse.y));
+                root.contextMenu(Qt.point(mouse.x, mouse.y));
             else {
                 const mods = mouse.modifiers;
                 const meta = mods & Qt.MetaModifier || mods & Qt.ControlModifier;
-                root.onSelected();
+                root.clicked();
             }
         }
     }

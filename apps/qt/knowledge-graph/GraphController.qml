@@ -27,6 +27,6 @@ QtObject {
         const node = Engine.findNode(nodeId);
         if (node == undefined)
             return;
-        node.selected = true;
+        node.selected = !node.selected;
     }
 }

@@ -27,7 +27,11 @@ Item {
             driver: view_driver
             GraphView {
                 nodeModel: GraphStore.nodeList
-                nodeDelegate: NodeDelegate {}
+                nodeDelegate: NodeDelegate {
+                    onMouseOver: controller.nodeHovered(itemId)
+                    onMouseExit: controller.nodeUnHovered(itemId)
+                    onClicked: controller.nodeSelected(itemId)
+                }
             }
         }
         LabelListView {
