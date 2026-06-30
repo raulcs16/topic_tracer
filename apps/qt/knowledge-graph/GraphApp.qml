@@ -26,12 +26,17 @@ Item {
             Layout.fillHeight: true
             driver: view_driver
             GraphView {
+                id: graph
                 nodeModel: GraphStore.nodeList
+                edgeModel: GraphStore.edgeList
+                boxModel: GraphStore.boxList
                 nodeDelegate: NodeDelegate {
                     onMouseOver: controller.nodeHovered(itemId)
                     onMouseExit: controller.nodeUnHovered(itemId)
                     onClicked: controller.nodeSelected(itemId)
                 }
+                edgeDelegate: EdgeSpline {}
+                boxDelegate: BoundingBoxDelegate {}
             }
         }
         LabelListView {

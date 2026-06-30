@@ -5,24 +5,25 @@ Item {
     id: root
 
     required property AbstractListModel nodeModel
+    required property AbstractListModel edgeModel
+    required property AbstractListModel boxModel
+
     property alias nodeDelegate: nodesList.delegate
-    // required property NodeListModel nodeModel
-    // required property EdgeListModel edgeModel
-    // required property BoundingBoxListModel bboxModel
+    property alias edgeDelegate: edgeList.delegate
+    property alias boxDelegate: boxList.delegate
 
-    width: parent.width
-    height: parent.height
+    anchors.fill: parent
 
-    // Repeater {
-    //     model: root.edgeModel
-    //     delegate: EdgeSpline {}
-    // }
+    Repeater {
+        id: edgeList
+        model: root.edgeModel
+    }
     Repeater {
         id: nodesList
         model: root.nodeModel
     }
-    // Repeater {
-    //     model: root.bboxModel
-    //     delegate: BoundingBoxDelegate {}
-    // }
+    Repeater {
+        id: boxList
+        model: root.boxModel
+    }
 }

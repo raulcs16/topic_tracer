@@ -11,6 +11,10 @@ Item {
     property real zoom: driver.zoom
     property real panStep: driver.panStep
     property bool gridOn: driver.gridOn
+    Rectangle {
+        anchors.fill: parent
+        color: "#000"
+    }
 
     Behavior on centerX {
         NumberAnimation {

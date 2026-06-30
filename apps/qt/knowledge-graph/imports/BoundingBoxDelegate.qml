@@ -4,16 +4,14 @@ import QtQuick
 Item {
     id: root
 
-    required property int index
-    required property int id
     required property rect rect
-    property string label: ""
+    required property string label
 
     property color border_color: "red"
     property int border_width: 2
 
     Text {
-        text: root.label ? root.label : root.id
+        text: root.label
         color: "#fff"
         font.bold: true
         font.pointSize: 24

@@ -13,6 +13,8 @@ qt_add_qml_module(GraphUI
     QML_FILES
         imports/GraphView.qml
         imports/NodeDelegate.qml
+        imports/EdgeSpline.qml
+        imports/BoundingBoxDelegate.qml
         imports/LabelListView.qml
         imports/LabelDelegate.qml
 
