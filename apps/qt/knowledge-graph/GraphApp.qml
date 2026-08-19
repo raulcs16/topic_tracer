@@ -13,6 +13,7 @@ Item {
     ViewPortDriver {
         id: view_driver
     }
+
     GraphController {
         id: controller
         viewDriver: view_driver
@@ -39,6 +40,7 @@ Item {
                 boxDelegate: BoundingBoxDelegate {}
             }
         }
+
         LabelListView {
             id: listView
             Layout.fillHeight: true

@@ -36,3 +36,29 @@ target_include_directories(GraphUI
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+qt_add_library(GraphEngine STATIC)
+qt_add_qml_module(GraphEngine
+    URI "Graph"
+    VERSION 1.0
+    DEPENDENCIES
+        Graph
+    SOURCES
+
+    IMPORT_PATH ${QT_QML_OUTPUT_DIRECTORY}
+)
+
+target_link_libraries(GrapUI PRIVATE
+    Qt6::Core
+)
+target_include_directories(GraphUI
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+
+
+
+
+
+
